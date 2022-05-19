@@ -59,6 +59,10 @@ const int HISTORY_MAX = 25;
 const int WATER_SENSOR_PIN = 1;
 const int OIL_SENSOR_PIN = 2;
 const int PRESSURE_SENSOR_PIN = 3;
+/* 回転数取得用ピン(デジタル/割り込み可能) */
+const int TACHO_PULSE_PIN = 2;
+/* 車速取得用ピン(デジタル/割り込み可能) */
+const int SPEED_PULSE_PIN = 3;
 
 /*--------------------------------------*/
 const int R25C   = 10000; // R25℃ = Ω
@@ -88,6 +92,17 @@ float g_OilPrsAvg = 0;
 /* 水温 */
 float g_WaterTmpAvg = 0;
 
+volatile unsigned long tachoBefore = 0;//クランクセンサーの前回の反応時の時間
+volatile unsigned long tachoAfter = 0;//クランクセンサーの今回の反応時の時間
+volatile unsigned long tachoWidth = 0;//クランク一回転の時間　tachoAfter - tachoBefore
+volatile float tachoRpm = 0;//エンジンの回転数[rpm]
+
+volatile unsigned long speedBefore = 0;
+volatile unsigned long speedAfter = 0;
+volatile unsigned long speedWidth = 0;
+volatile float speedKm = 0;//車速[Km/h]
+
+
 #if USE_LCD == 1
 // initialize the library by associating any needed LCD interface pin
 // with the arduino pin number it is connected to
@@ -102,6 +117,11 @@ void setup() {
   memset( g_WaterTmpHis, 0x00, sizeof(g_WaterTmpHis) );
   memset( g_OilTmpHis, 0x00, sizeof(g_OilTmpHis) );
   memset( g_OilPrsHis, 0x00, sizeof(g_OilPrsHis) );
+
+  pinMode(TACHO_PULSE_PIN, INPUT_PULLUP);//ピンモードの設定
+  pinMode(SPEED_PULSE_PIN, INPUT_PULLUP);//ピンモードの設定
+  attachInterrupt(digitalPinToInterrupt(TACHO_PULSE_PIN), InterruptTachoFunc, FALLING);//外部割り込み
+  attachInterrupt(digitalPinToInterrupt(SPEED_PULSE_PIN), InterruptSpeedFunc, FALLING);//外部割り込み
 
   Serial.begin(19200);
 
@@ -136,13 +156,13 @@ static void UpdateLCD()
     g_LCDmode += 1;
     break;
   }
-  if( g_LCDmode < 0 ) g_LCDmode = 3;
-  if( g_LCDmode > 3 ) g_LCDmode = 0;
+  if( g_LCDmode < 0 ) g_LCDmode = 6;
+  if( g_LCDmode > 6 ) g_LCDmode = 0;
 
   lcd.clear();
   switch( g_LCDmode ){
     case 0:
-      UpdateLCD_All();
+      UpdateLCD_Tmps();
       break;
     case 1:
       UpdateLCD_WaterTemp();
@@ -153,10 +173,19 @@ static void UpdateLCD()
     case 3:
       UpdateLCD_OilPress();
       break;
+    case 4:
+      UpdateLCD_TachoSpeed();
+      break;
+    case 5:
+      UpdateLCD_Tacho();
+      break;
+    case 6:
+      UpdateLCD_Speed();
+      break;
   }
 } /* UpdateLCD */
 
-static void UpdateLCD_All()
+static void UpdateLCD_Tmps()
 {
   char buf1[16+1];
   char buf2[16+1];
@@ -180,7 +209,7 @@ static void UpdateLCD_All()
   lcd.print(buf1);
   lcd.setCursor(0,1);
   lcd.print(buf2);
-} /* UpdateLCD_All */
+} /* UpdateLCD_Tmps */
 
 
 static void UpdateLCD_WaterTemp()
@@ -254,6 +283,73 @@ static void UpdateLCD_OilPress(){
   lcd.setCursor(0,1);
   lcd.print(buf2);
 } /* UpdateLCD_OilPress */
+
+static void UpdateLCD_TachoSpeed(){
+  char buf1[16+1];
+  char buf2[16+1];
+
+  char bufVars[3][10+1];
+
+  memset( buf1, 0x00, sizeof(buf1) );
+  memset( buf2, 0x00, sizeof(buf2) );
+  memset( bufVars, 0x00, sizeof(bufVars) );
+
+  // 浮動小数点を文字列に変換
+  dtostrf(tachoRpm, 4,0, bufVars[0] );
+  dtostrf(speedKm,  3,0, bufVars[1] );
+
+  snprintf( buf1, sizeof(buf1), "Tacho  :%4.4s rpm", bufVars[0] );
+  snprintf( buf2, sizeof(buf2), "Speed  : %3.3s Km", bufVars[1] );
+
+  lcd.setCursor(0,0);
+  lcd.print(buf1);
+  lcd.setCursor(0,1);
+  lcd.print(buf2);
+} /* UpdateLCD_TachoSpeed */
+
+static void UpdateLCD_Tacho(){
+  char buf1[16+1];
+  char buf2[16+1];
+
+  char bufVars[3][10+1];
+
+  memset( buf1, 0x00, sizeof(buf1) );
+  memset( buf2, 0x00, sizeof(buf2) );
+  memset( bufVars, 0x00, sizeof(bufVars) );
+
+  // 浮動小数点を文字列に変換
+  dtostrf(tachoRpm, 4,0, bufVars[0] );
+
+  snprintf( buf1, sizeof(buf1), "Tacho" );
+  snprintf( buf2, sizeof(buf2), "    %4.4s rpm", bufVars[0] );
+
+  lcd.setCursor(0,0);
+  lcd.print(buf1);
+  lcd.setCursor(0,1);
+  lcd.print(buf2);
+} /* UpdateLCD_Tacho */
+
+static void UpdateLCD_Speed(){
+  char buf1[16+1];
+  char buf2[16+1];
+
+  char bufVars[3][10+1];
+
+  memset( buf1, 0x00, sizeof(buf1) );
+  memset( buf2, 0x00, sizeof(buf2) );
+  memset( bufVars, 0x00, sizeof(bufVars) );
+
+  // 浮動小数点を文字列に変換
+  dtostrf(speedKm,  3,0, bufVars[1] );
+
+  snprintf( buf1, sizeof(buf1), "Speed" );
+  snprintf( buf2, sizeof(buf2), "    %3.3s Km", bufVars[1] );
+
+  lcd.setCursor(0,0);
+  lcd.print(buf1);
+  lcd.setCursor(0,1);
+  lcd.print(buf2);
+} /* UpdateLCD_Speed */
 #endif
 
 static void UpdateSensorInfo()
@@ -371,5 +467,22 @@ static float resistance_by_input(int input) {
 static float convert_temp_by_ntc(float r) {
   return B / (log(r/R25C) + (B/C25)) - K;
 } /* convert_temp_by_ntc */
+
+void InterruptTachoFunc()
+{
+  tachoAfter = micros();//現在の時刻を記録
+  tachoWidth = tachoAfter - tachoBefore;//前回と今回の時間の差を計算
+  tachoBefore = tachoAfter;//今回の値を前回の値に代入する
+  tachoRpm = 60000000.0 / tachoWidth;//タイヤの回転数[rpm]を計算
+} /* InterruptTachoFunc */
+
+void InterruptSpeedFunc()
+{
+  const float CSPD = 60.0 * 60 / (637 * 4) * 1000 * 1000;
+  speedAfter = micros();//現在の時刻を記録
+  speedWidth = speedAfter - speedBefore;//前回と今回の時間の差を計算
+  speedBefore = speedAfter;//今回の値を前回の値に代入する
+  speedKm = CSPD / speedWidth;
+} /* InterruptSpeedFunc */
 
 /* EOF */
