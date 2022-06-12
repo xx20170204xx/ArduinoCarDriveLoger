@@ -21,6 +21,16 @@ R= 1KΩ ？
 +5V GND A3
 
 
+
++5V----------|<--------+---|<---GND
+                       |
+SpeedPulse---1Kohm-----+--------D2 or D3
+    or
+TachoPulse
+
+diode : --|<--
+        1N4148
+
 */
 
 #define USE_LCD 0
@@ -118,9 +128,12 @@ void setup() {
   memset( g_OilTmpHis, 0x00, sizeof(g_OilTmpHis) );
   memset( g_OilPrsHis, 0x00, sizeof(g_OilPrsHis) );
 
+  /* Tacho */
   pinMode(TACHO_PULSE_PIN, INPUT_PULLUP);//ピンモードの設定
-  pinMode(SPEED_PULSE_PIN, INPUT_PULLUP);//ピンモードの設定
   attachInterrupt(digitalPinToInterrupt(TACHO_PULSE_PIN), InterruptTachoFunc, FALLING);//外部割り込み
+
+  /* SPEED */
+  pinMode(SPEED_PULSE_PIN, INPUT_PULLUP);//ピンモードの設定
   attachInterrupt(digitalPinToInterrupt(SPEED_PULSE_PIN), InterruptSpeedFunc, FALLING);//外部割り込み
 
   Serial.begin(19200);
@@ -134,6 +147,7 @@ void setup() {
 
 void loop() {
   UpdateSensorInfo();
+  UpdateSpeedReset();
   OutputSerial();
 #if USE_LCD == 1
   UpdateLCD();
@@ -144,6 +158,7 @@ void loop() {
 #if USE_LCD == 1
 static void UpdateLCD()
 {
+  const unsigned int SEL_MAX = 6;
   int btn = getLCDButton(0);
   switch( btn )
   {
@@ -156,25 +171,25 @@ static void UpdateLCD()
     g_LCDmode += 1;
     break;
   }
-  if( g_LCDmode < 0 ) g_LCDmode = 6;
-  if( g_LCDmode > 6 ) g_LCDmode = 0;
+  if( g_LCDmode < 0 ) g_LCDmode = SEL_MAX;
+  if( g_LCDmode > SEL_MAX ) g_LCDmode = 0;
 
   lcd.clear();
   switch( g_LCDmode ){
     case 0:
-      UpdateLCD_Tmps();
+      UpdateLCD_TachoSpeed();
       break;
     case 1:
-      UpdateLCD_WaterTemp();
+      UpdateLCD_Tmps();
       break;
     case 2:
-      UpdateLCD_OilTemp();
+      UpdateLCD_WaterTemp();
       break;
     case 3:
-      UpdateLCD_OilPress();
+      UpdateLCD_OilTemp();
       break;
     case 4:
-      UpdateLCD_TachoSpeed();
+      UpdateLCD_OilPress();
       break;
     case 5:
       UpdateLCD_Tacho();
@@ -319,9 +334,10 @@ static void UpdateLCD_Tacho(){
 
   // 浮動小数点を文字列に変換
   dtostrf(tachoRpm, 4,0, bufVars[0] );
+  dtostrf(tachoWidth, 16,0, bufVars[1] );
 
-  snprintf( buf1, sizeof(buf1), "Tacho" );
-  snprintf( buf2, sizeof(buf2), "    %4.4s rpm", bufVars[0] );
+  snprintf( buf1, sizeof(buf1), "Tacho:%4.4s rpm", bufVars[0] );
+  snprintf( buf2, sizeof(buf2), "%16.16s", bufVars[1] );
 
   lcd.setCursor(0,0);
   lcd.print(buf1);
@@ -340,16 +356,18 @@ static void UpdateLCD_Speed(){
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
-  dtostrf(speedKm,  3,0, bufVars[1] );
+  dtostrf(speedKm,  3,0, bufVars[0] );
+  dtostrf(speedWidth, 16,0, bufVars[1] );
 
-  snprintf( buf1, sizeof(buf1), "Speed" );
-  snprintf( buf2, sizeof(buf2), "    %3.3s Km", bufVars[1] );
+  snprintf( buf1, sizeof(buf1), "Speed: %4.4s Km", bufVars[0] );
+  snprintf( buf2, sizeof(buf2), "%16.16s", bufVars[1] );
 
   lcd.setCursor(0,0);
   lcd.print(buf1);
   lcd.setCursor(0,1);
   lcd.print(buf2);
 } /* UpdateLCD_Speed */
+
 #endif
 
 static void UpdateSensorInfo()
@@ -398,8 +416,22 @@ static void UpdateSensorInfo()
 
 } /* UpdateSensorInfo */
 
+/*
+  パルスが入らない状態を確認して 0Kmを設定する
+*/
+static void UpdateSpeedReset( void ){
+  const float CSPD = 60.0 * 60 / (637 * 4) * 1000 * 1000;
+  unsigned long width = micros() - speedBefore;
+  if( width <= CSPD )
+    return;
+
+  speedWidth = 0.0f;
+  speedKm = 0.0f;
+
+} /* UpdateSpeedReset */
+
 static void OutputSerial( void ){
-  char bufVars[6][10+1];
+  char bufVars[8][10+1];
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
@@ -409,8 +441,11 @@ static void OutputSerial( void ){
   dtostrf(g_WaterTmpAvg, 3,4, bufVars[3] );
   dtostrf(g_OilTmpAvg,   3,4, bufVars[4] );
   dtostrf(g_OilPrsAvg,   3,4, bufVars[5] );
+  dtostrf(tachoRpm,      5,0, bufVars[6] );
+  dtostrf(speedKm,       3,0, bufVars[7] );
 
-  for( int ii = 0; ii < 6; ii++ )
+  // 水温 油温 油圧は平均のみ出力
+  for( int ii = 0; ii < 8; ii++ )
   {
     Serial.print(bufVars[ii]);
     Serial.print('\t');
@@ -470,10 +505,11 @@ static float convert_temp_by_ntc(float r) {
 
 void InterruptTachoFunc()
 {
+  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f;
   tachoAfter = micros();//現在の時刻を記録
   tachoWidth = tachoAfter - tachoBefore;//前回と今回の時間の差を計算
   tachoBefore = tachoAfter;//今回の値を前回の値に代入する
-  tachoRpm = 60000000.0 / tachoWidth;//タイヤの回転数[rpm]を計算
+  tachoRpm = ONE_MIN_USEC / (tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
 } /* InterruptTachoFunc */
 
 void InterruptSpeedFunc()
