@@ -33,7 +33,8 @@ diode : --|<--
 
 */
 
-#define USE_LCD 0
+#define DEBUG_TACHOSPEED 1
+#define USE_LCD 1
 
 #if USE_LCD == 1
 // include the library code:
@@ -128,6 +129,7 @@ void setup() {
   memset( g_OilTmpHis, 0x00, sizeof(g_OilTmpHis) );
   memset( g_OilPrsHis, 0x00, sizeof(g_OilPrsHis) );
 
+#if DEBUG_TACHOSPEED == 0
   /* Tacho */
   pinMode(TACHO_PULSE_PIN, INPUT_PULLUP);//ピンモードの設定
   attachInterrupt(digitalPinToInterrupt(TACHO_PULSE_PIN), InterruptTachoFunc, FALLING);//外部割り込み
@@ -135,6 +137,9 @@ void setup() {
   /* SPEED */
   pinMode(SPEED_PULSE_PIN, INPUT_PULLUP);//ピンモードの設定
   attachInterrupt(digitalPinToInterrupt(SPEED_PULSE_PIN), InterruptSpeedFunc, FALLING);//外部割り込み
+#else
+  /* nop */
+#endif
 
   Serial.begin(19200);
 
@@ -147,7 +152,12 @@ void setup() {
 
 void loop() {
   UpdateSensorInfo();
+#if DEBUG_TACHOSPEED == 0
+  UpdateTachoReset();
   UpdateSpeedReset();
+#else
+  UpdateDebugTachoSpeed();
+#endif
   OutputSerial();
 #if USE_LCD == 1
   UpdateLCD();
@@ -419,6 +429,20 @@ static void UpdateSensorInfo()
 /*
   パルスが入らない状態を確認して 0Kmを設定する
 */
+static void UpdateTachoReset( void ){
+  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f / 2.0f;
+  unsigned long width = micros() - tachoBefore;
+  if( width <= ONE_MIN_USEC )
+    return;
+
+  tachoWidth = 0.0f;
+  tachoRpm = 0.0f;
+
+} /* UpdateTachoReset */
+
+/*
+  パルスが入らない状態を確認して 0Kmを設定する
+*/
 static void UpdateSpeedReset( void ){
   const float CSPD = 60.0 * 60 / (637 * 4) * 1000 * 1000;
   unsigned long width = micros() - speedBefore;
@@ -503,7 +527,7 @@ static float convert_temp_by_ntc(float r) {
   return B / (log(r/R25C) + (B/C25)) - K;
 } /* convert_temp_by_ntc */
 
-void InterruptTachoFunc()
+static void InterruptTachoFunc( void )
 {
   const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f;
   tachoAfter = micros();//現在の時刻を記録
@@ -512,7 +536,7 @@ void InterruptTachoFunc()
   tachoRpm = ONE_MIN_USEC / (tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
 } /* InterruptTachoFunc */
 
-void InterruptSpeedFunc()
+static void InterruptSpeedFunc( void )
 {
   const float CSPD = 60.0 * 60 / (637 * 4) * 1000 * 1000;
   speedAfter = micros();//現在の時刻を記録
@@ -520,5 +544,29 @@ void InterruptSpeedFunc()
   speedBefore = speedAfter;//今回の値を前回の値に代入する
   speedKm = CSPD / speedWidth;
 } /* InterruptSpeedFunc */
+
+static void UpdateDebugTachoSpeed( void ){
+#define RPM_MAX   8000
+#define SPEED_MAX  300
+    static int GEAR = 0;
+    static float GEARS[] = {183.068f, 106.008f, 71.938f, 52.716f, 43.163f};
+    tachoRpm += RPM_MAX * 0.1f * ( 100.0f / 1000.0f );
+    tachoWidth = 1;
+
+    speedKm = tachoRpm / GEARS[GEAR];
+    
+    if( tachoRpm  >= RPM_MAX )
+    {
+      tachoRpm = 750.0f;
+      GEAR += 1;
+    }
+    if( GEAR > 4 )
+    {
+      GEAR = 0;
+    }
+
+
+} /* UpdateDebugTachoSpeed */
+
 
 /* EOF */
