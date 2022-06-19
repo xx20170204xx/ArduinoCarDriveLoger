@@ -74,12 +74,24 @@ const int PRESSURE_SENSOR_PIN = 3;
 const int TACHO_PULSE_PIN = 2;
 /* 車速取得用ピン(デジタル/割り込み可能) */
 const int SPEED_PULSE_PIN = 3;
+/* 設定速度超過用ピン */
+const int SPEED_WARNING_PIN=10;
+/* 設定回転数超過用ピン */
+const int RPM_WARNING_PIN=11;
 
 /*--------------------------------------*/
 const int R25C   = 10000; // R25℃ = Ω
 const int B      = 3380;  // B定数
 const float K    = 273.16; // ケルビン
 const float C25  = K + 25; // 摂氏25度
+
+/* 1回転当たりの発生パルス数 */
+/* 4, 8, 16, 20, 25 */
+const int SPEED_PULSE_COUNT = 4;
+
+const float SPEED_WARNING_VALUE = 61.0f;
+const float RPM_WARNING_VALUE = 3000.0f;
+
 /*--------------------------------------*/
 
 int g_HisSel = 0;
@@ -103,15 +115,15 @@ float g_OilPrsAvg = 0;
 /* 水温 */
 float g_WaterTmpAvg = 0;
 
-volatile unsigned long tachoBefore = 0;//クランクセンサーの前回の反応時の時間
-volatile unsigned long tachoAfter = 0;//クランクセンサーの今回の反応時の時間
-volatile unsigned long tachoWidth = 0;//クランク一回転の時間　tachoAfter - tachoBefore
-volatile float tachoRpm = 0;//エンジンの回転数[rpm]
+volatile unsigned long g_tachoBefore = 0;//クランクセンサーの前回の反応時の時間
+volatile unsigned long g_tachoAfter = 0;//クランクセンサーの今回の反応時の時間
+volatile unsigned long g_tachoWidth = 0;//クランク一回転の時間　tachoAfter - tachoBefore
+volatile float g_tachoRpm = 0;//エンジンの回転数[rpm]
 
-volatile unsigned long speedBefore = 0;
-volatile unsigned long speedAfter = 0;
-volatile unsigned long speedWidth = 0;
-volatile float speedKm = 0;//車速[Km/h]
+volatile unsigned long g_speedBefore = 0;
+volatile unsigned long g_speedAfter = 0;
+volatile unsigned long g_speedWidth = 0;
+volatile float g_speedKm = 0;//車速[Km/h]
 
 
 #if USE_LCD == 1
@@ -128,6 +140,9 @@ void setup() {
   memset( g_WaterTmpHis, 0x00, sizeof(g_WaterTmpHis) );
   memset( g_OilTmpHis, 0x00, sizeof(g_OilTmpHis) );
   memset( g_OilPrsHis, 0x00, sizeof(g_OilPrsHis) );
+
+  pinMode(SPEED_WARNING_PIN, OUTPUT);
+  pinMode(RPM_WARNING_PIN, OUTPUT);
 
 #if DEBUG_TACHOSPEED == 0
   /* Tacho */
@@ -159,6 +174,7 @@ void loop() {
   UpdateDebugTachoSpeed();
 #endif
   OutputSerial();
+  OutputWarningPin();
 #if USE_LCD == 1
   UpdateLCD();
 #endif
@@ -320,8 +336,8 @@ static void UpdateLCD_TachoSpeed(){
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
-  dtostrf(tachoRpm, 4,0, bufVars[0] );
-  dtostrf(speedKm,  3,0, bufVars[1] );
+  dtostrf(g_tachoRpm, 4,0, bufVars[0] );
+  dtostrf(g_speedKm,  3,0, bufVars[1] );
 
   snprintf( buf1, sizeof(buf1), "Tacho  :%4.4s rpm", bufVars[0] );
   snprintf( buf2, sizeof(buf2), "Speed  : %3.3s Km", bufVars[1] );
@@ -343,8 +359,8 @@ static void UpdateLCD_Tacho(){
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
-  dtostrf(tachoRpm, 4,0, bufVars[0] );
-  dtostrf(tachoWidth, 16,0, bufVars[1] );
+  dtostrf(g_tachoRpm, 4,0, bufVars[0] );
+  dtostrf(g_tachoWidth, 16,0, bufVars[1] );
 
   snprintf( buf1, sizeof(buf1), "Tacho:%4.4s rpm", bufVars[0] );
   snprintf( buf2, sizeof(buf2), "%16.16s", bufVars[1] );
@@ -366,8 +382,8 @@ static void UpdateLCD_Speed(){
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
-  dtostrf(speedKm,  3,0, bufVars[0] );
-  dtostrf(speedWidth, 16,0, bufVars[1] );
+  dtostrf(g_speedKm,  3,0, bufVars[0] );
+  dtostrf(g_speedWidth, 16,0, bufVars[1] );
 
   snprintf( buf1, sizeof(buf1), "Speed: %4.4s Km", bufVars[0] );
   snprintf( buf2, sizeof(buf2), "%16.16s", bufVars[1] );
@@ -431,12 +447,12 @@ static void UpdateSensorInfo()
 */
 static void UpdateTachoReset( void ){
   const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f / 2.0f;
-  unsigned long width = micros() - tachoBefore;
+  unsigned long width = micros() - g_tachoBefore;
   if( width <= ONE_MIN_USEC )
     return;
 
-  tachoWidth = 0.0f;
-  tachoRpm = 0.0f;
+  g_tachoWidth = 0.0f;
+  g_tachoRpm = 0.0f;
 
 } /* UpdateTachoReset */
 
@@ -444,13 +460,13 @@ static void UpdateTachoReset( void ){
   パルスが入らない状態を確認して 0Kmを設定する
 */
 static void UpdateSpeedReset( void ){
-  const float CSPD = 60.0 * 60 / (637 * 4) * 1000 * 1000;
-  unsigned long width = micros() - speedBefore;
+  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
+  unsigned long width = micros() - g_speedBefore;
   if( width <= CSPD )
     return;
 
-  speedWidth = 0.0f;
-  speedKm = 0.0f;
+  g_speedWidth = 0.0f;
+  g_speedKm = 0.0f;
 
 } /* UpdateSpeedReset */
 
@@ -465,8 +481,8 @@ static void OutputSerial( void ){
   dtostrf(g_WaterTmpAvg, 3,4, bufVars[3] );
   dtostrf(g_OilTmpAvg,   3,4, bufVars[4] );
   dtostrf(g_OilPrsAvg,   3,4, bufVars[5] );
-  dtostrf(tachoRpm,      5,0, bufVars[6] );
-  dtostrf(speedKm,       3,0, bufVars[7] );
+  dtostrf(g_tachoRpm,    5,0, bufVars[6] );
+  dtostrf(g_speedKm,     3,0, bufVars[7] );
 
   // 水温 油温 油圧は平均のみ出力
   for( int ii = 0; ii < 8; ii++ )
@@ -477,6 +493,13 @@ static void OutputSerial( void ){
   Serial.println("");
 
 } /* OutputSerial */
+
+static void OutputWarningPin(void)
+{
+  digitalWrite(SPEED_WARNING_PIN, (g_speedKm >= SPEED_WARNING_VALUE));
+  digitalWrite(RPM_WARNING_PIN, (g_tachoRpm >= RPM_WARNING_VALUE));
+  
+} /* OutputWarningPin */
 
 #if USE_LCD == 1
 static int getLCDButton( int pinNum )
@@ -530,19 +553,19 @@ static float convert_temp_by_ntc(float r) {
 static void InterruptTachoFunc( void )
 {
   const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f;
-  tachoAfter = micros();//現在の時刻を記録
-  tachoWidth = tachoAfter - tachoBefore;//前回と今回の時間の差を計算
-  tachoBefore = tachoAfter;//今回の値を前回の値に代入する
-  tachoRpm = ONE_MIN_USEC / (tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
+  g_tachoAfter = micros();//現在の時刻を記録
+  g_tachoWidth = g_tachoAfter - g_tachoBefore;//前回と今回の時間の差を計算
+  g_tachoBefore = g_tachoAfter;//今回の値を前回の値に代入する
+  g_tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
 } /* InterruptTachoFunc */
 
 static void InterruptSpeedFunc( void )
 {
-  const float CSPD = 60.0 * 60 / (637 * 4) * 1000 * 1000;
-  speedAfter = micros();//現在の時刻を記録
-  speedWidth = speedAfter - speedBefore;//前回と今回の時間の差を計算
-  speedBefore = speedAfter;//今回の値を前回の値に代入する
-  speedKm = CSPD / speedWidth;
+  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
+  g_speedAfter = micros();//現在の時刻を記録
+  g_speedWidth = g_speedAfter - g_speedBefore;//前回と今回の時間の差を計算
+  g_speedBefore = g_speedAfter;//今回の値を前回の値に代入する
+  g_speedKm = CSPD / g_speedWidth;
 } /* InterruptSpeedFunc */
 
 static void UpdateDebugTachoSpeed( void ){
@@ -550,14 +573,14 @@ static void UpdateDebugTachoSpeed( void ){
 #define SPEED_MAX  300
     static int GEAR = 0;
     static float GEARS[] = {183.068f, 106.008f, 71.938f, 52.716f, 43.163f};
-    tachoRpm += RPM_MAX * 0.1f * ( 100.0f / 1000.0f );
-    tachoWidth = 1;
+    g_tachoRpm += RPM_MAX * 0.1f * ( 100.0f / 1000.0f );
+    g_tachoWidth = 1;
 
-    speedKm = tachoRpm / GEARS[GEAR];
+    g_speedKm = g_tachoRpm / GEARS[GEAR];
     
-    if( tachoRpm  >= RPM_MAX )
+    if( g_tachoRpm  >= RPM_MAX )
     {
-      tachoRpm = 750.0f;
+      g_tachoRpm = 750.0f;
       GEAR += 1;
     }
     if( GEAR > 4 )
