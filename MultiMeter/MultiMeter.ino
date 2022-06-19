@@ -36,6 +36,8 @@ diode : --|<--
 #define DEBUG_TACHOSPEED 1
 #define USE_LCD 1
 
+const char* VERSION_STRING = "20220619XX";
+
 #if USE_LCD == 1
 // include the library code:
 #include <LiquidCrystal.h>
@@ -59,6 +61,7 @@ const int LCD_BUTTON_VAR_DOWN=308;
 const int LCD_BUTTON_VAR_UP=132;
 const int LCD_BUTTON_VAR_RIGHT=0;
 
+const char SEP_CHAR= '\t';
 
 /* 更新間隔(ms) */
 const int UPDATE_DELAY = 100;
@@ -166,6 +169,7 @@ void setup() {
 }
 
 void loop() {
+  ReadSerialCommand();
   UpdateSensorInfo();
 #if DEBUG_TACHOSPEED == 0
   UpdateTachoReset();
@@ -180,6 +184,22 @@ void loop() {
 #endif
   delay(UPDATE_DELAY);
 } /* loop */
+
+static void ReadSerialCommand()
+{
+  char cmd = Serial.read();
+  switch(cmd)
+  {
+    /* Version */
+    case 'V':
+      {
+        Serial.print('V');
+        Serial.print(SEP_CHAR);
+        Serial.println(VERSION_STRING);
+      }
+      break;
+  }
+} /* ReadSerialCommand */
 
 #if USE_LCD == 1
 static void UpdateLCD()
@@ -484,11 +504,13 @@ static void OutputSerial( void ){
   dtostrf(g_tachoRpm,    5,0, bufVars[6] );
   dtostrf(g_speedKm,     3,0, bufVars[7] );
 
+  Serial.print('D');
+  Serial.print(SEP_CHAR);
   // 水温 油温 油圧は平均のみ出力
   for( int ii = 0; ii < 8; ii++ )
   {
     Serial.print(bufVars[ii]);
-    Serial.print('\t');
+    Serial.print(SEP_CHAR);
   }
   Serial.println("");
 
