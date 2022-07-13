@@ -7,8 +7,6 @@ public class SerialReceive : MonoBehaviour
 {
     public SerialPortUtilityPro serialHandler;
 
-    public UnityEngine.UI.Text m_text = null;
-
     public MeterUnitController controller = null;
 
     public void OpenDevice()

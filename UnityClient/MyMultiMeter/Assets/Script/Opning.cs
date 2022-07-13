@@ -10,7 +10,7 @@ public class Opning : MonoBehaviour
     private VideoPlayer player;
 
     [SerializeField]
-    string nextScene;
+    int nextScene = 1;
 
     public VideoClip[] clips;
 
@@ -32,13 +32,15 @@ public class Opning : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        var frameCount = player.clip.frameCount;
+        ulong frameCount = player.clip.frameCount;
         if (player.frame < 0)
         {
             return;
         }
 
-            if ((ulong)player.frame >= frameCount)
+        if (frameCount > 2) { frameCount -= 2;  }
+
+        if ((ulong)player.frame >= frameCount)
         {
             Debug.Log("stop");
             player.Stop();

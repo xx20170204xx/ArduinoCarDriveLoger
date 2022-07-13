@@ -1124,7 +1124,7 @@ GameObject:
   - component: {fileID: 457423552}
   - component: {fileID: 457423551}
   m_Layer: 5
-  m_Name: Needle (1)
+  m_Name: peakNeedle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1143,7 +1143,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -1870,7 +1870,7 @@ GameObject:
   - component: {fileID: 883846200}
   - component: {fileID: 883846199}
   m_Layer: 5
-  m_Name: Needle (1)
+  m_Name: peakNeedle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1908,7 +1908,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2103,7 +2103,7 @@ GameObject:
   - component: {fileID: 1014075244}
   - component: {fileID: 1014075243}
   m_Layer: 5
-  m_Name: Needle (1)
+  m_Name: peakNeedle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2141,7 +2141,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2244,7 +2244,7 @@ GameObject:
   - component: {fileID: 1065631051}
   - component: {fileID: 1065631050}
   m_Layer: 5
-  m_Name: Needle (1)
+  m_Name: peakNeedle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2282,7 +2282,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3408,7 +3408,7 @@ GameObject:
   - component: {fileID: 1621508618}
   - component: {fileID: 1621508617}
   m_Layer: 5
-  m_Name: Needle (1)
+  m_Name: peakNeedle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3427,7 +3427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -3796,7 +3796,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 1728027793}
-  format: '{0:F2} Kpa'
+  format: '{0:F2} bar'
   peak: 0
 --- !u!114 &1728027793
 MonoBehaviour:
@@ -3831,7 +3831,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0 kpa
+  m_Text: 0 bar
 --- !u!222 &1728027794
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -3852,7 +3852,7 @@ GameObject:
   - component: {fileID: 1840707299}
   - component: {fileID: 1840707298}
   m_Layer: 5
-  m_Name: Needle (1)
+  m_Name: peakNeedle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3890,7 +3890,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.5019608}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4177,7 +4177,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 1929236506}
-  format: '{0:F2} Kpa'
+  format: '{0:F2} bar'
   peak: 0
 --- !u!114 &1929236506
 MonoBehaviour:
@@ -4212,7 +4212,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0 kpa
+  m_Text: 0 bar
 --- !u!222 &1929236507
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -4482,7 +4482,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   text: {fileID: 2007129000}
-  format: '{0:F2} Kpa'
+  format: '{0:F2} bar'
   peak: 0
 --- !u!114 &2007129000
 MonoBehaviour:
@@ -4517,7 +4517,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 0 kpa
+  m_Text: 0 bar
 --- !u!222 &2007129001
 CanvasRenderer:
   m_ObjectHideFlags: 0

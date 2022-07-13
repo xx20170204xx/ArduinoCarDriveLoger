@@ -220,9 +220,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 686321456}
-  nextScene: SampleScene_Android
+  nextScene: 1
   clips:
-  - {fileID: 32900000, guid: faf35ed9323075542a7413395760e0b3, type: 3}
+  - {fileID: 32900000, guid: 2bbd98ba9ab61534db7409b650fb0926, type: 3}
+  - {fileID: 32900000, guid: 4781532da7187cc4c88f3f16e0fb49be, type: 3}
 --- !u!4 &828283777
 Transform:
   m_ObjectHideFlags: 0
