@@ -1,5 +1,9 @@
 /*
+https://github.com/xx20170204xx/ArduinoCarDriveLoger/blob/main/MultiMeter/MultiMeter.ino
+
+参考URL
 https://github.com/puriso/arduino-thermometer_by_defi_sensor/blob/master/thermomerter_by_defi.ino/thermomerter_by_defi.ino.ino
+https://github.com/matt-downs/arduino-oled-auto-gauges/blob/master/boost/boost.ino
 
 [ Temp ]
 [Sensor]
@@ -200,6 +204,59 @@ static void ReadSerialCommand()
       break;
   }
 } /* ReadSerialCommand */
+
+// 油圧取得(Kpa * 100)
+static float get_oil_pressure( int pinNum ){
+  int input_for_value = analogRead(pinNum);
+  float vo = (float)input_for_value * 5.0f / 1023.0f;
+  float ret = 250 * (vo - 0.480) * 0.0101972;
+
+  return ret;
+} /* get_oil_pressure */
+
+// 温度取得(摂氏)
+static float get_temp( const int pinNum ){
+  float out_tmp;
+  int input_for_temp;
+  float res;
+
+  input_for_temp = analogRead(pinNum);
+  input_for_temp = input_for_temp;
+  res = resistance_by_input(input_for_temp);
+  out_tmp = convert_temp_by_ntc(res);
+ 
+  return out_tmp;
+} /* get_temp */
+
+// 入力から抵抗値を求める(5V)
+static float resistance_by_input(int input) {
+  float vout = input / 1023.0f * 5.0f; //分圧した出力電圧の計算
+  float r = ((5.0 / vout) - 1.0f) * R25C; //サーミスタ抵抗計算
+  return r;
+} /* resistance_by_input */
+
+// NTCサーミスタでの温度
+static float convert_temp_by_ntc(float r) {
+  return B / (log(r/R25C) + (B/C25)) - K;
+} /* convert_temp_by_ntc */
+
+static void InterruptTachoFunc( void )
+{
+  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f;
+  g_tachoAfter = micros();//現在の時刻を記録
+  g_tachoWidth = g_tachoAfter - g_tachoBefore;//前回と今回の時間の差を計算
+  g_tachoBefore = g_tachoAfter;//今回の値を前回の値に代入する
+  g_tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
+} /* InterruptTachoFunc */
+
+static void InterruptSpeedFunc( void )
+{
+  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
+  g_speedAfter = micros();//現在の時刻を記録
+  g_speedWidth = g_speedAfter - g_speedBefore;//前回と今回の時間の差を計算
+  g_speedBefore = g_speedAfter;//今回の値を前回の値に代入する
+  g_speedKm = CSPD / g_speedWidth;
+} /* InterruptSpeedFunc */
 
 #if USE_LCD == 1
 static void UpdateLCD()
@@ -537,64 +594,18 @@ static int getLCDButton( int pinNum )
 } /* getLCDButton */
 #endif
 
-// 油圧取得(Kpa)
-static float get_oil_pressure( int pinNum ){
-  int input_for_value = analogRead(pinNum);
-  float vo = (float)input_for_value * 5.0f / 1023.0f;
-  float ret = 250 * (vo - 0.480) * 0.0101972;
-
-  return ret;
-} /* get_oil_pressure */
-
-// 温度取得(摂氏)
-static float get_temp( const int pinNum ){
-  float out_tmp;
-  int input_for_temp;
-  float res;
-
-  input_for_temp = analogRead(pinNum);
-  input_for_temp = input_for_temp;
-  res = resistance_by_input(input_for_temp);
-  out_tmp = convert_temp_by_ntc(res);
- 
-  return out_tmp;
-} /* get_temp */
-
-// 入力から抵抗値を求める(5V)
-static float resistance_by_input(int input) {
-  float vout = input / 1023.0f * 5.0f; //分圧した出力電圧の計算
-  float r = ((5.0 / vout) - 1.0f) * R25C; //サーミスタ抵抗計算
-  return r;
-} /* resistance_by_input */
-
-// NTCサーミスタでの温度
-static float convert_temp_by_ntc(float r) {
-  return B / (log(r/R25C) + (B/C25)) - K;
-} /* convert_temp_by_ntc */
-
-static void InterruptTachoFunc( void )
-{
-  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f;
-  g_tachoAfter = micros();//現在の時刻を記録
-  g_tachoWidth = g_tachoAfter - g_tachoBefore;//前回と今回の時間の差を計算
-  g_tachoBefore = g_tachoAfter;//今回の値を前回の値に代入する
-  g_tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
-} /* InterruptTachoFunc */
-
-static void InterruptSpeedFunc( void )
-{
-  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
-  g_speedAfter = micros();//現在の時刻を記録
-  g_speedWidth = g_speedAfter - g_speedBefore;//前回と今回の時間の差を計算
-  g_speedBefore = g_speedAfter;//今回の値を前回の値に代入する
-  g_speedKm = CSPD / g_speedWidth;
-} /* InterruptSpeedFunc */
-
 static void UpdateDebugTachoSpeed( void ){
 #define RPM_MAX   8000
 #define SPEED_MAX  300
     static int GEAR = 0;
-    static float GEARS[] = {183.068f, 106.008f, 71.938f, 52.716f, 43.163f};
+    static float GEARS[] = { 
+        0.0f,     // N
+        183.068f, // 1st
+        106.008f, // 2nd
+        71.938f,  // 3rd
+        52.716f,  // 4th
+        43.163f   // 5th
+    };
     g_tachoRpm += RPM_MAX * 0.1f * ( 100.0f / 1000.0f );
     g_tachoWidth = 1;
 
@@ -605,7 +616,7 @@ static void UpdateDebugTachoSpeed( void ){
       g_tachoRpm = 750.0f;
       GEAR += 1;
     }
-    if( GEAR > 4 )
+    if( GEAR > 5 )
     {
       GEAR = 0;
     }
