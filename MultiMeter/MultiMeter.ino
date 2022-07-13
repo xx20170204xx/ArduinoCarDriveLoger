@@ -205,7 +205,7 @@ static void ReadSerialCommand()
   }
 } /* ReadSerialCommand */
 
-// 油圧取得(Kpa * 100)
+// 油圧取得(bar)
 static float get_oil_pressure( int pinNum ){
   int input_for_value = analogRead(pinNum);
   float vo = (float)input_for_value * 5.0f / 1023.0f;
@@ -321,7 +321,7 @@ static void UpdateLCD_Tmps()
   dtostrf(g_OilPrsAvg, 3,4, bufVars[2] );
 
   snprintf( buf1, sizeof(buf1), "TMP O:%3.3s W:%3.3s", bufVars[0], bufVars[1] );
-  snprintf( buf2, sizeof(buf2), "PRS O:%7.7sKpa", bufVars[2] );
+  snprintf( buf2, sizeof(buf2), "PRS O:%7.7sbar", bufVars[2] );
 
   lcd.setCursor(0,0);
   lcd.print(buf1);
@@ -394,7 +394,7 @@ static void UpdateLCD_OilPress(){
   dtostrf(g_OilPrsAvg, 3,4, bufVars[2] );
 
   snprintf( buf1, sizeof(buf1), "Oil Press" );
-  snprintf( buf2, sizeof(buf2), "    %8.8s Kpa", bufVars[2] );
+  snprintf( buf2, sizeof(buf2), "    %8.8s bar", bufVars[2] );
 
   lcd.setCursor(0,0);
   lcd.print(buf1);
@@ -609,7 +609,7 @@ static void UpdateDebugTachoSpeed( void ){
     g_tachoRpm += RPM_MAX * 0.1f * ( 100.0f / 1000.0f );
     g_tachoWidth = 1;
 
-    g_speedKm = g_tachoRpm / GEARS[GEAR];
+    g_speedKm = (GEARS[GEAR] != 0.0f ? g_tachoRpm / GEARS[GEAR] : 0.0f);
     
     if( g_tachoRpm  >= RPM_MAX )
     {
