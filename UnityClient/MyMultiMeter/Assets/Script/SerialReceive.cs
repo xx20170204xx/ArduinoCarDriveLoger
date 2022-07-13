@@ -1,30 +1,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using SerialPortUtility;
 
 public class SerialReceive : MonoBehaviour
 {
-    //https://qiita.com/yjiro0403/items/54e9518b5624c0030531
-    //上記URLのSerialHandler.cのクラス
-    public SerialHandler serialHandler;
+    public SerialPortUtilityPro serialHandler;
 
     public UnityEngine.UI.Text m_text = null;
 
     public MeterUnitController controller = null;
 
-    void Start()
+    public void OpenDevice()
     {
-        //信号を受信したときに、そのメッセージの処理を行う
-        serialHandler.OnDataReceived += OnDataReceived;
-    }
+        if (serialHandler.IsConnected() == false) 
+        {
+            serialHandler.Open();
+        }
+    } /* OpenDevice */
 
     //受信した信号(message)に対する処理
-    void OnDataReceived(string message)
+    public void OnDataReceived( object _data)
     {
-        var data = message.Split(
-                new string[] { "\n" }, System.StringSplitOptions.None);
         try
         {
+            var message = _data as string;
+            var data = message.Split(
+                    new string[] { "\n" }, System.StringSplitOptions.None);
             controller.OnDataReceived(data[0]);
 
         }
@@ -32,5 +34,12 @@ public class SerialReceive : MonoBehaviour
         {
             Debug.LogWarning(e.Message);//エラーを表示
         }
-    }
+    } /* OnDataReceived */
+
+    public void OnSerialEvent(SerialPortUtilityPro _serialPort,string _data)
+    {
+        Debug.Log("OnSerialEvent : " + _data);
+
+
+    } /* OnSerialEvent */
 }

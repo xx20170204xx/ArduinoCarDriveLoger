@@ -22,22 +22,22 @@ public class MeterUnitController : MonoBehaviour
     public void OnDataReceived(string message)
     {
         string[] values = message.Split('\t');
-        waterTempMeter.Value = float.Parse(values[4]);
-        oilTempMeter.Value = float.Parse(values[5]);
-        oilPressMeter.Value = float.Parse(values[6]);
+        if(waterTempMeter) waterTempMeter.Value = float.Parse(values[4]);
+        if(oilTempMeter)oilTempMeter.Value = float.Parse(values[5]);
+        if (oilPressMeter) oilPressMeter.Value = float.Parse(values[6]);
 
-        tachoMeter.Value = float.Parse(values[7]);
-        speedMeter.Value = float.Parse(values[8]);
-        Meter.Value = tachoMeter.Value / speedMeter.Value;
+        if (tachoMeter) tachoMeter.Value = float.Parse(values[7]);
+        if (speedMeter) speedMeter.Value = float.Parse(values[8]);
+        if (Meter) Meter.Value = tachoMeter.Value / speedMeter.Value;
     } /* OnDataReceived */
 
     public void resetValue()
     {
-        waterTempMeter.resetValue();
-        oilTempMeter.resetValue();
-        oilPressMeter.resetValue();
-        tachoMeter.resetValue();
-        speedMeter.resetValue();
-        Meter.resetValue();
+        if (waterTempMeter) waterTempMeter.resetValue();
+        if (oilTempMeter) oilTempMeter.resetValue();
+        if (oilPressMeter) oilPressMeter.resetValue();
+        if (tachoMeter) tachoMeter.resetValue();
+        if (speedMeter) speedMeter.resetValue();
+        if (Meter) Meter.resetValue();
     } /* resetValue */
 }
