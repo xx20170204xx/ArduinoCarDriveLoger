@@ -13,6 +13,10 @@ public class SerialReceive : MonoBehaviour
     {
         if (serialHandler.IsConnected() == false) 
         {
+            // serialHandler.VendorID = "";
+            // serialHandler.ProductID = "";
+            // serialHandler.SerialNumber = "";
+            // serialHandler.Port = "";
             serialHandler.Open();
         }
     } /* OpenDevice */
