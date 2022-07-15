@@ -40,7 +40,7 @@ diode : --|<--
 #define DEBUG_TACHOSPEED 1
 #define USE_LCD 1
 
-const char* VERSION_STRING = "20220619XX";
+const char* VERSION_STRING = "20220716XX";
 
 #if USE_LCD == 1
 // include the library code:
@@ -77,6 +77,7 @@ const int HISTORY_MAX = 25;
 const int WATER_SENSOR_PIN = 1;
 const int OIL_SENSOR_PIN = 2;
 const int PRESSURE_SENSOR_PIN = 3;
+const int BOOST_SENSOR_PIN = 4;
 /* 回転数取得用ピン(デジタル/割り込み可能) */
 const int TACHO_PULSE_PIN = 2;
 /* 車速取得用ピン(デジタル/割り込み可能) */
@@ -239,6 +240,17 @@ static float resistance_by_input(int input) {
 static float convert_temp_by_ntc(float r) {
   return B / (log(r/R25C) + (B/C25)) - K;
 } /* convert_temp_by_ntc */
+
+/* ブースト圧(bar) */
+static float get_boost_press( const int pinNum )
+{
+  return 0.0f; /* TODO : DELETE */
+
+  int input_for_value = analogRead(pinNum);
+  float vo = (float)input_for_value * 5.0f / 1023.0f;
+  float ret = (vo - 1.0f) * 0.88;
+  
+} /* get_boost_press */
 
 static void InterruptTachoFunc( void )
 {
