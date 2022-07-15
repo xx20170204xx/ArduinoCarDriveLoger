@@ -73,6 +73,9 @@ const int UPDATE_DELAY = 100;
 /*  平均値を求めるための履歴数 */
 const int HISTORY_MAX = 25;
 
+/* アナログピンの値を取得する際の回数 */
+const int SENSOR_AVG_COUNT = 600;
+
 /* 各センサーのアナログピン番号 */
 const int WATER_SENSOR_PIN = 1;
 const int OIL_SENSOR_PIN = 2;
@@ -208,7 +211,8 @@ static void ReadSerialCommand()
 
 // 油圧取得(bar)
 static float get_oil_pressure( int pinNum ){
-  int input_for_value = analogRead(pinNum);
+  double input_for_value = analogReadAvg(pinNum, SENSOR_AVG_COUNT);
+
   float vo = (float)input_for_value * 5.0f / 1023.0f;
   float ret = 250 * (vo - 0.480) * 0.0101972;
 
@@ -218,12 +222,11 @@ static float get_oil_pressure( int pinNum ){
 // 温度取得(摂氏)
 static float get_temp( const int pinNum ){
   float out_tmp;
-  int input_for_temp;
   float res;
 
-  input_for_temp = analogRead(pinNum);
-  input_for_temp = input_for_temp;
-  res = resistance_by_input(input_for_temp);
+  double input_for_value = analogReadAvg(pinNum, SENSOR_AVG_COUNT);
+
+  res = resistance_by_input((int)input_for_value);
   out_tmp = convert_temp_by_ntc(res);
  
   return out_tmp;
@@ -246,9 +249,10 @@ static float get_boost_press( const int pinNum )
 {
   return 0.0f; /* TODO : DELETE */
 
-  int input_for_value = analogRead(pinNum);
+ double input_for_value = analogReadAvg(pinNum, SENSOR_AVG_COUNT);
+
   float vo = (float)input_for_value * 5.0f / 1023.0f;
-  float ret = (vo - 1.0f) * 0.88;
+  float ret = (vo - 1.0f ) * 0.88;
   
 } /* get_boost_press */
 
@@ -575,7 +579,6 @@ static void OutputSerial( void ){
 
   Serial.print('D');
   Serial.print(SEP_CHAR);
-  // 水温 油温 油圧は平均のみ出力
   for( int ii = 0; ii < 8; ii++ )
   {
     Serial.print(bufVars[ii]);
@@ -605,6 +608,16 @@ static int getLCDButton( int pinNum )
   return LCD_BUTTON_NONE;
 } /* getLCDButton */
 #endif
+
+// 指定したアナログピンを指定回数取得した平均を返す
+static double analogReadAvg( int pinNum , int count )
+{
+  double input_for_value = 0;
+  for( int ii = 0; ii < count; ii++ ) { input_for_value += analogRead(pinNum); }
+  input_for_value /= count;
+  return input_for_value;
+} /* analogReadAvg */
+
 
 static void UpdateDebugTachoSpeed( void ){
 #define RPM_MAX   8000
