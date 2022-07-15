@@ -70,11 +70,8 @@ const char SEP_CHAR= '\t';
 /* 更新間隔(ms) */
 const int UPDATE_DELAY = 100;
 
-/*  平均値を求めるための履歴数 */
-const int HISTORY_MAX = 25;
-
 /* アナログピンの値を取得する際の回数 */
-const int SENSOR_AVG_COUNT = 600;
+const int SENSOR_AVG_COUNT = 300;
 
 /* 各センサーのアナログピン番号 */
 const int WATER_SENSOR_PIN = 1;
@@ -105,26 +102,12 @@ const float RPM_WARNING_VALUE = 3000.0f;
 
 /*--------------------------------------*/
 
-int g_HisSel = 0;
-float g_WaterTmpHis[ HISTORY_MAX ];
-float g_OilTmpHis[ HISTORY_MAX ];
-float g_OilPrsHis[ HISTORY_MAX ];
-
-bool g_first = false;
-
 /* 油温 */
 float g_OilTmp = 0;
 /* 油圧 */
 float g_OilPrs = 0;
 /* 水温 */
 float g_WaterTmp = 0;
-
-/* 油温 */
-float g_OilTmpAvg = 0;
-/* 油圧 */
-float g_OilPrsAvg = 0;
-/* 水温 */
-float g_WaterTmpAvg = 0;
 
 volatile unsigned long g_tachoBefore = 0;//クランクセンサーの前回の反応時の時間
 volatile unsigned long g_tachoAfter = 0;//クランクセンサーの今回の反応時の時間
@@ -147,10 +130,6 @@ int g_LCDmode=0;
 #endif
 
 void setup() {
-  // global init
-  memset( g_WaterTmpHis, 0x00, sizeof(g_WaterTmpHis) );
-  memset( g_OilTmpHis, 0x00, sizeof(g_OilTmpHis) );
-  memset( g_OilPrsHis, 0x00, sizeof(g_OilPrsHis) );
 
   pinMode(SPEED_WARNING_PIN, OUTPUT);
   pinMode(RPM_WARNING_PIN, OUTPUT);
@@ -332,9 +311,9 @@ static void UpdateLCD_Tmps()
 
   // 浮動小数点を文字列に変換
   //  小数点以下なし
-  dtostrf(g_OilTmpAvg, 3,0, bufVars[0] );
-  dtostrf(g_WaterTmpAvg, 3,0, bufVars[1] );
-  dtostrf(g_OilPrsAvg, 3,4, bufVars[2] );
+  dtostrf(g_OilTmp, 3,0, bufVars[0] );
+  dtostrf(g_WaterTmp, 3,0, bufVars[1] );
+  dtostrf(g_OilPrs, 3,4, bufVars[2] );
 
   snprintf( buf1, sizeof(buf1), "TMP O:%3.3s W:%3.3s", bufVars[0], bufVars[1] );
   snprintf( buf2, sizeof(buf2), "PRS O:%7.7sbar", bufVars[2] );
@@ -359,7 +338,7 @@ static void UpdateLCD_WaterTemp()
 
   // 浮動小数点を文字列に変換
   //  小数点以下1
-  dtostrf(g_WaterTmpAvg, 3,1, bufVars[1] );
+  dtostrf(g_WaterTmp, 3,1, bufVars[1] );
 
   snprintf( buf1, sizeof(buf1), "Water Temp" );
   snprintf( buf2, sizeof(buf2), "      %8.8s C", bufVars[1] );
@@ -384,7 +363,7 @@ static void UpdateLCD_OilTemp()
 
   // 浮動小数点を文字列に変換
   //  小数点以下1
-  dtostrf(g_OilTmpAvg, 3,1, bufVars[0] );
+  dtostrf(g_OilTmp, 3,1, bufVars[0] );
 
   snprintf( buf1, sizeof(buf1), "Oil Temp" );
   snprintf( buf2, sizeof(buf2), "      %8.8s C", bufVars[0] );
@@ -407,7 +386,7 @@ static void UpdateLCD_OilPress(){
 
   // 浮動小数点を文字列に変換
   //  小数点以下4
-  dtostrf(g_OilPrsAvg, 3,4, bufVars[2] );
+  dtostrf(g_OilPrs, 3,4, bufVars[2] );
 
   snprintf( buf1, sizeof(buf1), "Oil Press" );
   snprintf( buf2, sizeof(buf2), "    %8.8s bar", bufVars[2] );
@@ -500,39 +479,6 @@ static void UpdateSensorInfo()
   g_OilTmp = get_temp(OIL_SENSOR_PIN);
   g_OilPrs = get_oil_pressure(PRESSURE_SENSOR_PIN);
 
-  // 平均値を取得
-  g_WaterTmpHis[g_HisSel] = g_WaterTmp;
-  g_OilTmpHis[g_HisSel] = g_OilTmp;
-  g_OilPrsHis[g_HisSel] = g_OilPrs;
-
-  /* 最初に取得した場合、履歴を最初に取得した値で埋めつくす */
-  if( g_first == false )
-  {
-    g_first = true;
-    for( int ii = 0; ii < HISTORY_MAX; ii++ )
-    {
-      g_WaterTmpHis[ii] = g_WaterTmp;
-      g_OilTmpHis[ii] = g_OilTmp;
-      g_OilPrsHis[ii] = g_OilPrs;
-    }
-  }
-
-  /* 平均値を算出 */
-  for( int ii = 0; ii < HISTORY_MAX; ii++ )
-  {
-    wtr_avg += g_WaterTmpHis[ii];
-    oilT_avg += g_OilTmpHis[ii];
-    oilP_avg += g_OilPrsHis[ii];
-  }
-
-  // 平均値を設定
-  g_WaterTmpAvg = wtr_avg / (float)HISTORY_MAX;
-  g_OilTmpAvg = oilT_avg / (float)HISTORY_MAX;
-  g_OilPrsAvg = oilP_avg / (float)HISTORY_MAX;
-
-  g_HisSel += 1;
-  if( g_HisSel >= HISTORY_MAX )g_HisSel = 0;
-
 } /* UpdateSensorInfo */
 
 /*
@@ -564,22 +510,19 @@ static void UpdateSpeedReset( void ){
 } /* UpdateSpeedReset */
 
 static void OutputSerial( void ){
-  char bufVars[8][10+1];
+  char bufVars[5][10+1];
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
   dtostrf(g_WaterTmp,    3,4, bufVars[0] );
   dtostrf(g_OilTmp,      3,4, bufVars[1] );
   dtostrf(g_OilPrs,      3,4, bufVars[2] );
-  dtostrf(g_WaterTmpAvg, 3,4, bufVars[3] );
-  dtostrf(g_OilTmpAvg,   3,4, bufVars[4] );
-  dtostrf(g_OilPrsAvg,   3,4, bufVars[5] );
-  dtostrf(g_tachoRpm,    5,0, bufVars[6] );
-  dtostrf(g_speedKm,     3,0, bufVars[7] );
+  dtostrf(g_tachoRpm,    5,0, bufVars[3] );
+  dtostrf(g_speedKm,     3,0, bufVars[4] );
 
   Serial.print('D');
   Serial.print(SEP_CHAR);
-  for( int ii = 0; ii < 8; ii++ )
+  for( int ii = 0; ii < 5; ii++ )
   {
     Serial.print(bufVars[ii]);
     Serial.print(SEP_CHAR);

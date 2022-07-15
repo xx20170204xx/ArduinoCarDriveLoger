@@ -22,12 +22,12 @@ public class MeterUnitController : MonoBehaviour
     public void OnDataReceived(string message)
     {
         string[] values = message.Split('\t');
-        if(waterTempMeter) waterTempMeter.Value = float.Parse(values[4]);
-        if(oilTempMeter)oilTempMeter.Value = float.Parse(values[5]);
-        if (oilPressMeter) oilPressMeter.Value = float.Parse(values[6]);
+        if(waterTempMeter) waterTempMeter.Value = float.Parse(values[1]);
+        if(oilTempMeter)oilTempMeter.Value = float.Parse(values[2]);
+        if (oilPressMeter) oilPressMeter.Value = float.Parse(values[3]);
 
-        if (tachoMeter) tachoMeter.Value = float.Parse(values[7]);
-        if (speedMeter) speedMeter.Value = float.Parse(values[8]);
+        if (tachoMeter) tachoMeter.Value = float.Parse(values[4]);
+        if (speedMeter) speedMeter.Value = float.Parse(values[5]);
         if (Meter) Meter.Value = tachoMeter.Value / speedMeter.Value;
     } /* OnDataReceived */
 
