@@ -57,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Script\MeterBase.cs" />
+    <Compile Include="Assets\Script\DeviceList\DevListPanel.cs" />
     <Compile Include="Assets\Script\MeterUnitController.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\SerialPortUtilityPro.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPDeviceList.cs" />
@@ -67,10 +68,11 @@
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptJSON.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptModbus.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPProgramming.cs" />
+    <Compile Include="Assets\Script\DeviceList\Dev.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptSimple.cs" />
+    <Compile Include="Assets\Script\Opning.cs" />
     <Compile Include="Assets\Script\PanelSelect.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\DebugConsole.cs" />
-    <Compile Include="Assets\Script\Opning.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\SerialPortUtilityPro\Plugins\x86_64\spap.dll" />
