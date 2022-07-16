@@ -5086,7 +5086,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e05cf78deccf8428b57daa05f86a38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serial: {fileID: 0}
+  serial: {fileID: 1702349612}
   prefab: {fileID: 5861778797944844787, guid: eba185922263a724787c038a997fdb22, type: 3}
   contents: {fileID: 1648843740}
   deviceType: {fileID: 662535543}

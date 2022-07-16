@@ -18,6 +18,7 @@ public class SerialReceive : MonoBehaviour
     private void Start()
     {
         LoadDeviceInfo();
+        OpenDevice();
     } /* Start */
 
     public void OpenDevice()
