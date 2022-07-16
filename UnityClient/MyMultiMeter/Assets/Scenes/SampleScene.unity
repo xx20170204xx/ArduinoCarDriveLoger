@@ -5086,6 +5086,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e05cf78deccf8428b57daa05f86a38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  serial: {fileID: 0}
   prefab: {fileID: 5861778797944844787, guid: eba185922263a724787c038a997fdb22, type: 3}
   contents: {fileID: 1648843740}
   deviceType: {fileID: 662535543}
@@ -5120,7 +5121,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c53a53d4c59daf742b7221e854c30bb9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsAutoOpen: 1
+  IsAutoOpen: 0
   OpenMethod: 1
   ReadProtocol: 2
   BaudRate: 19200
@@ -5211,6 +5212,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   serialHandler: {fileID: 1702349610}
   controller: {fileID: 1614000004}
+  openSystem: 0
+  VecderID: 
+  ProductID: 
+  SerialNumber: 
+  Port: 
 --- !u!114 &1702349613
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5227,7 +5233,7 @@ MonoBehaviour:
   - {fileID: 1614000004}
   - {fileID: 625475866}
   - {fileID: 1264635974}
-  - {fileID: 1679700844}
+  deviceList: {fileID: 1679700844}
   startNum: 0
 --- !u!1 &1728027790
 GameObject:

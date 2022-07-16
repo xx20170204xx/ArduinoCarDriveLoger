@@ -7,6 +7,8 @@ using SerialPortUtility;
 public class DevListPanel : MonoBehaviour
 {
     [SerializeField]
+    private SerialReceive serial;
+    [SerializeField]
     private GameObject prefab;
     [SerializeField]
     private GameObject contents;
@@ -44,6 +46,8 @@ public class DevListPanel : MonoBehaviour
             GameObject _go = Instantiate(prefab);
             _go.transform.parent = this.contents.transform;
             var dev = _go.GetComponent<Dev>();
+
+            dev.serial = this.serial;
             dev.openSystem = openSystem;
             dev.info = devInfo;
             dev.m_text.text = "PortName=[" + devInfo.PortName + "] deviceType =[" + openSystem.ToString() + "] Vendor=[" + devInfo.Vendor + "] Product=[" + devInfo.Product + "] SerialNumber=[" + devInfo.SerialNumber + "]";

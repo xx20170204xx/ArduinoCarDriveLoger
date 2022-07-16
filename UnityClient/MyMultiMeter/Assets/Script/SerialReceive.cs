@@ -9,14 +9,25 @@ public class SerialReceive : MonoBehaviour
 
     public MeterUnitController controller = null;
 
+    public SerialPortUtilityPro.OpenSystem openSystem = SerialPortUtilityPro.OpenSystem.NumberOrder;
+    public string VecderID;
+    public string ProductID;
+    public string SerialNumber;
+    public string Port;
+
+    private void Start()
+    {
+        LoadDeviceInfo();
+    } /* Start */
+
     public void OpenDevice()
     {
-        if (serialHandler.IsConnected() == false) 
+        if (serialHandler.IsConnected() == false && openSystem != SerialPortUtilityPro.OpenSystem.NumberOrder ) 
         {
-            // serialHandler.VendorID = "";
-            // serialHandler.ProductID = "";
-            // serialHandler.SerialNumber = "";
-            // serialHandler.Port = "";
+            serialHandler.VendorID = VecderID;
+            serialHandler.ProductID = ProductID;
+            serialHandler.SerialNumber = SerialNumber;
+            // serialHandler.Port = Port;
             serialHandler.Open();
         }
     } /* OpenDevice */
@@ -44,4 +55,53 @@ public class SerialReceive : MonoBehaviour
 
 
     } /* OnSerialEvent */
+
+    public void SaveDeviceInfo()
+    {
+        string _path = Application.persistentDataPath + "/" + "setting.xml";
+
+        System.Xml.XmlTextWriter xmlWriter = new System.Xml.XmlTextWriter(_path, System.Text.Encoding.UTF8);
+        xmlWriter.WriteStartDocument();
+        xmlWriter.WriteStartElement("setting");
+        {
+            xmlWriter.WriteAttributeString("OpenSystem", openSystem.ToString());
+            xmlWriter.WriteAttributeString("VendorID", VecderID);
+            xmlWriter.WriteAttributeString("ProductID", ProductID);
+            xmlWriter.WriteAttributeString("SerialNumber", SerialNumber);
+        }
+        xmlWriter.WriteEndElement();
+        xmlWriter.WriteEndDocument();
+        xmlWriter.Close();
+
+    } /* SaveDeviceInfo */
+
+    public void LoadDeviceInfo()
+    {
+        string _path = Application.persistentDataPath + "/" + "setting.xml";
+        System.Xml.XmlTextReader xmlReader = new System.Xml.XmlTextReader(_path);
+
+        while (xmlReader.Read())
+        {
+            Debug.Log( xmlReader.Name );
+            if (xmlReader.Name == "setting")
+            {
+                string OpenSystem = xmlReader.GetAttribute("OpenSystem");
+                VecderID = xmlReader.GetAttribute("VendorID");
+                ProductID = xmlReader.GetAttribute("ProductID");
+                SerialNumber = xmlReader.GetAttribute("SerialNumber");
+                if (OpenSystem == SerialPortUtilityPro.OpenSystem.USB.ToString())
+                {
+                    this.openSystem = SerialPortUtilityPro.OpenSystem.USB;
+                }
+                if (OpenSystem == SerialPortUtilityPro.OpenSystem.BluetoothSSP.ToString())
+                {
+                    this.openSystem = SerialPortUtilityPro.OpenSystem.BluetoothSSP;
+                }
+            }
+        }
+
+
+    } /* LoadDeviceInfo */
+
+
 }

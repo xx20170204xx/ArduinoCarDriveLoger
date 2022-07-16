@@ -6,7 +6,10 @@ using UnityEngine;
 public class PanelSelect : MonoBehaviour
 {
     [SerializeField]
-    private MeterUnitController[] units;
+    private List<MeterUnitController> units = new List<MeterUnitController>();
+
+    [SerializeField]
+    private MeterUnitController deviceList = null;
 
     [SerializeField]
     [Min(0)]
@@ -23,14 +26,16 @@ public class PanelSelect : MonoBehaviour
             this.gameObject.SetActive(false);
             return;
         }
-        if (units.Length == 0)
+        if (units.Count == 0)
         {
             Debug.LogError("Not found  MeterUnitController.");
             this.gameObject.SetActive(false);
             return;
         }
 
-        for (int ii = 0; ii < units.Length; ii++)
+        units.Add(deviceList);
+
+        for (int ii = 0; ii < units.Count; ii++)
         {
             GameObject _go = units[ii].gameObject;
             _go.SetActive(false);
@@ -39,7 +44,7 @@ public class PanelSelect : MonoBehaviour
 
         nowNum = startNum;
 
-        if (nowNum < units.Length)
+        if (nowNum < units.Count)
         {
             units[nowNum].gameObject.SetActive(true);
         }
@@ -55,7 +60,7 @@ public class PanelSelect : MonoBehaviour
 
     public void OnNextPanel()
     {
-        if (units.Length < 1)
+        if (units.Count < 1)
         {
             return;
         }
@@ -63,7 +68,7 @@ public class PanelSelect : MonoBehaviour
         units[nowNum].gameObject.SetActive(false);
 
         nowNum += 1;
-        if (units.Length == nowNum)
+        if (units.Count == nowNum)
         {
             nowNum = 0;
         }
@@ -74,7 +79,7 @@ public class PanelSelect : MonoBehaviour
     } /* OnNextPanel */
     public void OnPrevPanel()
     {
-        if (units.Length < 1)
+        if (units.Count < 1)
         {
             return;
         }
@@ -82,7 +87,7 @@ public class PanelSelect : MonoBehaviour
         units[nowNum].gameObject.SetActive(false);
         if (nowNum == 0)
         {
-            nowNum = units.Length - 1;
+            nowNum = units.Count - 1;
         } else {
             nowNum -= 1;
         }
