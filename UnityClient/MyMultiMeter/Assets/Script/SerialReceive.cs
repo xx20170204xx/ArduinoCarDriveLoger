@@ -1,3 +1,4 @@
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,6 +15,10 @@ public class SerialReceive : MonoBehaviour
     public string ProductID;
     public string SerialNumber;
     public string Port;
+
+    private bool isRecordData = false;
+    private string RecordDataFilename = "";
+
 
     private void Start()
     {
@@ -41,7 +46,12 @@ public class SerialReceive : MonoBehaviour
             var message = _data as string;
             var data = message.Split(
                     new string[] { "\n" }, System.StringSplitOptions.None);
+
             controller.OnDataReceived(data[0]);
+            if (isRecordData == true)
+            {
+                SaveRecordData(data[0]);
+            }
 
         }
         catch (System.Exception e)
@@ -103,6 +113,36 @@ public class SerialReceive : MonoBehaviour
 
 
     } /* LoadDeviceInfo */
+
+    public void SwitchRecordData()
+    {
+        System.DateTime dateTime = System.DateTime.Now;
+        if (isRecordData == false)
+        {
+            isRecordData = true;
+            RecordDataFilename = Application.persistentDataPath + "/data_" + dateTime.ToString("yyyyMMddHHmmss") + ".csv";
+        } else {
+            isRecordData = false;
+        }
+    } /* SwitchRecordData */
+
+    private void SaveRecordData( string _data )
+    {
+        StreamWriter csvWriter = null;
+        System.DateTime dateTime = System.DateTime.Now;
+        if (string.IsNullOrEmpty(RecordDataFilename) == true)
+        {
+            return;
+        }
+        csvWriter = new StreamWriter(RecordDataFilename,true);
+
+        string data = _data.Replace("\t", ",");
+        data = data.Replace("\r", "");
+        data = data.Replace("\n", "");
+        csvWriter.WriteLine( dateTime.ToString("yyyy/MM/dd HH:mm:ss.fff") + "," + data);
+        csvWriter.Close();
+
+    } /* SaveRecordData */
 
 
 }

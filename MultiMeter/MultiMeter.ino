@@ -71,7 +71,7 @@ const char SEP_CHAR= '\t';
 const int UPDATE_DELAY = 100;
 
 /* アナログピンの値を取得する際の回数 */
-const int SENSOR_AVG_COUNT = 300;
+const int SENSOR_AVG_COUNT = 100;
 
 /* 各センサーのアナログピン番号 */
 const int WATER_SENSOR_PIN = 1;
