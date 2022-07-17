@@ -38,7 +38,8 @@ diode : --|<--
 */
 
 #define DEBUG_TACHOSPEED 1
-#define USE_LCD 1
+#define DEBUG_TMP_PRS 1
+#define USE_LCD 0
 
 const char* VERSION_STRING = "20220716XX";
 
@@ -108,6 +109,8 @@ float g_OilTmp = 0;
 float g_OilPrs = 0;
 /* 水温 */
 float g_WaterTmp = 0;
+/* ブースト圧 */
+float g_BoostPrs = 0;
 
 volatile unsigned long g_tachoBefore = 0;//クランクセンサーの前回の反応時の時間
 volatile unsigned long g_tachoAfter = 0;//クランクセンサーの今回の反応時の時間
@@ -157,7 +160,11 @@ void setup() {
 
 void loop() {
   ReadSerialCommand();
+#if DEBUG_TMP_PRS == 0
   UpdateSensorInfo();
+#else
+  UpdateDebugSensorInfo();
+#endif
 #if DEBUG_TACHOSPEED == 0
   UpdateTachoReset();
   UpdateSpeedReset();
@@ -187,6 +194,43 @@ static void ReadSerialCommand()
       break;
   }
 } /* ReadSerialCommand */
+
+static void OutputSerial( void ){
+  char bufVars[6][10+1];
+  memset( bufVars, 0x00, sizeof(bufVars) );
+
+  // 浮動小数点を文字列に変換
+  dtostrf(g_WaterTmp,    3,4, bufVars[0] );
+  dtostrf(g_OilTmp,      3,4, bufVars[1] );
+  dtostrf(g_OilPrs,      3,4, bufVars[2] );
+  dtostrf(g_tachoRpm,    5,0, bufVars[3] );
+  dtostrf(g_speedKm,     3,0, bufVars[4] );
+  // dtostrf(g_BoostPrs,    3,4, bufVars[5] );
+
+  Serial.print('D');
+  Serial.print(SEP_CHAR);
+  for( int ii = 0; ii < 5; ii++ )
+  {
+    Serial.print(bufVars[ii]);
+    Serial.print(SEP_CHAR);
+  }
+  Serial.println("");
+
+} /* OutputSerial */
+
+static void UpdateSensorInfo()
+{
+  float wtr_avg = 0;
+  float oilT_avg = 0;
+  float oilP_avg = 0;
+
+  // センサーから各温度・圧力を取得
+  g_WaterTmp = get_temp(WATER_SENSOR_PIN);
+  g_OilTmp = get_temp(OIL_SENSOR_PIN);
+  g_OilPrs = get_oil_pressure(PRESSURE_SENSOR_PIN);
+  // g_BoostPrs = get_boost_press(BOOST_SENSOR_PIN);
+
+} /* UpdateSensorInfo */
 
 // 油圧取得(bar)
 static float get_oil_pressure( int pinNum ){
@@ -468,19 +512,6 @@ static void UpdateLCD_Speed(){
 
 #endif
 
-static void UpdateSensorInfo()
-{
-  float wtr_avg = 0;
-  float oilT_avg = 0;
-  float oilP_avg = 0;
-
-  // センサーから各温度・圧力を取得
-  g_WaterTmp = get_temp(WATER_SENSOR_PIN);
-  g_OilTmp = get_temp(OIL_SENSOR_PIN);
-  g_OilPrs = get_oil_pressure(PRESSURE_SENSOR_PIN);
-
-} /* UpdateSensorInfo */
-
 /*
   パルスが入らない状態を確認して 0Kmを設定する
 */
@@ -508,28 +539,6 @@ static void UpdateSpeedReset( void ){
   g_speedKm = 0.0f;
 
 } /* UpdateSpeedReset */
-
-static void OutputSerial( void ){
-  char bufVars[5][10+1];
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  dtostrf(g_WaterTmp,    3,4, bufVars[0] );
-  dtostrf(g_OilTmp,      3,4, bufVars[1] );
-  dtostrf(g_OilPrs,      3,4, bufVars[2] );
-  dtostrf(g_tachoRpm,    5,0, bufVars[3] );
-  dtostrf(g_speedKm,     3,0, bufVars[4] );
-
-  Serial.print('D');
-  Serial.print(SEP_CHAR);
-  for( int ii = 0; ii < 5; ii++ )
-  {
-    Serial.print(bufVars[ii]);
-    Serial.print(SEP_CHAR);
-  }
-  Serial.println("");
-
-} /* OutputSerial */
 
 static void OutputWarningPin(void)
 {
@@ -591,6 +600,36 @@ static void UpdateDebugTachoSpeed( void ){
 
 
 } /* UpdateDebugTachoSpeed */
+
+static void UpdateDebugSensorInfo( void )
+{
+/*
+float g_OilTmp = 0;    // 油温
+float g_OilPrs = 0;    // 油圧
+float g_WaterTmp = 0;  // 水温
+float g_BoostPrs = 0;  // ブースト圧
+*/
+    static float TMP_MIN = -20.0f;
+    static float TMP_MAX = 150.0f;
+
+    /* bar */
+    static float PRS_MIN = -1.5f;
+    static float PRS_MAX = 12.0f;
+
+    g_OilTmp += TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
+    g_WaterTmp += TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
+
+    g_OilPrs += PRS_MAX * 0.1f * ( 100.0f / 1000.0f );
+
+
+
+    if( g_OilTmp >= TMP_MAX ){ g_OilTmp = TMP_MIN; }
+    if( g_WaterTmp >= TMP_MAX ){ g_WaterTmp = TMP_MIN; }
+
+    if( g_OilPrs >= PRS_MAX ){ g_OilPrs = PRS_MIN; }
+
+
+} /* UpdateDebugSensorInfo */
 
 
 /* EOF */
