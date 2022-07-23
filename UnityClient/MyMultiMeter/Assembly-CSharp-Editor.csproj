@@ -58,6 +58,7 @@
   <ItemGroup>
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\Editor\SPAPToolsObjectType.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\Editor\SPAPTools.cs" />
+    <Compile Include="Assets\Editor\meter\TachoShiftLampMeterInspector.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\Editor\SPAPEditor.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -23,6 +23,7 @@ public class AnalogMeter : MeterBase
     // Update is called once per frame
     void Update()
     {
+        UpdateSubMeter();
         Value = Mathf.Clamp(Value, valueMin, valueMax);
         UpdateText();
         UpdateNeedle(needle, Value);

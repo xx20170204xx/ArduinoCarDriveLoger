@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class MeterUnitController : MonoBehaviour
 {
@@ -22,22 +23,27 @@ public class MeterUnitController : MonoBehaviour
     public void OnDataReceived(string message)
     {
         string[] values = message.Split('\t');
-        if(waterTempMeter) waterTempMeter.Value = float.Parse(values[1]);
-        if(oilTempMeter)oilTempMeter.Value = float.Parse(values[2]);
-        if (oilPressMeter) oilPressMeter.Value = float.Parse(values[3]);
+        if(waterTempMeter != null) waterTempMeter.Value = float.Parse(values[1]);
+        if(oilTempMeter != null) oilTempMeter.Value = float.Parse(values[2]);
+        if (oilPressMeter != null) oilPressMeter.Value = float.Parse(values[3]);
 
-        if (tachoMeter) tachoMeter.Value = float.Parse(values[4]);
-        if (speedMeter) speedMeter.Value = float.Parse(values[5]);
-        if (Meter) Meter.Value = tachoMeter.Value / speedMeter.Value;
+        if (tachoMeter != null) tachoMeter.Value = float.Parse(values[4]);
+        if (speedMeter != null) speedMeter.Value = float.Parse(values[5]);
+        if (Meter != null) Meter.Value = tachoMeter.Value / speedMeter.Value;
     } /* OnDataReceived */
 
     public void resetValue()
     {
-        if (waterTempMeter) waterTempMeter.resetValue();
-        if (oilTempMeter) oilTempMeter.resetValue();
-        if (oilPressMeter) oilPressMeter.resetValue();
-        if (tachoMeter) tachoMeter.resetValue();
-        if (speedMeter) speedMeter.resetValue();
-        if (Meter) Meter.resetValue();
+        if (waterTempMeter != null) waterTempMeter.resetValue();
+        if (oilTempMeter != null) oilTempMeter.resetValue();
+        if (oilPressMeter != null) oilPressMeter.resetValue();
+        if (tachoMeter != null) tachoMeter.resetValue();
+        if (speedMeter != null) speedMeter.resetValue();
+        if (Meter != null) Meter.resetValue();
     } /* resetValue */
+
+    private void Update()
+    {
+    } /* Update */
+
 }

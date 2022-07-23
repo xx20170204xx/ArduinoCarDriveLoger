@@ -56,14 +56,15 @@
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio Tools for Unity\16.0\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Script\MeterBase.cs" />
+    <Compile Include="Assets\Script\Meter\MeterBase.cs" />
     <Compile Include="Assets\Script\DeviceList\DevListPanel.cs" />
     <Compile Include="Assets\Script\MeterUnitController.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\SerialPortUtilityPro.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPDeviceList.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
-    <Compile Include="Assets\Script\AnalogMeter.cs" />
+    <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptHTTP.cs" />
+    <Compile Include="Assets\Script\Meter\TachoShiftLampMeter.cs" />
     <Compile Include="Assets\Script\SerialReceive.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptJSON.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptModbus.cs" />
