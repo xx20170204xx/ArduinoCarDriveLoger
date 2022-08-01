@@ -88,9 +88,6 @@ public class TachoShiftLampMeter : MeterBase
         float range = valueMax - valueMin;
         float step = range / lampImages.Length;
 
-        float rr =  Value - valueMin;
-        int jj = (int)(rr / step);
-
         float _value = 0;
         for (int ii = 0; ii < lampImages.Length; ii++)
         {
@@ -98,7 +95,7 @@ public class TachoShiftLampMeter : MeterBase
             var lamp = GetLampInfo(_value);
             if (act == true)
             {
-                if (Value >= _value) {
+                if (Value > _value) {
                     if (lampImage.image1 != null) { lampImage.image1.sprite = lamp.litSprite; }
                     if (lampImage.image2 != null) { lampImage.image2.sprite = lamp.litSprite; }
                 }else {
@@ -131,7 +128,7 @@ public class TachoShiftLampMeter : MeterBase
         }
 
         return lamps[lamps.Length-1];
-    }
+    } /* GetLampInfo */
 
 
 }

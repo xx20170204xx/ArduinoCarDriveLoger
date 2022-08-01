@@ -78,7 +78,7 @@ public class SerialReceive : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning(e.Message);//エラーを表示
+            Debug.LogWarning(e.Message.ToString());//エラーを表示
         }
     } /* OnDataReceived */
 
