@@ -14,6 +14,6 @@ Android+Arduino+Unityを使ってのマルチメーターを目指したものです。
 ![Figure1. Client](Fig/UnityClient/20220802.png)
 
 
-2022/07/24
+2022/08/03
 <!-- https://docs.github.com/ja/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax -->
 <!-- EOF -->
