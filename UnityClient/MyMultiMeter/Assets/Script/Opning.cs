@@ -43,9 +43,15 @@ public class Opning : MonoBehaviour
         if ((ulong)player.frame >= frameCount)
         {
             Debug.Log("stop");
-            player.Stop();
-            SceneManager.LoadScene(nextScene);
-            this.gameObject.SetActive(false);
+            SkipScene();
         }
-    }
+    } /* Update */
+
+    public void SkipScene()
+    {
+        player.Stop();
+        SceneManager.LoadScene(nextScene);
+        this.gameObject.SetActive(false);
+    } /* SkipScene */
+
 }
