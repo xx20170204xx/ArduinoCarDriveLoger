@@ -11,7 +11,7 @@ Android+Arduino+Unityを使ってのマルチメーターを目指したものです。
 -->
 
 ## Figure
-![Figure1.Client](Fig/UnityClient/20220802.png)
+![Figure1. Client](Fig/UnityClient/20220802.png)
 
 
 2022/07/24
