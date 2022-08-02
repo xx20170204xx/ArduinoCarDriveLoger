@@ -1,5 +1,5 @@
 /*
-https://github.com/xx20170204xx/ArduinoCarDriveLoger/blob/main/MultiMeter/MultiMeter.ino
+https://github.com/xx20170204xx/ArduinoCarDriveLoger/blob/main/MultiMeterBT/MultiMeterBT.ino
 
 参考URL
 https://github.com/puriso/arduino-thermometer_by_defi_sensor/blob/master/thermomerter_by_defi.ino/thermomerter_by_defi.ino.ino
@@ -171,6 +171,7 @@ void BTconfirmRequest(void)
 
 void setup() {
 
+  // 20220802 : PIN番号が使用できないためコメントアウト
   // pinMode(SPEED_WARNING_PIN, OUTPUT);
   // pinMode(RPM_WARNING_PIN, OUTPUT);
 
@@ -602,8 +603,9 @@ static void UpdateSpeedReset( void ){
 
 static void OutputWarningPin(void)
 {
-  digitalWrite(SPEED_WARNING_PIN, (g_speedKm >= SPEED_WARNING_VALUE));
-  digitalWrite(RPM_WARNING_PIN, (g_tachoRpm >= RPM_WARNING_VALUE));
+  // 20220802 : PIN番号が使用できないためコメントアウト
+  // digitalWrite(SPEED_WARNING_PIN, (g_speedKm >= SPEED_WARNING_VALUE));
+  // digitalWrite(RPM_WARNING_PIN, (g_tachoRpm >= RPM_WARNING_VALUE));
   
 } /* OutputWarningPin */
 
