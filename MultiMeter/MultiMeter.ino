@@ -149,7 +149,7 @@ void setup() {
   /* nop */
 #endif
 
-  Serial.begin(19200);
+  Serial.begin(115200);
 
 #if USE_LCD == 1
   // set up the LCD's number of columns and rows:

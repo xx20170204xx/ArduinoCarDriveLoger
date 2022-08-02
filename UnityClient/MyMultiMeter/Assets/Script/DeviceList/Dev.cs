@@ -9,7 +9,6 @@ public class Dev : MonoBehaviour
     [HideInInspector]
     public SerialReceive serial;
 
-    [HideInInspector]
     public Text m_text;
 
     [HideInInspector]
@@ -26,5 +25,14 @@ public class Dev : MonoBehaviour
         serial.SerialNumber = info.SerialNumber;
         serial.Port = info.PortName;
         serial.SaveDeviceInfo();
+
+        string message = "";
+        message += "OnSelected :";
+        message += openSystem + " " ;
+        message += info.Vendor + " ";
+        message += info.Product + " ";
+        message += info.SerialNumber + " ";
+        message += info.PortName + " ";
+        serial.AddDebugText(message);
     } /* OnSelected */
 }

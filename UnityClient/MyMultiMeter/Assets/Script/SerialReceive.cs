@@ -2,6 +2,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using SerialPortUtility;
 
 /*
@@ -31,6 +32,8 @@ public class SerialReceive : MonoBehaviour
     public float longitude; /* 経度 */
     public float altitude;  /* 高度 */
 
+    public Text m_debugText = null;
+
     private void Awake()
     {
         Instance = this;
@@ -52,6 +55,7 @@ public class SerialReceive : MonoBehaviour
     {
         if (serialHandler.IsConnected() == false && openSystem != SerialPortUtilityPro.OpenSystem.NumberOrder ) 
         {
+            serialHandler.OpenMethod = openSystem;
             serialHandler.VendorID = VecderID;
             serialHandler.ProductID = ProductID;
             serialHandler.SerialNumber = SerialNumber;
@@ -79,13 +83,23 @@ public class SerialReceive : MonoBehaviour
         catch (System.Exception e)
         {
             Debug.LogWarning(e.Message.ToString());//エラーを表示
+            AddDebugText("Exception :" + e.Message.ToString());
         }
     } /* OnDataReceived */
 
     public void OnSerialEvent(SerialPortUtilityPro _serialPort,string _data)
     {
         Debug.Log("OnSerialEvent : " + _data);
-
+        AddDebugText("OnSerialEvent :" + _data);
+        if (_data == "OPEN_ERROR")
+        {
+            string message = "OnSerialEvent :" + _data;
+            AddDebugText(message);
+            message = "  " + serialHandler.OpenMethod;   AddDebugText(message);
+            message = "  " + serialHandler.VendorID; AddDebugText(message);
+            message = "  " + serialHandler.ProductID; AddDebugText(message);
+            message = "  " + serialHandler.SerialNumber; AddDebugText(message);
+        }
 
     } /* OnSerialEvent */
 
@@ -214,5 +228,14 @@ public class SerialReceive : MonoBehaviour
             yield return new WaitForSeconds(10);
         }
     } /* StartLocationService */
+
+    public void AddDebugText(string message)
+    {
+        if (m_debugText != null)
+        {
+            m_debugText.text += "\r\n" + message;
+        }
+
+    } /* AddDebugText */
 
 }
