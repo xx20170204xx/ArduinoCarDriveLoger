@@ -11,7 +11,10 @@ Android+Arduino+Unityを使ってのマルチメーターを目指したものです。
 -->
 
 ## Figure
+### Android Client
 ![Figure1. Client](Fig/UnityClient/20220802.png)
+### Device(Arduino Uno)
+![Figure2. Arduino Uno](Fig/Arduino/IMG_20220725_015618122.png)
 
 
 2022/08/03
