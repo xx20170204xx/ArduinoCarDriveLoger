@@ -18,19 +18,34 @@ public class SerialReceive : MonoBehaviour
 
     public MeterUnitController controller = null;
 
+    [HideInInspector]
     public SerialPortUtilityPro.OpenSystem openSystem = SerialPortUtilityPro.OpenSystem.NumberOrder;
+    [HideInInspector]
     public string VecderID;
+    [HideInInspector]
     public string ProductID;
+    [HideInInspector]
     public string SerialNumber;
+    [HideInInspector]
     public string Port;
 
     private bool isRecordData = false;
     private string RecordDataFilename = "";
 
     /* GPS情報 */
+    [HideInInspector]
     public float latitude;  /* 経度 */
+    [HideInInspector]
     public float longitude; /* 経度 */
+    [HideInInspector]
     public float altitude;  /* 高度 */
+
+    [SerializeField]
+    private Image recoedImage = null;
+    [SerializeField]
+    private Sprite recoedSprite = null;
+    [SerializeField]
+    private Sprite stopSprite = null;
 
     public Text m_debugText = null;
 
@@ -157,9 +172,19 @@ public class SerialReceive : MonoBehaviour
         {
             isRecordData = true;
             RecordDataFilename = Application.persistentDataPath + "/data_" + dateTime.ToString("yyyyMMddHHmmss") + ".csv";
+            if (recoedImage != null && stopSprite != null)
+            {
+                recoedImage.sprite = stopSprite;
+            }
         } else {
             isRecordData = false;
+            if (recoedImage != null && recoedSprite != null)
+            {
+                recoedImage.sprite = recoedSprite;
+            }
         }
+        Debug.Log("isRecordData : " + isRecordData.ToString());
+        AddDebugText("isRecordData : " + isRecordData.ToString());
     } /* SwitchRecordData */
 
     private void SaveRecordData( string _data )

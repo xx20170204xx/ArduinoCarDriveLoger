@@ -4972,7 +4972,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 3503, y: -1891}
   m_SizeDelta: {x: 2560, y: 1440}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &1102871612
@@ -7722,6 +7722,10 @@ MonoBehaviour:
   latitude: 0
   longitude: 0
   altitude: 0
+  recoedImage: {fileID: 1131218183}
+  recoedSprite: {fileID: -1290855366162983238, guid: 6a94b40b72c2ca64686bdbb8b7042ed3,
+    type: 3}
+  stopSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   m_debugText: {fileID: 1310681989}
 --- !u!114 &1702349613
 MonoBehaviour:
