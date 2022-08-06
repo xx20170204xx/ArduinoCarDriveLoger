@@ -45,12 +45,31 @@ public class DevListPanel : MonoBehaviour
         {
             GameObject _go = Instantiate(prefab);
             _go.transform.parent = this.contents.transform;
+            _go.transform.localScale = this.contents.transform.localScale;
             var dev = _go.GetComponent<Dev>();
 
             dev.serial = this.serial;
             dev.openSystem = openSystem;
             dev.info = devInfo;
-            dev.m_text.text = "PortName=[" + devInfo.PortName + "] deviceType =[" + openSystem.ToString() + "] Vendor=[" + devInfo.Vendor + "] Product=[" + devInfo.Product + "] SerialNumber=[" + devInfo.SerialNumber + "]";
+            //if( openSystem ==SerialPortUtilityPro.OpenSystem.USB )
+
+            string strInfoText = "";
+            switch (openSystem)
+            {
+                case SerialPortUtilityPro.OpenSystem.USB:
+                    {
+                        strInfoText = "PortName=[" + devInfo.PortName + "] Vendor=[" + devInfo.Vendor + "] Product=[" + devInfo.Product + "]";
+                    }
+                    break;
+
+                case SerialPortUtilityPro.OpenSystem.BluetoothSSP:
+                    {
+                        strInfoText = "SerialNumber=[" + devInfo.SerialNumber + "]";
+                    }
+                    break;
+            }
+
+            dev.m_text.text = strInfoText;
         }
 
     } /* OnUpdateDeviceList */
