@@ -69,7 +69,7 @@
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptJSON.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptModbus.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPProgramming.cs" />
-    <Compile Include="Assets\Script\DeviceList\Dev.cs" />
+    <Compile Include="Assets\Script\DeviceList\DevInfo.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptSimple.cs" />
     <Compile Include="Assets\Script\Opning.cs" />
     <Compile Include="Assets\Script\PanelSelect.cs" />

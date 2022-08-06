@@ -46,7 +46,7 @@ public class DevListPanel : MonoBehaviour
             GameObject _go = Instantiate(prefab);
             _go.transform.parent = this.contents.transform;
             _go.transform.localScale = this.contents.transform.localScale;
-            var dev = _go.GetComponent<Dev>();
+            var dev = _go.GetComponent<DevInfo>();
 
             dev.serial = this.serial;
             dev.openSystem = openSystem;

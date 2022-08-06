@@ -200,8 +200,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 3563526203428455183}
-        m_TargetAssemblyTypeName: Dev, Assembly-CSharp
+      - m_Target: {fileID: 5515186219551375325}
+        m_TargetAssemblyTypeName: DevInfo, Assembly-CSharp
         m_MethodName: OnSelected
         m_Mode: 1
         m_Arguments:
@@ -223,9 +223,9 @@ GameObject:
   - component: {fileID: 4877243473049266235}
   - component: {fileID: 1060066747659342235}
   - component: {fileID: 1477137485700323955}
-  - component: {fileID: 3563526203428455183}
   - component: {fileID: 8464104541537206691}
   - component: {fileID: 4270437988703803603}
+  - component: {fileID: 5515186219551375325}
   m_Layer: 5
   m_Name: DevInfo
   m_TagString: Untagged
@@ -291,21 +291,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3563526203428455183
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5861778797944844787}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32d689abb78daba429d2253c7d250876, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  serial: {fileID: 0}
-  m_text: {fileID: 4024697255887102168}
-  openSystem: 0
 --- !u!114 &8464104541537206691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -352,3 +337,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &5515186219551375325
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5861778797944844787}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32d689abb78daba429d2253c7d250876, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  serial: {fileID: 0}
+  m_text: {fileID: 4024697255887102168}
+  openSystem: 0

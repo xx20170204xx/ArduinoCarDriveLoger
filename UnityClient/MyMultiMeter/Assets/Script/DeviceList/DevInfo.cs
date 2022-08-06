@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using SerialPortUtility;
 
-public class Dev : MonoBehaviour
+public class DevInfo : MonoBehaviour
 {
     [HideInInspector]
     public SerialReceive serial;
