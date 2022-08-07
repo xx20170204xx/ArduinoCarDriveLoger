@@ -4,6 +4,15 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/*
+ *
+ * Modƒƒ‚
+ * 
+ * –¼Ì                 ‘®«
+ * Thumbnail_Image      Texture
+ * MeterPanel           MeterUnitController(GameObject)
+ */
+
 [RequireComponent(typeof(MeterUnitController))]
 public class ModListPanel : MonoBehaviour
 {
