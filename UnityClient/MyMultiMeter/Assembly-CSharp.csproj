@@ -60,6 +60,7 @@
     <Compile Include="Assets\Script\DeviceList\DevListPanel.cs" />
     <Compile Include="Assets\Script\MeterUnitController.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\SerialPortUtilityPro.cs" />
+    <Compile Include="Assets\Script\ModList\ModListPanel.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPDeviceList.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
     <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
@@ -71,12 +72,14 @@
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPProgramming.cs" />
     <Compile Include="Assets\Script\DeviceList\DevInfo.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptSimple.cs" />
+    <Compile Include="Assets\Script\ModList\ModInfo.cs" />
     <Compile Include="Assets\Script\Opning.cs" />
     <Compile Include="Assets\Script\PanelSelect.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\DebugConsole.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\SerialPortUtilityPro\Plugins\x86_64\spap.dll" />
+    <None Include="Assets\StreamingAssets\dummy.txt" />
     <None Include="Assets\SerialPortUtilityPro\Readme.txt" />
     <None Include="Assets\SerialPortUtilityPro\Plugins\x86\spap.dll" />
   </ItemGroup>

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using SerialPortUtility;
 
+[RequireComponent(typeof(MeterUnitController))]
 public class DevListPanel : MonoBehaviour
 {
     [SerializeField]
@@ -31,18 +32,17 @@ public class DevListPanel : MonoBehaviour
         }
 
         /* 一覧のクリア */
-        int count = contents.transform.childCount;
-        for (int ii = 0; ii < count; ii++)
-        {
-            var chld = contents.transform.GetChild(0);
-            chld.gameObject.SetActive(false);
-            chld.gameObject.transform.SetParent(null);
-            Destroy(chld.gameObject);
-        }
+        ClearList();
 
         var _list = SerialPortUtilityPro.GetConnectedDeviceList(openSystem);
         foreach (var devInfo in _list)
         {
+            if (prefab == null)
+            {
+                Debug.LogWarning(this.GetType().ToString() + " : " + "prefab is null."); ;
+                continue;
+            }
+
             GameObject _go = Instantiate(prefab);
             _go.transform.parent = this.contents.transform;
             _go.transform.localScale = this.contents.transform.localScale;
@@ -73,4 +73,24 @@ public class DevListPanel : MonoBehaviour
         }
 
     } /* OnUpdateDeviceList */
+
+    private void ClearList()
+    {
+        if (contents == null)
+        {
+            return;
+        }
+
+        /* 一覧のクリア */
+        int count = contents.transform.childCount;
+        for (int ii = 0; ii < count; ii++)
+        {
+            var chld = contents.transform.GetChild(0);
+            chld.gameObject.SetActive(false);
+            chld.gameObject.transform.SetParent(null);
+            Destroy(chld.gameObject);
+        }
+
+    } /* ClearList */
+
 }
