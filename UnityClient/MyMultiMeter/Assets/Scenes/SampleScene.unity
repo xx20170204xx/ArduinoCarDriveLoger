@@ -215,7 +215,7 @@ GameObject:
   - component: {fileID: 11530281}
   - component: {fileID: 11530280}
   m_Layer: 5
-  m_Name: oilPress (1)
+  m_Name: gearRatio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -255,7 +255,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 11530281}
   format: '{0:F0}'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -558,7 +557,6 @@ MonoBehaviour:
   subMeter: {fileID: 1901611453}
   text: {fileID: 2096015224}
   format: '{0:F0} rpm'
-  peak: 0
   lowValue: 750
   highValue: 11000
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -957,7 +955,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 843645477}
   format: '{0:F0} rpm'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -1002,7 +999,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 82511637}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -1236,7 +1232,7 @@ GameObject:
   - component: {fileID: 103107458}
   - component: {fileID: 103107457}
   m_Layer: 5
-  m_Name: oilPress (1)
+  m_Name: gearRatio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1257,7 +1253,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 103107458}
   format: '{0:F0}'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -1773,7 +1768,7 @@ GameObject:
   - component: {fileID: 178371301}
   - component: {fileID: 178371300}
   m_Layer: 5
-  m_Name: oilPress (1)
+  m_Name: gearRatio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1813,7 +1808,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 178371301}
   format: '{0:F0}'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -2449,7 +2443,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1981284}
   format: '{0:F0} Km'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -3180,7 +3173,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 500757677}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -3449,7 +3441,7 @@ GameObject:
   - component: {fileID: 557218436}
   - component: {fileID: 557218435}
   m_Layer: 5
-  m_Name: oilPress (1)
+  m_Name: gearRatio
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3470,7 +3462,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 557218436}
   format: '{0:F0}'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -4248,7 +4239,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1257872650}
   format: '{0:F0} Km'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -6598,7 +6588,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1193003400}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -6849,7 +6838,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1258859637}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -7354,7 +7342,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1320333910}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -7825,7 +7812,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1451608619}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -8639,7 +8625,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1533678632}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -9255,7 +9240,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1348361022}
   format: '{0:F0} Km'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -9799,7 +9783,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1728027793}
   format: '{0:F2} bar'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -10465,7 +10448,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1119704317}
   format: '{0:F0} Km'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -10605,7 +10587,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 0}
   format: '{0:F0}'
-  peak: 0
   lowValue: 0
   highValue: 6900
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -10746,7 +10727,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1929236506}
   format: '{0:F2} bar'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11053,7 +11033,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 343610093}
   format: '{0:F0} rpm'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11098,7 +11077,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1972415664}
   format: '{0:F2} bar'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11218,7 +11196,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1973859363}
   format: "{0:F0} \u2103"
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -11450,7 +11427,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 2007129000}
   format: '{0:F2} bar'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -12211,7 +12187,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 2112777432}
   format: '{0:F0} rpm'
-  peak: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}

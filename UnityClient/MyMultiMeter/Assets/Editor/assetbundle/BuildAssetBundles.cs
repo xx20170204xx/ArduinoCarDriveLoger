@@ -18,7 +18,7 @@ public class BuildAssetBundles : MonoBehaviour
         prefabAssets[1] = "Assets/bundle/ModSample1/MeterPanel.prefab";
         buildMap[0].assetNames = prefabAssets;
 
-        //‚±‚Ìê‡AƒAƒZƒbƒgƒoƒ“ƒhƒ‹prefab_bundle_prefab_A_only‚É‚ÍAprefabA,image1.png‚ª’Ç‰Á‚³‚ê‚é
+        //ã“ã®å ´åˆã€ã‚¢ã‚»ãƒƒãƒˆãƒãƒ³ãƒ‰ãƒ«prefab_bundle_prefab_A_onlyã«ã¯ã€prefabA,image1.pngãŒè¿½åŠ ã•ã‚Œã‚‹
 
         BuildPipeline.BuildAssetBundles("Assets/StreamingAssets", buildMap, BuildAssetBundleOptions.None, BuildTarget.Android);
     }

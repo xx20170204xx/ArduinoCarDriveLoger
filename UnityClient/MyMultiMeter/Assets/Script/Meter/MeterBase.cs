@@ -12,12 +12,16 @@ public class MeterBase : MonoBehaviour
      * https://docs.microsoft.com/ja-jp/dotnet/standard/base-types/standard-numeric-format-strings
      */
     [SerializeField]
-    private string format = "{0:F0}";
+    protected string format = "{0:F0}";
 
+#if false
+    [SerializeField]
+#endif
     private float meterValue;
 
     public float Value { get { return this.meterValue; } set { this.meterValue = value; if (this.peak < value) { this.peak = value; } } }
-    public float peak;
+    
+    protected float peak;
 
     public float lowValue = -1.0f;
     public float highValue = 95.0f;

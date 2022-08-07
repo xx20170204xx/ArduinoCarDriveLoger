@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 /*
  *
- * Modメモ
+ * Mod繝｡繝｢
  * 
- * 名称                 属性
+ * 蜷咲ｧｰ                 螻樊ｧ
  * Thumbnail_Image      Texture
  * MeterPanel           MeterUnitController(GameObject)
  */
@@ -31,7 +31,7 @@ public class ModListPanel : MonoBehaviour
 
     public void OnUpdateModList()
     {
-        /* 一覧のクリア */
+        /* 荳隕ｧ縺ｮ繧ｯ繝ｪ繧｢ */
         ClearList();
 
         string findModPath = Application.streamingAssetsPath + "/" + modFolderName;
@@ -75,7 +75,7 @@ public class ModListPanel : MonoBehaviour
             return;
         }
 
-        /* 一覧のクリア */
+        /* 荳隕ｧ縺ｮ繧ｯ繝ｪ繧｢ */
         int count = contents.transform.childCount;
         for (int ii = 0; ii < count; ii++)
         {

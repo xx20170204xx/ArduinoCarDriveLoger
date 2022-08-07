@@ -5,36 +5,36 @@ using UnityEngine.UI;
 
 public class MeterUnitController : MonoBehaviour
 {
-    [Tooltip("…‰·")]
+    [Tooltip("æ°´æ¸©")]
     [SerializeField]
     private MeterBase waterTempMeter = null;
-    [Tooltip("–û‰·")]
+    [Tooltip("æ²¹æ¸©")]
     [SerializeField]
     private MeterBase oilTempMeter = null;
-    [Tooltip("–ûˆ³")]
+    [Tooltip("æ²¹åœ§")]
     [SerializeField]
     private MeterBase oilPressMeter = null;
 
-    [Tooltip("‰ñ“]”")]
+    [Tooltip("å›è»¢æ•°")]
     [SerializeField]
     private MeterBase tachoMeter = null;
-    [Tooltip("‘¬“x")]
+    [Tooltip("é€Ÿåº¦")]
     [SerializeField]
     private MeterBase speedMeter = null;
 
-    [Tooltip("Œ¸‘¬”ä")]
+    [Tooltip("æ¸›é€Ÿæ¯”")]
     [SerializeField]
     private MeterBase gearRatioMeter = null;
 
     public void OnDataReceived(string message)
     {
         string[] values = message.Split('\t');
-        /* …‰·E–û‰·E–ûˆ³ */
+        /* æ°´æ¸©ãƒ»æ²¹æ¸©ãƒ»æ²¹åœ§ */
         if(waterTempMeter != null) waterTempMeter.Value = float.Parse(values[1]);
         if(oilTempMeter != null) oilTempMeter.Value = float.Parse(values[2]);
         if (oilPressMeter != null) oilPressMeter.Value = float.Parse(values[3]);
 
-        /* ‰ñ“]”E‘¬“xEŒ¸‘¬”ä */
+        /* å›è»¢æ•°ãƒ»é€Ÿåº¦ãƒ»æ¸›é€Ÿæ¯” */
         if (tachoMeter != null) tachoMeter.Value = float.Parse(values[4]);
         if (speedMeter != null) speedMeter.Value = float.Parse(values[5]);
         if (gearRatioMeter != null) gearRatioMeter.Value = tachoMeter.Value / speedMeter.Value;

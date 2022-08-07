@@ -8,7 +8,7 @@ using SerialPortUtility;
 /*
  
     GPS:
-        Android�̏ꍇ�A�A�v����񂩂�ʒu�����擾���邱�Ƃ�������K�v������
+        Androidの場合、アプリ情報から位置情報を取得することを許可する必要がある
 */
 public class SerialReceive : MonoBehaviour
 {
@@ -32,13 +32,13 @@ public class SerialReceive : MonoBehaviour
     private bool isRecordData = false;
     private string RecordDataFilename = "";
 
-    /* GPS��� */
+    /* GPS情報 */
     [HideInInspector]
-    public float latitude;  /* �o�x */
+    public float latitude;  /* 経度 */
     [HideInInspector]
-    public float longitude; /* �o�x */
+    public float longitude; /* 経度 */
     [HideInInspector]
-    public float altitude;  /* ���x */
+    public float altitude;  /* 高度 */
 
     [SerializeField]
     private Image recoedImage = null;
@@ -79,7 +79,7 @@ public class SerialReceive : MonoBehaviour
         }
     } /* OpenDevice */
 
-    //��M�����M��(message)�ɑ΂��鏈��
+    //受信した信号(message)に対する処理
     public void OnDataReceived( object _data)
     {
         try
@@ -97,7 +97,7 @@ public class SerialReceive : MonoBehaviour
         }
         catch (System.Exception e)
         {
-            Debug.LogWarning(e.Message.ToString());//�G���[��\��
+            Debug.LogWarning(e.Message.ToString());//エラーを表示
             AddDebugText("Exception :" + e.Message.ToString());
         }
     } /* OnDataReceived */
@@ -201,9 +201,9 @@ public class SerialReceive : MonoBehaviour
         data = data.Replace("\r", "");
         data = data.Replace("\n", "");
 
-        data += "," + latitude;   /* �ܓx */
-        data += "," + longitude;  /* �o�x */
-        data += "," + altitude;   /* ���x*/
+        data += "," + latitude;   /* 緯度 */
+        data += "," + longitude;  /* 経度 */
+        data += "," + altitude;   /* 高度*/
 
         csvWriter.WriteLine( dateTime.ToString("yyyy/MM/dd HH:mm:ss.fff") + "," + data);
         csvWriter.Close();

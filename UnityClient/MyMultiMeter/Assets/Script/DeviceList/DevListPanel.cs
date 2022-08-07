@@ -31,7 +31,7 @@ public class DevListPanel : MonoBehaviour
             openSystem = SerialPortUtilityPro.OpenSystem.BluetoothSSP;
         }
 
-        /* 一覧のクリア */
+        /* 荳隕ｧ縺ｮ繧ｯ繝ｪ繧｢ */
         ClearList();
 
         var _list = SerialPortUtilityPro.GetConnectedDeviceList(openSystem);
@@ -81,7 +81,7 @@ public class DevListPanel : MonoBehaviour
             return;
         }
 
-        /* 一覧のクリア */
+        /* 荳隕ｧ縺ｮ繧ｯ繝ｪ繧｢ */
         int count = contents.transform.childCount;
         for (int ii = 0; ii < count; ii++)
         {

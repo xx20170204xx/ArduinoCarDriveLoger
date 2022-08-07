@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
 public class AnalogMeter : MeterBase
 {
     private Quaternion init_rot;
@@ -16,6 +17,11 @@ public class AnalogMeter : MeterBase
     public float angle_max = 360.0f;
     void Start()
     {
+        if (needle == null)
+        {
+            this.gameObject.SetActive(false);
+            return;
+        }
         init_rot = needle.transform.rotation;
 
     }
@@ -36,7 +42,7 @@ public class AnalogMeter : MeterBase
 
     protected void UpdateNeedle( Image _needle, float _value )
     {
-        if (needle == null)
+        if (_needle == null)
         {
             return;
         }
