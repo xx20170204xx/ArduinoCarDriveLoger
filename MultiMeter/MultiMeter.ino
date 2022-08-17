@@ -15,7 +15,7 @@ https://github.com/matt-downs/arduino-oled-auto-gauges/blob/master/boost/boost.i
 +5V  GND A1
          A2
 
-R= 1KΩ ？
+R= 1Kohm
 
 [  Press ]
 [ Sensor ]
@@ -24,8 +24,15 @@ R= 1KΩ ？
  |   |  |
 +5V GND A3
 
+[  Boost ]
+[ Sensor ]
+ |   |  |
+ |   |  |
+ |   |  |
++5V GND A3
 
-
+                       +-- ||---GND
+                       |
 +5V----------|<--------+---|<---GND
                        |
 SpeedPulse---1Kohm-----+--------D2 or D3
@@ -84,9 +91,9 @@ const int TACHO_PULSE_PIN = 2;
 /* 車速取得用ピン(デジタル/割り込み可能) */
 const int SPEED_PULSE_PIN = 3;
 /* 設定速度超過用ピン */
-const int SPEED_WARNING_PIN=10;
+// const int SPEED_WARNING_PIN=10;
 /* 設定回転数超過用ピン */
-const int RPM_WARNING_PIN=11;
+// const int RPM_WARNING_PIN=11;
 
 /*--------------------------------------*/
 const int R25C   = 10000; // R25℃ = Ω
@@ -134,8 +141,8 @@ int g_LCDmode=0;
 
 void setup() {
 
-  pinMode(SPEED_WARNING_PIN, OUTPUT);
-  pinMode(RPM_WARNING_PIN, OUTPUT);
+//  pinMode(SPEED_WARNING_PIN, OUTPUT);
+//  pinMode(RPM_WARNING_PIN, OUTPUT);
 
 #if DEBUG_TACHOSPEED == 0
   /* Tacho */
@@ -542,8 +549,8 @@ static void UpdateSpeedReset( void ){
 
 static void OutputWarningPin(void)
 {
-  digitalWrite(SPEED_WARNING_PIN, (g_speedKm >= SPEED_WARNING_VALUE));
-  digitalWrite(RPM_WARNING_PIN, (g_tachoRpm >= RPM_WARNING_VALUE));
+//  digitalWrite(SPEED_WARNING_PIN, (g_speedKm >= SPEED_WARNING_VALUE));
+//  digitalWrite(RPM_WARNING_PIN, (g_tachoRpm >= RPM_WARNING_VALUE));
   
 } /* OutputWarningPin */
 

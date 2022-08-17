@@ -54,7 +54,8 @@ public class StaticMapController : MonoBehaviour
                 RawImage img = GetComponent<RawImage>();
                 Destroy(img.texture); //マップをなくす
                 img.texture = ((DownloadHandlerTexture)req.downloadHandler).texture; //マップを貼りつける
-            }catch (System.Exception _e){ 
+            }catch (System.Exception _e){
+                Debug.LogWarning(_e.Message);
             }
         }
 
