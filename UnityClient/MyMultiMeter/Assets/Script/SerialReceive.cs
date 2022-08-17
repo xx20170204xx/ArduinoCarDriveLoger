@@ -47,6 +47,10 @@ public class SerialReceive : MonoBehaviour
     [SerializeField]
     private Sprite stopSprite = null;
 
+    [SerializeField]
+    private string m_GoogleAPIKEY;
+    public string GoogleAPIKey { get{ return m_GoogleAPIKEY; } }
+
     public Text m_debugText = null;
 
     private void Awake()
