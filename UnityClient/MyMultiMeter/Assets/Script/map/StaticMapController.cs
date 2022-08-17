@@ -9,8 +9,8 @@ public class StaticMapController : MonoBehaviour
 {
     private const string DUMMY_API_KEY = "XXGoogleAPIKeyXX";
     private string STATIC_MAP_URL = "https://maps.googleapis.com/maps/api/staticmap?key=" + DUMMY_API_KEY + "&zoom=15&size=640x640&scale=2&maptype=terrain&style=element:labels|visibility:off";// Google Maps Static API URL、${APIKey}を作成したapiキーに書き換える
-    private float updateTime = 0.0f;
-    private float backTime = 5.0f;
+    private float remainTime = 0.0f;
+    private float updateTime = 5.0f;
 
 
     // Start is called before the first frame update
@@ -23,19 +23,19 @@ public class StaticMapController : MonoBehaviour
             return;
         }
         STATIC_MAP_URL = STATIC_MAP_URL.Replace(DUMMY_API_KEY, SerialReceive.Instance.GoogleAPIKey);
-        updateTime = backTime;
+        remainTime = updateTime;
         StartCoroutine(getStaticMap());// getStaticMapを実行する
     } /* Start */
 
     // Update is called once per frame
     void Update()
     {
-        updateTime -= Time.deltaTime;
+        remainTime -= Time.deltaTime;
 
-        if (updateTime <= 0)// もし、frameが300以上なら、
+        if (remainTime <= 0)
         {
             StartCoroutine(getStaticMap());// getStaticMapを実行する
-            updateTime = backTime;
+            remainTime = updateTime;
         }
     } /* Update */
 
