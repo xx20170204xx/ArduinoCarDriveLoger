@@ -566,7 +566,7 @@ MonoBehaviour:
   needlePeak: {fileID: 552669370}
   valueMin: 0
   valueMax: 11000
-  angle_max: 360
+  angle_max: 247.5
 --- !u!1 &62982814
 GameObject:
   m_ObjectHideFlags: 0
@@ -4326,8 +4326,8 @@ MonoBehaviour:
   needle: {fileID: 1868747857}
   needlePeak: {fileID: 778051087}
   valueMin: 0
-  valueMax: 360
-  angle_max: 360
+  valueMax: 180
+  angle_max: 405
 --- !u!224 &757919471
 RectTransform:
   m_ObjectHideFlags: 0

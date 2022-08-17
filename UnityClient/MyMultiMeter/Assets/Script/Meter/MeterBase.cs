@@ -16,6 +16,11 @@ public class MeterBase : MonoBehaviour
 
 #if false
     [SerializeField]
+#if true
+    [Range(-273,360)]
+#else
+    [Range(-273,11000)]  /* tacho—p */
+#endif
 #endif
     private float meterValue;
 
