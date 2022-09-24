@@ -130,14 +130,14 @@ public class MeterUnitController : MonoBehaviour
         }
     } /* ReloadSetting */
 
-#if UNITY_EDITOR
+#if true// UNITY_EDITOR
     private IEnumerator coroutine;
 
-    public void StartDemoMode()
+    public void StartDemoPlay()
     {
         coroutine = DemoPlay();
         StartCoroutine(coroutine);
-    } /* StartDemoMode */
+    } /* StartDemoPlay */
 
     private IEnumerator DemoPlay()
     {
@@ -150,6 +150,7 @@ public class MeterUnitController : MonoBehaviour
         float _speed = 0f;
         int _gear = 1;
         const int GEAR_MAX = 5;
+        float _shift_timing = 7500.0f;
 
         Debug.Log("Start Demo.");
         while (_end_flag)
@@ -162,9 +163,9 @@ public class MeterUnitController : MonoBehaviour
             if (_oil_press >= 10.0f) _oil_press = 0;
             _tacho += 1000f / 60.0f;
             _speed = _tacho / (((GEAR_MAX+1) - _gear) * 40);
-            if (_tacho >= 9000.0f) { 
-                _tacho = 750.0f;
+            if (_tacho >= _shift_timing) {
                 _gear += 1;
+                _tacho = _speed * (((GEAR_MAX + 1) - _gear) * 40);
             }
 
             string _mes = "V\t1.0\t1.0\t1.0\t1.0\t1.0\t\n";

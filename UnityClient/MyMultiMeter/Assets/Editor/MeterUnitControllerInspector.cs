@@ -14,7 +14,7 @@ public class MeterUnitControllerEditor : Editor
             MeterUnitController targetScript = target as MeterUnitController;
             if (targetScript != null)
             {
-                targetScript.StartDemoMode();
+                targetScript.StartDemoPlay();
             }
         }
     } /* OnInspectorGUI */

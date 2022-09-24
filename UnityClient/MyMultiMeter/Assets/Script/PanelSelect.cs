@@ -121,6 +121,11 @@ public class PanelSelect : MonoBehaviour
         serial.controller.gameObject.SetActive(true);
     } /* OnPrevPanel */
 
+    public void OnStartDemoPlay()
+    {
+        useUnits[nowNum].StartDemoPlay();
+    } /* OnStartDemoPlay */
+
     public void UpdateModPanels( ModInfo[] modInfos,GameObject _parent )
     {
         useUnits.Clear();
