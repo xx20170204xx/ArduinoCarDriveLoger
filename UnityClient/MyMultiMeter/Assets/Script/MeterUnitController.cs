@@ -51,10 +51,80 @@ public class MeterUnitController : MonoBehaviour
         if (tachoMeter != null) tachoMeter.resetValue();
         if (speedMeter != null) speedMeter.resetValue();
         if (gearRatioMeter != null) gearRatioMeter.resetValue();
+        ReloadSetting();
     } /* resetValue */
 
-    private void Update()
+    public void ReloadSetting()
     {
-    } /* Update */
+        if (waterTempMeter != null)
+        {
+            var _type = MeterBase.MeterType.TYPE_WATER_TEMP;
+            var _setting = SerialReceive.Instance.m_MeterSetting[_type];
+            var _meter = waterTempMeter;
+            do {
+                _meter.lowValue = _setting.m_lowValue;
+                _meter.highValue = _setting.m_highValue;
+                _meter.lowColor = _setting.m_lowColor;
+                _meter.normalColor = _setting.m_normalColor;
+                _meter.highColor = _setting.m_highColor;
+            } while ( _meter = _meter.subMeter);
+        }
+        if (oilTempMeter != null)
+        {
+            var _type = MeterBase.MeterType.TYPE_OIL_TEMP;
+            var _setting = SerialReceive.Instance.m_MeterSetting[_type];
+            var _meter = oilTempMeter;
+            do
+            {
+                _meter.lowValue = _setting.m_lowValue;
+                _meter.highValue = _setting.m_highValue;
+                _meter.lowColor = _setting.m_lowColor;
+                _meter.normalColor = _setting.m_normalColor;
+                _meter.highColor = _setting.m_highColor;
+            } while (_meter = _meter.subMeter);
+        }
+        if (oilPressMeter != null)
+        {
+            var _type = MeterBase.MeterType.TYPE_OIL_PRESS;
+            var _setting = SerialReceive.Instance.m_MeterSetting[_type];
+            var _meter = oilPressMeter;
+            do
+            {
+                _meter.lowValue = _setting.m_lowValue;
+                _meter.highValue = _setting.m_highValue;
+                _meter.lowColor = _setting.m_lowColor;
+                _meter.normalColor = _setting.m_normalColor;
+                _meter.highColor = _setting.m_highColor;
+            } while (_meter = _meter.subMeter);
+        }
+        if (tachoMeter != null)
+        {
+            var _type = MeterBase.MeterType.TYPE_TACHO;
+            var _setting = SerialReceive.Instance.m_MeterSetting[_type];
+            var _meter = tachoMeter;
+            do
+            {
+                _meter.lowValue = _setting.m_lowValue;
+                _meter.highValue = _setting.m_highValue;
+                _meter.lowColor = _setting.m_lowColor;
+                _meter.normalColor = _setting.m_normalColor;
+                _meter.highColor = _setting.m_highColor;
+            } while (_meter = _meter.subMeter);
+        }
+        if (speedMeter != null)
+        {
+            var _type = MeterBase.MeterType.TYPE_SPEED;
+            var _setting = SerialReceive.Instance.m_MeterSetting[_type];
+            var _meter = speedMeter;
+            do
+            {
+                _meter.lowValue = _setting.m_lowValue;
+                _meter.highValue = _setting.m_highValue;
+                _meter.lowColor = _setting.m_lowColor;
+                _meter.normalColor = _setting.m_normalColor;
+                _meter.highColor = _setting.m_highColor;
+            } while (_meter = _meter.subMeter);
+        }
+    } /* ReloadSetting */
 
-}
+}/* class */

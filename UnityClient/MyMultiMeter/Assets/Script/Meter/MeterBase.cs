@@ -5,6 +5,38 @@ using UnityEngine.UI;
 
 public class MeterBase : MonoBehaviour
 {
+    public enum MeterType 
+    {
+        TYPE_NONE,
+
+        TYPE_TACHO= 1,
+        TYPE_SPEED,
+        TYPE_GEAR_RATIO,
+
+        TYPE_WATER_TEMP = 10,
+        TYPE_OIL_TEMP,
+        TYPE_OIL_PRESS,
+        TYPE_BOOST_PRESS,
+    }
+    public enum MeterValueType 
+    {
+        TYPE_NONE,
+        TYPE_LOW_VALUE,
+        TYPE_HIGH_VALUE,
+        TYPE_BLINK_VALUE,
+
+    }
+
+    public enum MeterColorType
+    {
+        TYPE_NONE,
+        TYPE_LOW_COLOR,
+        TYPE_NORMAL_COLOR,
+        TYPE_HIGH_COLOR,
+    }
+
+
+    public MeterType meterType = MeterType.TYPE_NONE;
     public MeterBase subMeter;
     public Text text = null;
 
@@ -72,5 +104,5 @@ public class MeterBase : MonoBehaviour
         if (Value > highValue) { text.color = highColor; }
 
     } /* UpdateText */
-}
+} /* class */
 

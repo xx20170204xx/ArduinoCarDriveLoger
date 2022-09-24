@@ -12,6 +12,9 @@ public class PanelSelect : MonoBehaviour
     private MeterUnitController deviceList = null;
 
     [SerializeField]
+    private MeterUnitController settingPanel = null;
+
+    [SerializeField]
     private MeterUnitController modList = null;
 
     [SerializeField]
@@ -47,6 +50,10 @@ public class PanelSelect : MonoBehaviour
 
         if (deviceList != null) {
             useUnits.Add(deviceList);
+        }
+        if (settingPanel != null)
+        {
+            useUnits.Add(settingPanel);
         }
         if (modList != null)
         {
@@ -126,6 +133,10 @@ public class PanelSelect : MonoBehaviour
         {
             useUnits.Add(deviceList);
         }
+        if (settingPanel != null)
+        {
+            useUnits.Add(settingPanel);
+        }
         if (modList != null)
         {
             useUnits.Add(modList);
@@ -180,4 +191,4 @@ public class PanelSelect : MonoBehaviour
 
     } /* UpdateModPanels */
 
-}
+} /* class */

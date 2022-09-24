@@ -12,6 +12,17 @@ using SerialPortUtility;
 */
 public class SerialReceive : MonoBehaviour
 {
+    public struct MeterSetting
+    {
+        public float m_lowValue;
+        public float m_highValue;
+        public float m_blinkValue;
+        public Color m_lowColor;
+        public Color m_normalColor;
+        public Color m_highColor;
+    }
+    public Dictionary<MeterBase.MeterType, MeterSetting> m_MeterSetting = new Dictionary<MeterBase.MeterType, MeterSetting>();
+
     public static SerialReceive Instance { get; set; }
 
     public SerialPortUtilityPro serialHandler;
@@ -128,12 +139,36 @@ public class SerialReceive : MonoBehaviour
 
         System.Xml.XmlTextWriter xmlWriter = new System.Xml.XmlTextWriter(_path, System.Text.Encoding.UTF8);
         xmlWriter.WriteStartDocument();
+        xmlWriter.WriteWhitespace("\r\n");
+        xmlWriter.WriteStartElement("AllSetting");
+        xmlWriter.WriteWhitespace("\r\n");
         xmlWriter.WriteStartElement("setting");
         {
             xmlWriter.WriteAttributeString("OpenSystem", openSystem.ToString());
             xmlWriter.WriteAttributeString("VendorID", VecderID);
             xmlWriter.WriteAttributeString("ProductID", ProductID);
             xmlWriter.WriteAttributeString("SerialNumber", SerialNumber);
+        }
+        xmlWriter.WriteEndElement();
+        xmlWriter.WriteWhitespace("\r\n");
+        xmlWriter.WriteWhitespace("\r\n");
+        foreach (var key in m_MeterSetting.Keys)
+        {
+            var values = m_MeterSetting[key];
+            xmlWriter.WriteComment("Meter=[" + key.ToString() + "]");
+            xmlWriter.WriteWhitespace("\r\n");
+            xmlWriter.WriteStartElement("meter");
+            {
+                xmlWriter.WriteAttributeString("type", key.ToString("d"));
+                xmlWriter.WriteAttributeString("lowValue", values.m_lowValue.ToString());
+                xmlWriter.WriteAttributeString("highValue", values.m_highValue.ToString());
+                xmlWriter.WriteAttributeString("blinkValue", values.m_blinkValue.ToString());
+                xmlWriter.WriteAttributeString("lowColor", "#"+ColorUtility.ToHtmlStringRGBA(values.m_lowColor));
+                xmlWriter.WriteAttributeString("normalColor", "#" + ColorUtility.ToHtmlStringRGBA(values.m_normalColor));
+                xmlWriter.WriteAttributeString("highColor", "#" + ColorUtility.ToHtmlStringRGBA(values.m_highColor));
+            }
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteWhitespace("\r\n");
         }
         xmlWriter.WriteEndElement();
         xmlWriter.WriteEndDocument();
@@ -146,26 +181,78 @@ public class SerialReceive : MonoBehaviour
         string _path = Application.persistentDataPath + "/" + "setting.xml";
         System.Xml.XmlTextReader xmlReader = new System.Xml.XmlTextReader(_path);
 
-        while (xmlReader.Read())
+        try
         {
-            Debug.Log( xmlReader.Name );
-            if (xmlReader.Name == "setting")
+            while (xmlReader.Read())
             {
-                string OpenSystem = xmlReader.GetAttribute("OpenSystem");
-                VecderID = xmlReader.GetAttribute("VendorID");
-                ProductID = xmlReader.GetAttribute("ProductID");
-                SerialNumber = xmlReader.GetAttribute("SerialNumber");
-                if (OpenSystem == SerialPortUtilityPro.OpenSystem.USB.ToString())
+                Debug.Log(xmlReader.Name);
+                if (xmlReader.Name == "setting")
                 {
-                    this.openSystem = SerialPortUtilityPro.OpenSystem.USB;
+                    string OpenSystem = xmlReader.GetAttribute("OpenSystem");
+                    VecderID = xmlReader.GetAttribute("VendorID");
+                    ProductID = xmlReader.GetAttribute("ProductID");
+                    SerialNumber = xmlReader.GetAttribute("SerialNumber");
+                    if (OpenSystem == SerialPortUtilityPro.OpenSystem.USB.ToString())
+                    {
+                        this.openSystem = SerialPortUtilityPro.OpenSystem.USB;
+                    }
+                    if (OpenSystem == SerialPortUtilityPro.OpenSystem.BluetoothSSP.ToString())
+                    {
+                        this.openSystem = SerialPortUtilityPro.OpenSystem.BluetoothSSP;
+                    }
                 }
-                if (OpenSystem == SerialPortUtilityPro.OpenSystem.BluetoothSSP.ToString())
+                if (xmlReader.Name == "meter")
                 {
-                    this.openSystem = SerialPortUtilityPro.OpenSystem.BluetoothSSP;
+                    string meter_type = xmlReader.GetAttribute("type");
+                    string lowValue = xmlReader.GetAttribute("lowValue");
+                    string highValue = xmlReader.GetAttribute("highValue");
+                    string blinkValue = xmlReader.GetAttribute("blinkValue");
+                    string lowColorStr = xmlReader.GetAttribute("lowColor");
+                    string normalColorStr = xmlReader.GetAttribute("normalColor");
+                    string highColorStr = xmlReader.GetAttribute("highColor");
+
+                    Debug.Log("Type=" + meter_type.ToString() +
+                        " lowValue=" + lowValue +
+                        " highValue=" + highValue +
+                        " blinkValue=" + blinkValue +
+                        " lowColor=" + lowColorStr +
+                        " normalColor=" + normalColorStr +
+                        " highColor=" + highColorStr
+                        );
+                    MeterBase.MeterType _key = (MeterBase.MeterType)int.Parse(meter_type);
+                    MeterSetting mSetting;
+                    if (this.m_MeterSetting.ContainsKey(_key))
+                    {
+                        mSetting = m_MeterSetting[_key];
+                    }else {
+                        mSetting = new MeterSetting();
+                        m_MeterSetting.Add(_key, mSetting);
+                    }
+                    Color lowColor;
+                    Color normalColor;
+                    Color highColor;
+                    ColorUtility.TryParseHtmlString(lowColorStr,out lowColor);
+                    ColorUtility.TryParseHtmlString(normalColorStr, out normalColor);
+                    ColorUtility.TryParseHtmlString(highColorStr, out highColor);
+                    mSetting.m_lowValue = int.Parse(lowValue);
+                    mSetting.m_highValue = int.Parse(highValue);
+                    mSetting.m_blinkValue = int.Parse(blinkValue);
+                    mSetting.m_lowColor = lowColor;
+                    mSetting.m_normalColor = normalColor;
+                    mSetting.m_highColor = highColor;
+                    m_MeterSetting[_key] = mSetting;
                 }
             }
         }
-
+        catch (System.Exception _e)
+        {
+            Debug.LogWarning("Exception=[" + _e.Message + "]");
+            xmlReader.Close();
+        }
+        finally {
+            xmlReader.Close();
+        }
+        xmlReader = null;
 
     } /* LoadDeviceInfo */
 
@@ -267,4 +354,4 @@ public class SerialReceive : MonoBehaviour
 
     } /* AddDebugText */
 
-}
+} /* class */

@@ -149,6 +149,8 @@ public class TachoShiftLampMeterInspector : Editor
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
+        EditorGUILayout.PropertyField(serializedObject.FindProperty("meterType"));
+        EditorGUILayout.Separator();
         EditorGUILayout.PropertyField(serializedObject.FindProperty("subMeter"));
         EditorGUILayout.Separator();
         EditorGUILayout.PropertyField(serializedObject.FindProperty("text"));
@@ -172,4 +174,4 @@ public class TachoShiftLampMeterInspector : Editor
         serializedObject.ApplyModifiedProperties();
     } /* OnInspectorGUI */
 
-}
+} /* class */
