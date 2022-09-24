@@ -140,11 +140,11 @@ public class MeterUnitController : MonoBehaviour
 
     public void StartDemoMode()
     {
-        coroutine = WaitAndPrint(2.0f);
+        coroutine = DemoPlay();
         StartCoroutine(coroutine);
     } /* StartDemoMode */
 
-    private IEnumerator WaitAndPrint(float waitTime)
+    private IEnumerator DemoPlay()
     {
         bool _end_flag = true;
         float _wait_time = 1.0f / 60.0f;
@@ -154,6 +154,7 @@ public class MeterUnitController : MonoBehaviour
         float _tacho = 750f;
         float _speed = 0f;
         int _gear = 1;
+        const int GEAR_MAX = 5;
 
         Debug.Log("Start Demo.");
         while (_end_flag)
@@ -165,7 +166,7 @@ public class MeterUnitController : MonoBehaviour
             _oil_press += 1f / 60.0f;
             if (_oil_press >= 10.0f) _oil_press = 0;
             _tacho += 1000f / 60.0f;
-            _speed = _tacho / ((6 - _gear) * 40);
+            _speed = _tacho / (((GEAR_MAX+1) - _gear) * 40);
             if (_tacho >= 9000.0f) { 
                 _tacho = 750.0f;
                 _gear += 1;
@@ -175,13 +176,13 @@ public class MeterUnitController : MonoBehaviour
             _mes = string.Format("V\t{0}\t{1}\t{2}\t{3}\t{4}\n",
                 _temp, _temp,_oil_press,_tacho,_speed);
             OnDataReceived(_mes);
-            if (_gear >= 6) 
+            if (_gear >= (GEAR_MAX+1)) 
             {
                 _end_flag = false;
             }
         }
         Debug.Log("End Demo.");
-    }
+    } /* DemoPlay */
 #endif
 
 
