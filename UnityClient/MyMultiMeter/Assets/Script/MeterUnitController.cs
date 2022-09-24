@@ -109,6 +109,13 @@ public class MeterUnitController : MonoBehaviour
                 _meter.lowColor = _setting.m_lowColor;
                 _meter.normalColor = _setting.m_normalColor;
                 _meter.highColor = _setting.m_highColor;
+
+                Debug.Log("Meter Type" + _meter.GetType().ToString());
+                if (_meter.GetType() == typeof(TachoShiftLampMeter))
+                {
+                    ((TachoShiftLampMeter)_meter).shiftValue = _setting.m_blinkValue;
+                }
+
             } while (_meter = _meter.subMeter);
         }
         if (speedMeter != null)
@@ -123,8 +130,59 @@ public class MeterUnitController : MonoBehaviour
                 _meter.lowColor = _setting.m_lowColor;
                 _meter.normalColor = _setting.m_normalColor;
                 _meter.highColor = _setting.m_highColor;
+
             } while (_meter = _meter.subMeter);
         }
     } /* ReloadSetting */
+
+#if UNITY_EDITOR
+    private IEnumerator coroutine;
+
+    public void StartDemoMode()
+    {
+        coroutine = WaitAndPrint(2.0f);
+        StartCoroutine(coroutine);
+    } /* StartDemoMode */
+
+    private IEnumerator WaitAndPrint(float waitTime)
+    {
+        bool _end_flag = true;
+        float _wait_time = 1.0f / 60.0f;
+
+        float _temp = -10.0f;
+        float _oil_press = 0.0f;
+        float _tacho = 750f;
+        float _speed = 0f;
+        int _gear = 1;
+
+        Debug.Log("Start Demo.");
+        while (_end_flag)
+        {
+            yield return new WaitForSeconds(_wait_time);
+
+            _temp += 10f / 60.0f;
+            if (_temp >= 200.0f) _temp = -10.0f;
+            _oil_press += 1f / 60.0f;
+            if (_oil_press >= 10.0f) _oil_press = 0;
+            _tacho += 1000f / 60.0f;
+            _speed = _tacho / ((6 - _gear) * 40);
+            if (_tacho >= 9000.0f) { 
+                _tacho = 750.0f;
+                _gear += 1;
+            }
+
+            string _mes = "V\t1.0\t1.0\t1.0\t1.0\t1.0\t\n";
+            _mes = string.Format("V\t{0}\t{1}\t{2}\t{3}\t{4}\n",
+                _temp, _temp,_oil_press,_tacho,_speed);
+            OnDataReceived(_mes);
+            if (_gear >= 6) 
+            {
+                _end_flag = false;
+            }
+        }
+        Debug.Log("End Demo.");
+    }
+#endif
+
 
 }/* class */
