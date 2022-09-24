@@ -14,8 +14,6 @@ public class SettingPanel : MonoBehaviour
     [SerializeField]
     private SettingColor m_tachoLowColor;
     [SerializeField]
-    private SettingColor m_tachoNormalColor;
-    [SerializeField]
     private SettingColor m_tachoHighColor;
 
     [Space]
@@ -26,8 +24,6 @@ public class SettingPanel : MonoBehaviour
     private SettingValue m_speedHighValue;
     [SerializeField]
     private SettingColor m_speedLowColor;
-    [SerializeField]
-    private SettingColor m_speedNormalColor;
     [SerializeField]
     private SettingColor m_speedHighColor;
 
@@ -40,8 +36,6 @@ public class SettingPanel : MonoBehaviour
     [SerializeField]
     private SettingColor m_waterLowColor;
     [SerializeField]
-    private SettingColor m_waterNormalColor;
-    [SerializeField]
     private SettingColor m_waterHighColor;
 
     [Space]
@@ -52,8 +46,6 @@ public class SettingPanel : MonoBehaviour
     private SettingValue m_oiltHighValue;
     [SerializeField]
     private SettingColor m_oiltLowColor;
-    [SerializeField]
-    private SettingColor m_oiltNormalColor;
     [SerializeField]
     private SettingColor m_oiltHighColor;
 
@@ -66,8 +58,6 @@ public class SettingPanel : MonoBehaviour
     [SerializeField]
     private SettingColor m_oilpLowColor;
     [SerializeField]
-    private SettingColor m_oilpNormalColor;
-    [SerializeField]
     private SettingColor m_oilpHighColor;
 
     [Space]
@@ -78,8 +68,6 @@ public class SettingPanel : MonoBehaviour
     private SettingValue m_boostHighValue;
     [SerializeField]
     private SettingColor m_boostLowColor;
-    [SerializeField]
-    private SettingColor m_boostNormalColor;
     [SerializeField]
     private SettingColor m_boostHighColor;
 
@@ -162,7 +150,6 @@ public class SettingPanel : MonoBehaviour
             m_tachoHighValue.Value = _tacho.m_highValue;
             m_tachoBlinkValue.Value = _tacho.m_blinkValue;
             m_tachoLowColor.SetColor(_tacho.m_lowColor);
-            m_tachoNormalColor.SetColor(_tacho.m_normalColor);
             m_tachoHighColor.SetColor(_tacho.m_highColor);
         }
 
@@ -171,7 +158,6 @@ public class SettingPanel : MonoBehaviour
             m_speedLowValue.Value = _speed.m_lowValue;
             m_speedHighValue.Value = _speed.m_highValue;
             m_speedLowColor.SetColor(_speed.m_lowColor);
-            m_speedNormalColor.SetColor(_speed.m_normalColor);
             m_speedHighColor.SetColor(_speed.m_highColor);
         }
 
@@ -180,7 +166,6 @@ public class SettingPanel : MonoBehaviour
             m_waterLowValue.Value = _water.m_lowValue;
             m_waterHighValue.Value = _water.m_highValue;
             m_waterLowColor.SetColor(_water.m_lowColor);
-            m_waterNormalColor.SetColor(_water.m_normalColor);
             m_waterHighColor.SetColor(_water.m_highColor);
         }
 
@@ -189,7 +174,6 @@ public class SettingPanel : MonoBehaviour
             m_oiltLowValue.Value = _oilTemp.m_lowValue;
             m_oiltHighValue.Value = _oilTemp.m_highValue;
             m_oiltLowColor.SetColor(_oilTemp.m_lowColor);
-            m_oiltNormalColor.SetColor(_oilTemp.m_normalColor);
             m_oiltHighColor.SetColor(_oilTemp.m_highColor);
         }
 
@@ -198,7 +182,6 @@ public class SettingPanel : MonoBehaviour
             m_oilpLowValue.Value = _oilPress.m_lowValue;
             m_oilpHighValue.Value = _oilPress.m_highValue;
             m_oilpLowColor.SetColor(_oilPress.m_lowColor);
-            m_oilpNormalColor.SetColor(_oilPress.m_normalColor);
             m_oilpHighColor.SetColor(_oilPress.m_highColor);
         }
 
@@ -207,7 +190,6 @@ public class SettingPanel : MonoBehaviour
             m_boostLowValue.Value = _boostPress.m_lowValue;
             m_boostHighValue.Value = _boostPress.m_highValue;
             m_boostLowColor.SetColor(_boostPress.m_lowColor);
-            m_boostNormalColor.SetColor(_boostPress.m_normalColor);
             m_boostHighColor.SetColor(_boostPress.m_highColor);
         }
 
@@ -224,7 +206,6 @@ public class SettingPanel : MonoBehaviour
             _tacho.m_highValue = m_tachoHighValue.Value;
             _tacho.m_blinkValue = m_tachoBlinkValue.Value;
             _tacho.m_lowColor = m_tachoLowColor.Color;
-            _tacho.m_normalColor = m_tachoNormalColor.Color;
             _tacho.m_highColor = m_tachoHighColor.Color;
             SerialReceive.Instance.m_MeterSetting[_type] = _tacho;
         }
@@ -235,7 +216,6 @@ public class SettingPanel : MonoBehaviour
             _speed.m_lowValue = m_speedLowValue.Value;
             _speed.m_highValue = m_speedHighValue.Value;
             _speed.m_lowColor = m_speedLowColor.Color;
-            _speed.m_normalColor = m_speedNormalColor.Color;
             _speed.m_highColor = m_speedHighColor.Color;
             SerialReceive.Instance.m_MeterSetting[_type] = _speed;
         }
@@ -246,7 +226,6 @@ public class SettingPanel : MonoBehaviour
             _water.m_lowValue = m_waterLowValue.Value;
             _water.m_highValue = m_waterHighValue.Value;
             _water.m_lowColor = m_waterLowColor.Color;
-            _water.m_normalColor = m_waterNormalColor.Color;
             _water.m_highColor = m_waterHighColor.Color;
             SerialReceive.Instance.m_MeterSetting[_type] = _water;
         }
@@ -257,7 +236,6 @@ public class SettingPanel : MonoBehaviour
             _oilTemp.m_lowValue = m_oiltLowValue.Value;
             _oilTemp.m_highValue = m_oiltHighValue.Value;
             _oilTemp.m_lowColor = m_oiltLowColor.Color;
-            _oilTemp.m_normalColor = m_oiltNormalColor.Color;
             _oilTemp.m_highColor = m_oiltHighColor.Color;
             SerialReceive.Instance.m_MeterSetting[_type] = _oilTemp;
         }
@@ -268,7 +246,6 @@ public class SettingPanel : MonoBehaviour
             _oilPress.m_lowValue = m_oilpLowValue.Value;
             _oilPress.m_highValue = m_oilpHighValue.Value;
             _oilPress.m_lowColor = m_oilpLowColor.Color;
-            _oilPress.m_normalColor = m_oilpNormalColor.Color;
             _oilPress.m_highColor = m_oilpHighColor.Color;
             SerialReceive.Instance.m_MeterSetting[_type] = _oilPress;
         }
@@ -279,7 +256,6 @@ public class SettingPanel : MonoBehaviour
             _boostPress.m_lowValue = m_boostLowValue.Value;
             _boostPress.m_highValue = m_boostHighValue.Value;
             _boostPress.m_lowColor = m_boostLowColor.Color;
-            _boostPress.m_normalColor = m_boostNormalColor.Color;
             _boostPress.m_highColor = m_boostHighColor.Color;
             SerialReceive.Instance.m_MeterSetting[_type] = _boostPress;
         }

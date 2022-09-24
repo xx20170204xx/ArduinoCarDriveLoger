@@ -65,7 +65,6 @@ public class MeterUnitController : MonoBehaviour
                 _meter.lowValue = _setting.m_lowValue;
                 _meter.highValue = _setting.m_highValue;
                 _meter.lowColor = _setting.m_lowColor;
-                _meter.normalColor = _setting.m_normalColor;
                 _meter.highColor = _setting.m_highColor;
             } while ( _meter = _meter.subMeter);
         }
@@ -79,7 +78,6 @@ public class MeterUnitController : MonoBehaviour
                 _meter.lowValue = _setting.m_lowValue;
                 _meter.highValue = _setting.m_highValue;
                 _meter.lowColor = _setting.m_lowColor;
-                _meter.normalColor = _setting.m_normalColor;
                 _meter.highColor = _setting.m_highColor;
             } while (_meter = _meter.subMeter);
         }
@@ -93,7 +91,6 @@ public class MeterUnitController : MonoBehaviour
                 _meter.lowValue = _setting.m_lowValue;
                 _meter.highValue = _setting.m_highValue;
                 _meter.lowColor = _setting.m_lowColor;
-                _meter.normalColor = _setting.m_normalColor;
                 _meter.highColor = _setting.m_highColor;
             } while (_meter = _meter.subMeter);
         }
@@ -107,7 +104,6 @@ public class MeterUnitController : MonoBehaviour
                 _meter.lowValue = _setting.m_lowValue;
                 _meter.highValue = _setting.m_highValue;
                 _meter.lowColor = _setting.m_lowColor;
-                _meter.normalColor = _setting.m_normalColor;
                 _meter.highColor = _setting.m_highColor;
 
                 Debug.Log("Meter Type" + _meter.GetType().ToString());
@@ -128,7 +124,6 @@ public class MeterUnitController : MonoBehaviour
                 _meter.lowValue = _setting.m_lowValue;
                 _meter.highValue = _setting.m_highValue;
                 _meter.lowColor = _setting.m_lowColor;
-                _meter.normalColor = _setting.m_normalColor;
                 _meter.highColor = _setting.m_highColor;
 
             } while (_meter = _meter.subMeter);

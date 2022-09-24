@@ -18,7 +18,6 @@ public class SerialReceive : MonoBehaviour
         public float m_highValue;
         public float m_blinkValue;
         public Color m_lowColor;
-        public Color m_normalColor;
         public Color m_highColor;
     }
     public Dictionary<MeterBase.MeterType, MeterSetting> m_MeterSetting = new Dictionary<MeterBase.MeterType, MeterSetting>();
@@ -164,7 +163,6 @@ public class SerialReceive : MonoBehaviour
                 xmlWriter.WriteAttributeString("highValue", values.m_highValue.ToString());
                 xmlWriter.WriteAttributeString("blinkValue", values.m_blinkValue.ToString());
                 xmlWriter.WriteAttributeString("lowColor", "#"+ColorUtility.ToHtmlStringRGBA(values.m_lowColor));
-                xmlWriter.WriteAttributeString("normalColor", "#" + ColorUtility.ToHtmlStringRGBA(values.m_normalColor));
                 xmlWriter.WriteAttributeString("highColor", "#" + ColorUtility.ToHtmlStringRGBA(values.m_highColor));
             }
             xmlWriter.WriteEndElement();
@@ -208,7 +206,6 @@ public class SerialReceive : MonoBehaviour
                     string highValue = xmlReader.GetAttribute("highValue");
                     string blinkValue = xmlReader.GetAttribute("blinkValue");
                     string lowColorStr = xmlReader.GetAttribute("lowColor");
-                    string normalColorStr = xmlReader.GetAttribute("normalColor");
                     string highColorStr = xmlReader.GetAttribute("highColor");
 
                     Debug.Log("Type=" + meter_type.ToString() +
@@ -216,7 +213,6 @@ public class SerialReceive : MonoBehaviour
                         " highValue=" + highValue +
                         " blinkValue=" + blinkValue +
                         " lowColor=" + lowColorStr +
-                        " normalColor=" + normalColorStr +
                         " highColor=" + highColorStr
                         );
                     MeterBase.MeterType _key = (MeterBase.MeterType)int.Parse(meter_type);
@@ -229,16 +225,13 @@ public class SerialReceive : MonoBehaviour
                         m_MeterSetting.Add(_key, mSetting);
                     }
                     Color lowColor;
-                    Color normalColor;
                     Color highColor;
                     ColorUtility.TryParseHtmlString(lowColorStr,out lowColor);
-                    ColorUtility.TryParseHtmlString(normalColorStr, out normalColor);
                     ColorUtility.TryParseHtmlString(highColorStr, out highColor);
                     mSetting.m_lowValue = int.Parse(lowValue);
                     mSetting.m_highValue = int.Parse(highValue);
                     mSetting.m_blinkValue = int.Parse(blinkValue);
                     mSetting.m_lowColor = lowColor;
-                    mSetting.m_normalColor = normalColor;
                     mSetting.m_highColor = highColor;
                     m_MeterSetting[_key] = mSetting;
                 }
