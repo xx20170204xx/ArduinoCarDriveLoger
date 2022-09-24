@@ -827,7 +827,7 @@
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp 0757e76a-efc9-4471-8278-3fdb82e3be3c)
     )
-    (fp_text value "R" (at 3.81 1.92) (layer "F.Fab")
+    (fp_text value "200 ohm" (at 3.81 1.92) (layer "F.Fab")
       (effects (font (size 1 1) (thickness 0.15)))
       (tstamp ad0d197b-de44-4680-8434-bebf635dc7bb)
     )
