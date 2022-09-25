@@ -59,10 +59,13 @@
     <Compile Include="Assets\Script\Meter\MeterBase.cs" />
     <Compile Include="Assets\Script\DeviceList\DevListPanel.cs" />
     <Compile Include="Assets\Script\MeterUnitController.cs" />
+    <Compile Include="Assets\Script\Setting\SettingPanel.cs" />
     <Compile Include="Assets\Script\StopWatch.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\SerialPortUtilityPro.cs" />
+    <Compile Include="Assets\Script\Setting\SettingColor.cs" />
     <Compile Include="Assets\Script\ModList\ModListPanel.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPDeviceList.cs" />
+    <Compile Include="Assets\Script\Setting\SettingValue.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
     <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptHTTP.cs" />
@@ -78,15 +81,23 @@
     <Compile Include="Assets\Script\Opning.cs" />
     <Compile Include="Assets\Script\PanelSelect.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\DebugConsole.cs" />
-    <Compile Include="Assets\Script\Setting\SettingColor.cs" />
-    <Compile Include="Assets\Script\Setting\SettingValue.cs" />
-    <Compile Include="Assets\Script\Setting\SettingPanel.cs" />
+    <Compile Include="Assets\Script\VoiceController.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\SerialPortUtilityPro\Plugins\x86_64\spap.dll" />
+    <None Include="Assets\Voice\99_Dummy\020-3.txt" />
+    <None Include="Assets\Voice\99_Dummy\000-2.txt" />
+    <None Include="Assets\Voice\99_Dummy\010-0.txt" />
+    <None Include="Assets\Voice\99_Dummy\000-3.txt" />
+    <None Include="Assets\Voice\99_Dummy\000-1.txt" />
     <None Include="Assets\StreamingAssets\dummy.txt" />
+    <None Include="Assets\Voice\99_Dummy\000-0.txt" />
     <None Include="Assets\SerialPortUtilityPro\Readme.txt" />
+    <None Include="Assets\Voice\99_Dummy\010-1.txt" />
+    <None Include="Assets\Voice\99_Dummy\020-1.txt" />
+    <None Include="Assets\Voice\99_Dummy\020-2.txt" />
     <None Include="Assets\SerialPortUtilityPro\Plugins\x86\spap.dll" />
+    <None Include="Assets\Voice\99_Dummy\020-0.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

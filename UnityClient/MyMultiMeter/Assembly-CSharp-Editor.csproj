@@ -56,12 +56,12 @@
     <Analyzer Include="C:\Program Files (x86)\Microsoft Visual Studio Tools for Unity\16.0\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Editor\MeterUnitControllerInspector.cs" />
     <Compile Include="Assets\Editor\assetbundle\BuildAssetBundles.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\Editor\SPAPToolsObjectType.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\Editor\SPAPTools.cs" />
     <Compile Include="Assets\Editor\meter\TachoShiftLampMeterInspector.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\Editor\SPAPEditor.cs" />
-    <Compile Include="Assets\Editor\MeterUnitControllerInspector.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">

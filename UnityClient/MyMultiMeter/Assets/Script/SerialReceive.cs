@@ -63,8 +63,11 @@ public class SerialReceive : MonoBehaviour
 
     public Text m_debugText = null;
 
+    private Animator m_animator;
+
     private void Awake()
     {
+        m_animator = GetComponent<Animator>();
         Instance = this;
         StartCoroutine(StartLocationService());
     } /* Awake */
@@ -79,6 +82,38 @@ public class SerialReceive : MonoBehaviour
         LoadDeviceInfo();
         OpenDevice();
     } /* Start */
+
+    private void Update()
+    {
+        UpdateAnimatorTime();
+        UpdateAnimatorMeter();
+    } /* Update */
+
+    private void UpdateAnimatorTime()
+    {
+        if (m_animator == null) return;
+
+        {
+            System.DateTime time = System.DateTime.Now;
+            m_animator.SetFloat("TimeHour", (float)time.Hour);
+        }
+        m_animator.SetFloat( "Time", Time.time );
+    } /* UpdateAnimatorTime */
+
+    private void UpdateAnimatorMeter()
+    {
+        if (m_animator == null) return;
+        if (controller == null) return;
+
+        m_animator.SetFloat("WaterTemp", controller.WaterTemp);
+        m_animator.SetFloat("OilTemp", controller.OilTemp);
+        m_animator.SetFloat("OilPress", controller.OilPress);
+        m_animator.SetFloat("Tacho", controller.Tacho);
+        m_animator.SetFloat("Speed", controller.Speed);
+
+
+
+    } /* UpdateAnimatorMeter */
 
     public void OpenDevice()
     {
