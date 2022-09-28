@@ -17874,7 +17874,6 @@ GameObject:
   - component: {fileID: 1702349613}
   - component: {fileID: 1702349616}
   - component: {fileID: 1702349615}
-  - component: {fileID: 1702349614}
   m_Layer: 0
   m_Name: serial
   m_TagString: Untagged
@@ -17997,6 +17996,8 @@ MonoBehaviour:
   recoedSprite: {fileID: -1290855366162983238, guid: 6a94b40b72c2ca64686bdbb8b7042ed3,
     type: 3}
   stopSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  m_recStartClip: {fileID: 8300000, guid: 76de3a5a78423f744b77d881fa5ce04d, type: 3}
+  m_recStopClip: {fileID: 8300000, guid: 02d251f68525f5142af514deb81bde1c, type: 3}
   m_GoogleAPIKEY: 
   m_debugText: {fileID: 1310681989}
 --- !u!114 &1702349613
@@ -18020,19 +18021,6 @@ MonoBehaviour:
   settingPanel: {fileID: 1256958931}
   modList: {fileID: 1094124108}
   startNum: 0
---- !u!114 &1702349614
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1702349609}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 721ccad21c387aa49963a3ad829f7a31, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_clip: {fileID: 0}
 --- !u!82 &1702349615
 AudioSource:
   m_ObjectHideFlags: 0

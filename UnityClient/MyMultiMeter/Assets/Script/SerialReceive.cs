@@ -10,6 +10,7 @@ using SerialPortUtility;
     GPS:
         Androidの場合、アプリ情報から位置情報を取得することを許可する必要がある
 */
+[RequireComponent(typeof(AudioSource))]
 public class SerialReceive : MonoBehaviour
 {
     public struct MeterSetting
@@ -56,6 +57,10 @@ public class SerialReceive : MonoBehaviour
     private Sprite recoedSprite = null;
     [SerializeField]
     private Sprite stopSprite = null;
+    [SerializeField]
+    private AudioClip m_recStartClip = null;
+    [SerializeField]
+    private AudioClip m_recStopClip = null;
 
     [SerializeField]
     private string m_GoogleAPIKEY;
@@ -64,10 +69,12 @@ public class SerialReceive : MonoBehaviour
     public Text m_debugText = null;
 
     private Animator m_animator;
+    private AudioSource m_audioSource;
 
     private void Awake()
     {
         m_animator = GetComponent<Animator>();
+        m_audioSource = GetComponent<AudioSource>();
         Instance = this;
         StartCoroutine(StartLocationService());
     } /* Awake */
@@ -284,22 +291,43 @@ public class SerialReceive : MonoBehaviour
 
     } /* LoadDeviceInfo */
 
+    /*
+     * データの記録状態を切り替える
+    */
     public void SwitchRecordData()
     {
         System.DateTime dateTime = System.DateTime.Now;
+        /* データ記録状態の確認 */
         if (isRecordData == false)
         {
+            /* データ記録をしていない場合、 */
             isRecordData = true;
+            /* ファイル名を決める */
             RecordDataFilename = Application.persistentDataPath + "/data_" + dateTime.ToString("yyyyMMddHHmmss") + ".csv";
+            
+            /* 表示しているスプライトを切り替える */
             if (recoedImage != null && stopSprite != null)
             {
                 recoedImage.sprite = stopSprite;
             }
+            /* SEを出力する */
+            if (m_audioSource != null && m_recStartClip != null)
+            {
+                m_audioSource.PlayOneShot(m_recStartClip);
+            }
         } else {
+            /* データ記録をしている場合、 */
             isRecordData = false;
+
+            /* 表示しているスプライトを切り替える */
             if (recoedImage != null && recoedSprite != null)
             {
                 recoedImage.sprite = recoedSprite;
+            }
+            /* SEを出力する */
+            if (m_audioSource != null && m_recStopClip != null)
+            {
+                m_audioSource.PlayOneShot(m_recStopClip);
             }
         }
         Debug.Log("isRecordData : " + isRecordData.ToString());
