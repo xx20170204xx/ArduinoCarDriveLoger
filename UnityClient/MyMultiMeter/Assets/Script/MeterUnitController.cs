@@ -203,6 +203,7 @@ public class MeterUnitController : MonoBehaviour
             string _mes; ;
             _mes = string.Format("V\t{0}\t{1}\t{2}\t{3}\t{4}\n",
                 _wtemp, _otemp,_oil_press,_tacho,_speed);
+            SerialReceive.Instance.
             OnDataReceived(_mes);
             if (_gear >= (GEAR_MAX+1)) 
             {
@@ -219,6 +220,7 @@ public class MeterUnitController : MonoBehaviour
             string _mes; ;
             _mes = string.Format("V\t{0}\t{1}\t{2}\t{3}\t{4}\n",
                 _wtemp, _otemp, _oil_press, _tacho, _speed);
+            SerialReceive.Instance.
             OnDataReceived(_mes);
         }
         Debug.Log("End Demo.");

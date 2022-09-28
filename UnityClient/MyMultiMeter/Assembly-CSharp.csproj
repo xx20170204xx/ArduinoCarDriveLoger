@@ -70,7 +70,6 @@
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
     <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptHTTP.cs" />
-    <Compile Include="Assets\Script\map\StaticMapController.cs" />
     <Compile Include="Assets\Script\Meter\TachoShiftLampMeter.cs" />
     <Compile Include="Assets\Script\SerialReceive.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptJSON.cs" />

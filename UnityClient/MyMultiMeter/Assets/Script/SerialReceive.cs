@@ -62,19 +62,28 @@ public class SerialReceive : MonoBehaviour
     [SerializeField]
     private AudioClip m_recStopClip = null;
 
+    [Header("Opening SE")]
     [SerializeField]
-    private string m_GoogleAPIKEY;
-    public string GoogleAPIKey { get{ return m_GoogleAPIKEY; } }
+    private AudioClip m_opMoningClip = null;
+    [SerializeField]
+    private AudioClip m_opNoonClip = null;
+    [SerializeField]
+    private AudioClip m_opEveningClip = null;
+    [SerializeField]
+    private AudioClip m_opNightClip = null;
+    [SerializeField]
+    private AudioClip m_opDayOnce = null;
+
 
     public Text m_debugText = null;
 
-    private Animator m_animator;
     private AudioSource m_audioSource;
+    private System.DateTime m_lastDate;
 
     private void Awake()
     {
-        m_animator = GetComponent<Animator>();
         m_audioSource = GetComponent<AudioSource>();
+        m_lastDate = System.DateTime.Now;
         Instance = this;
         StartCoroutine(StartLocationService());
     } /* Awake */
@@ -88,39 +97,8 @@ public class SerialReceive : MonoBehaviour
     {
         LoadDeviceInfo();
         OpenDevice();
+        StartCoroutine(StartOpeningSE());
     } /* Start */
-
-    private void Update()
-    {
-        UpdateAnimatorTime();
-        UpdateAnimatorMeter();
-    } /* Update */
-
-    private void UpdateAnimatorTime()
-    {
-        if (m_animator == null) return;
-
-        {
-            System.DateTime time = System.DateTime.Now;
-            m_animator.SetFloat("TimeHour", (float)time.Hour);
-        }
-        m_animator.SetFloat( "Time", Time.time );
-    } /* UpdateAnimatorTime */
-
-    private void UpdateAnimatorMeter()
-    {
-        if (m_animator == null) return;
-        if (controller == null) return;
-
-        m_animator.SetFloat("WaterTemp", controller.WaterTemp);
-        m_animator.SetFloat("OilTemp", controller.OilTemp);
-        m_animator.SetFloat("OilPress", controller.OilPress);
-        m_animator.SetFloat("Tacho", controller.Tacho);
-        m_animator.SetFloat("Speed", controller.Speed);
-
-
-
-    } /* UpdateAnimatorMeter */
 
     public void OpenDevice()
     {
@@ -210,7 +188,13 @@ public class SerialReceive : MonoBehaviour
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\r\n");
         }
+        xmlWriter.WriteStartElement("lastDate");
+        {
+            System.DateTime _now = System.DateTime.Now;
+            xmlWriter.WriteAttributeString("lastDate", _now.ToString("yyyy/MM/dd"));
+        }
         xmlWriter.WriteEndElement();
+        xmlWriter.WriteWhitespace("\r\n");
         xmlWriter.WriteEndDocument();
         xmlWriter.Close();
 
@@ -276,6 +260,11 @@ public class SerialReceive : MonoBehaviour
                     mSetting.m_lowColor = lowColor;
                     mSetting.m_highColor = highColor;
                     m_MeterSetting[_key] = mSetting;
+                }
+                if (xmlReader.Name == "lastDate")
+                {
+                    string lastDate = xmlReader.GetAttribute("lastDate");
+                    System.DateTime.TryParseExact(lastDate, "yyyy/MM/dd", null,System.Globalization.DateTimeStyles.None, out m_lastDate);
                 }
             }
         }
@@ -400,6 +389,66 @@ public class SerialReceive : MonoBehaviour
             yield return new WaitForSeconds(10);
         }
     } /* StartLocationService */
+
+    private IEnumerator StartOpeningSE()
+    {
+        AudioClip _clip = null;
+        System.DateTime _now = System.DateTime.Now;
+
+        _clip = GetOpeningSE();
+
+        if (m_audioSource != null && _clip != null)
+        {
+            m_audioSource.PlayOneShot(_clip);
+        }
+
+        /* SEの終了待ち */
+        while (m_audioSource.isPlaying) 
+        {
+            yield return new WaitForSeconds(0.1f);
+        }
+
+        if (m_lastDate.Date == _now.Date)
+        {
+            yield break;
+        }
+
+
+        if (m_audioSource != null && m_opDayOnce != null)
+        {
+            m_audioSource.PlayOneShot(m_opDayOnce);
+        }
+
+    } /* StartOpeningSE */
+
+    private AudioClip GetOpeningSE()
+    {
+        System.DateTime _dateTime = System.DateTime.Now;
+
+        if (_dateTime.Hour < 5) 
+        {
+            return m_opNightClip;
+        }
+        if (_dateTime.Hour >= 5 && _dateTime.Hour < 12)
+        {
+            return m_opMoningClip;
+        }
+        if (_dateTime.Hour >= 12 && _dateTime.Hour < 18)
+        {
+            return m_opNoonClip;
+        }
+        if (_dateTime.Hour >= 18 && _dateTime.Hour < 22)
+        {
+            return m_opEveningClip;
+        }
+        if (_dateTime.Hour >= 22)
+        {
+            return m_opNightClip;
+        }
+        return null;
+    } /* GetOpeningSE */
+
+
 
     public void AddDebugText(string message)
     {
