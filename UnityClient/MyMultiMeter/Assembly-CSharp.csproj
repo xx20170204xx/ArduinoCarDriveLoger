@@ -61,13 +61,13 @@
     <Compile Include="Assets\Script\MeterUnitController.cs" />
     <Compile Include="Assets\Script\Setting\SettingPanel.cs" />
     <Compile Include="Assets\Script\StopWatch.cs" />
-    <Compile Include="Assets\Script\VoiceController.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\SerialPortUtilityPro.cs" />
     <Compile Include="Assets\Script\Setting\SettingColor.cs" />
     <Compile Include="Assets\Script\ModList\ModListPanel.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPDeviceList.cs" />
     <Compile Include="Assets\Script\Setting\SettingValue.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
+    <Compile Include="Assets\Script\InfoSoundController.cs" />
     <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptHTTP.cs" />
     <Compile Include="Assets\Script\Meter\TachoShiftLampMeter.cs" />

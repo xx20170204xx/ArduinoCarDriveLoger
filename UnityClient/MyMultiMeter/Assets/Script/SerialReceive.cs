@@ -21,7 +21,7 @@ public class SerialReceive : MonoBehaviour
         public Color m_lowColor;
         public Color m_highColor;
     }
-    public Dictionary<MeterBase.MeterType, MeterSetting> m_MeterSetting = new Dictionary<MeterBase.MeterType, MeterSetting>();
+    public Dictionary<MeterBase.MeterType, MeterSetting> m_MeterSetting = null;
 
     public static SerialReceive Instance { get; set; }
 
@@ -61,6 +61,8 @@ public class SerialReceive : MonoBehaviour
     private AudioClip m_recStartClip = null;
     [SerializeField]
     private AudioClip m_recStopClip = null;
+    [SerializeField]
+    private AudioClip m_conLostClip = null;
 
     [Header("Opening SE")]
     [SerializeField]
@@ -85,6 +87,20 @@ public class SerialReceive : MonoBehaviour
         m_audioSource = GetComponent<AudioSource>();
         m_lastDate = System.DateTime.Now;
         Instance = this;
+
+        if (m_MeterSetting == null ) 
+        {
+            m_MeterSetting = new Dictionary<MeterBase.MeterType, MeterSetting>();
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_TACHO, new MeterSetting());
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_SPEED, new MeterSetting());
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_GEAR_RATIO, new MeterSetting());
+
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_WATER_TEMP, new MeterSetting());
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_OIL_TEMP, new MeterSetting());
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_OIL_PRESS, new MeterSetting());
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_BOOST_PRESS, new MeterSetting());
+
+        }
         StartCoroutine(StartLocationService());
     } /* Awake */
 
@@ -458,5 +474,10 @@ public class SerialReceive : MonoBehaviour
         }
 
     } /* AddDebugText */
+
+    private void OnApplicationPause(bool _pause)
+    {
+        
+    } /* OnApplicationPause */
 
 } /* class */
