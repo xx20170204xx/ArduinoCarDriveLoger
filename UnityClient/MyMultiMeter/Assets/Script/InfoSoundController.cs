@@ -45,7 +45,7 @@ public class InfoSoundController : MonoBehaviour
     private Dictionary<AudioClip,float> m_AudioList= new Dictionary<AudioClip,float>();
     List<AudioClip> m_AudioKeys = new List<AudioClip>();
 
-void Awake()
+    void Awake()
     {
         m_audioSource = GetComponent<AudioSource>();
         /* Warning */
