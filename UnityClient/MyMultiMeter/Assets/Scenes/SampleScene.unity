@@ -912,7 +912,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 11530281}
   format: '{0:F0}'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -2025,7 +2024,6 @@ MonoBehaviour:
   subMeter: {fileID: 1901611453}
   text: {fileID: 2096015224}
   format: '{0:F0} rpm'
-  meterValue: 0
   lowValue: 750
   highValue: 11000
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -2425,7 +2423,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 843645477}
   format: '{0:F0} rpm'
-  meterValue: 0
   lowValue: 750
   highValue: 11000
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -2471,7 +2468,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 82511637}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -2921,7 +2917,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 103107458}
   format: '{0:F0}'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -3615,7 +3610,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 178371301}
   format: '{0:F0}'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -5830,7 +5824,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1981284}
   format: '{0:F0} Km'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -7457,7 +7450,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 500757677}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -7772,7 +7764,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 557218436}
   format: '{0:F0}'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -8828,7 +8819,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1257872650}
   format: '{0:F0} Km'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -13322,7 +13312,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1193003400}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -13746,7 +13735,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1258859637}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -14349,7 +14337,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1320333910}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -15540,7 +15527,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1451608619}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -16589,7 +16575,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1533678632}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -17655,7 +17640,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1348361022}
   format: '{0:F0} Km'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -18034,10 +18018,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   units:
-  - {fileID: 1614000004}
+  - {fileID: 1087496114}
   - {fileID: 625475866}
   - {fileID: 1264635974}
-  - {fileID: 1087496114}
+  - {fileID: 1614000004}
   deviceList: {fileID: 1679700844}
   settingPanel: {fileID: 1256958931}
   modList: {fileID: 1094124108}
@@ -18802,7 +18786,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1728027793}
   format: '{0:F2} bar'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -20026,7 +20009,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1119704317}
   format: '{0:F0} Km'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -20167,7 +20149,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 0}
   format: '{0:F0}'
-  meterValue: 0
   lowValue: 0
   highValue: 6900
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -20453,7 +20434,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1929236506}
   format: '{0:F2} bar'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -20761,7 +20741,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 343610093}
   format: '{0:F0} rpm'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -20807,7 +20786,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1972415664}
   format: '{0:F2} bar'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -20928,7 +20906,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 1973859363}
   format: "{0:F0} \u2103"
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -21161,7 +21138,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 2007129000}
   format: '{0:F2} bar'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
@@ -22070,7 +22046,6 @@ MonoBehaviour:
   subMeter: {fileID: 0}
   text: {fileID: 2112777432}
   format: '{0:F0} rpm'
-  meterValue: 0
   lowValue: -1
   highValue: 95
   lowColor: {r: 0, g: 1, b: 1, a: 1}
