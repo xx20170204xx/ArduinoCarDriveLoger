@@ -79,6 +79,7 @@ public class PanelSelect : MonoBehaviour
         }
 
         serial.controller = useUnits[nowNum];
+        serial.controller.resetValue();
 
 
     } /* Start */
