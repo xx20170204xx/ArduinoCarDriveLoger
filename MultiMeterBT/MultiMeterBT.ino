@@ -15,7 +15,7 @@ https://github.com/matt-downs/arduino-oled-auto-gauges/blob/master/boost/boost.i
 +5V  GND A1
          A2
 
-R= 1KΩ ？
+R= 1Kohm
 
 [  Press ]
 [ Sensor ]
@@ -24,8 +24,15 @@ R= 1KΩ ？
  |   |  |
 +5V GND A3
 
+[  Boost ]
+[ Sensor ]
+ |   |  |
+ |   |  |
+ |   |  |
++5V GND A4
 
-
+                       +-- ||---GND
+                       |
 +5V----------|<--------+---|<---GND
                        |
 SpeedPulse---1Kohm-----+--------D2 or D3
@@ -574,12 +581,12 @@ static void UpdateLCD_Speed(){
 #endif
 
 /*
-  パルスが入らない状態を確認して 0Kmを設定する
+  パルスが入らない状態を確認して 0rpmを設定する
 */
 static void UpdateTachoReset( void ){
-  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f / 2.0f;
+  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
   unsigned long width = micros() - g_tachoBefore;
-  if( width <= ONE_MIN_USEC )
+  if( width <= CSPD )
     return;
 
   g_tachoWidth = 0.0f;
@@ -671,22 +678,22 @@ float g_OilPrs = 0;    // 油圧
 float g_WaterTmp = 0;  // 水温
 float g_BoostPrs = 0;  // ブースト圧
 */
-    static float WnO_TMP_MIN = -20.0f;
-    static float WnO_TMP_MAX = 150.0f;
+    static float TMP_MIN = -20.0f;
+    static float TMP_MAX = 150.0f;
 
     /* bar */
     static float PRS_MIN = -1.5f;
     static float PRS_MAX = 12.0f;
 
-    g_OilTmp += WnO_TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
-    g_WaterTmp += WnO_TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
+    g_OilTmp += TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
+    g_WaterTmp += TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
 
     g_OilPrs += PRS_MAX * 0.1f * ( 100.0f / 1000.0f );
 
 
 
-    if( g_OilTmp >= WnO_TMP_MAX ){ g_OilTmp = WnO_TMP_MIN; }
-    if( g_WaterTmp >= WnO_TMP_MAX ){ g_WaterTmp = WnO_TMP_MIN; }
+    if( g_OilTmp >= TMP_MAX ){ g_OilTmp = TMP_MIN; }
+    if( g_WaterTmp >= TMP_MAX ){ g_WaterTmp = TMP_MIN; }
 
     if( g_OilPrs >= PRS_MAX ){ g_OilPrs = PRS_MIN; }
 

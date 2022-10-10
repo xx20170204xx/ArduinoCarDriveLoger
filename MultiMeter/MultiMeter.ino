@@ -520,12 +520,12 @@ static void UpdateLCD_Speed(){
 #endif
 
 /*
-  パルスが入らない状態を確認して 0Kmを設定する
+  パルスが入らない状態を確認して 0rpmを設定する
 */
 static void UpdateTachoReset( void ){
-  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f / 2.0f;
+  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
   unsigned long width = micros() - g_tachoBefore;
-  if( width <= ONE_MIN_USEC )
+  if( width <= CSPD )
     return;
 
   g_tachoWidth = 0.0f;
