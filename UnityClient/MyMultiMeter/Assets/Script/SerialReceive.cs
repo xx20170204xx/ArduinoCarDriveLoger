@@ -165,6 +165,14 @@ public class SerialReceive : MonoBehaviour
             message = "  " + serialHandler.ProductID; AddDebugText(message);
             message = "  " + serialHandler.SerialNumber; AddDebugText(message);
         }
+        if (_data == "DISCONNECT_ERROR")
+        {
+            /* SEを出力する */
+            if (m_audioSource != null && m_conLostClip != null)
+            {
+                m_audioSource.PlayOneShot(m_conLostClip);
+            }
+        }
 
     } /* OnSerialEvent */
 

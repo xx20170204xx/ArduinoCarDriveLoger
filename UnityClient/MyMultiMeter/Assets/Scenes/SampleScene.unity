@@ -17998,7 +17998,7 @@ MonoBehaviour:
   stopSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
   m_recStartClip: {fileID: 8300000, guid: 76de3a5a78423f744b77d881fa5ce04d, type: 3}
   m_recStopClip: {fileID: 8300000, guid: 02d251f68525f5142af514deb81bde1c, type: 3}
-  m_conLostClip: {fileID: 0}
+  m_conLostClip: {fileID: 8300000, guid: e45795a0cdf400a4191ac43a9032b53a, type: 3}
   m_opMoningClip: {fileID: 8300000, guid: 63bd8a307fbc5a049a3aafee926f4617, type: 3}
   m_opNoonClip: {fileID: 8300000, guid: 657609f49ff1c654788c758a12f1d791, type: 3}
   m_opEveningClip: {fileID: 8300000, guid: 7909005c7b8dced4ab0f366d460c9dba, type: 3}
