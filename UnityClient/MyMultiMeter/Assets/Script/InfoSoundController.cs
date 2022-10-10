@@ -80,7 +80,7 @@ public class InfoSoundController : MonoBehaviour
             }
         }
 
-        /* Ä¶’†‚Ìê‡AŠÖ”‚ð”²‚¯‚é */
+        /* å†ç”Ÿä¸­ã®å ´åˆã€é–¢æ•°ã‚’æŠœã‘ã‚‹ */
         if (m_audioSource.isPlaying == true)
         {
             return;
@@ -93,7 +93,7 @@ public class InfoSoundController : MonoBehaviour
             {
                 /* Play */
                 m_audioSource.PlayOneShot(_key);
-                /* X•ªŠÔ‚Íƒ`ƒFƒbƒN‚ð‚µ‚Ä‚à–Â‚ç‚³‚È‚¢ */
+                /* Xåˆ†é–“ã¯ãƒã‚§ãƒƒã‚¯ã‚’ã—ã¦ã‚‚é³´ã‚‰ã•ãªã„ */
                 m_AudioList[_key] = 60 * 1.0f;
                 break;
             }
@@ -143,12 +143,12 @@ public class InfoSoundController : MonoBehaviour
             }
         }
 
-        /* ƒGƒ“ƒXƒgŒŸ’m */
-        /* “K³ó‘Ô‚ª 1•b ˆÈã‚©‚Â Œ»Ý’l‚ª 0 ˆÈ‰º‚Ìê‡ */
+        /* ã‚¨ãƒ³ã‚¹ãƒˆæ¤œçŸ¥ */
+        /* é©æ­£çŠ¶æ…‹ãŒ 1ç§’ ä»¥ä¸Šã‹ã¤ ç¾åœ¨å€¤ãŒ 0 ä»¥ä¸‹ã®å ´åˆ */
         if (m_isTachoNormal > 1.0f && _value <= 0f)
         {
             m_EngStlCount += Time.deltaTime;
-            /* ŒŸ’m‰ñ”‚ª 1•b ‚ð’´‚¦‚½ê‡ */
+            /* æ¤œçŸ¥å›žæ•°ãŒ 1ç§’ ã‚’è¶…ãˆãŸå ´åˆ */
             if (m_EngStlCount >= 1.0f) 
             {
                 AddPlaySound(m_InfoEngStlClip);
@@ -175,7 +175,7 @@ public class InfoSoundController : MonoBehaviour
 
         if (_value >= _set.m_lowValue && _value <= _set.m_highValue)
         {
-            /* ‰·“x‚ª“K³“à‚Ìê‡ */
+            /* æ¸©åº¦ãŒé©æ­£å†…ã®å ´åˆ */
             m_isWaterTempNormal += Time.deltaTime;
         }
         else
@@ -204,7 +204,7 @@ public class InfoSoundController : MonoBehaviour
 
         if (_value >= _set.m_lowValue && _value <= _set.m_highValue)
         {
-            /* ‰·“x‚ª“K³“à‚Ìê‡ */
+            /* æ¸©åº¦ãŒé©æ­£å†…ã®å ´åˆ */
             m_isOilTempNormal += Time.deltaTime;
         }
         else

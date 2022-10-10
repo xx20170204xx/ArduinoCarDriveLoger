@@ -51,7 +51,7 @@ public class MeterBase : MonoBehaviour
 #if true
     [Range(-273,360)]
 #else
-    [Range(-273,11000)]  /* tacho—p */
+    [Range(-273,11000)]  /* tachoç”¨ */
 #endif
 #endif
     private float meterValue;

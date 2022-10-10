@@ -2,7 +2,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections;
 
-[CustomEditor(typeof(MeterUnitController))]//Šg’£‚·‚éƒNƒ‰ƒX‚ğw’è
+[CustomEditor(typeof(MeterUnitController))]//æ‹¡å¼µã™ã‚‹ã‚¯ãƒ©ã‚¹ã‚’æŒ‡å®š
 public class MeterUnitControllerEditor : Editor
 {
     public override void OnInspectorGUI()
