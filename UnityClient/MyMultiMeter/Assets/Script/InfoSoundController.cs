@@ -27,20 +27,12 @@ public class InfoSoundController : MonoBehaviour
 
     private AudioSource m_audioSource;
 
-    private bool m_isTachoMove = false;
-    private bool m_isTachoMovePrev = false;
     private float m_isTachoNormal = 0.0f;
     private float m_EngStlCount = 0.0f;
 
-    private bool m_isWaterTempMove = false;
-    private bool m_isWaterTempMovePrev = false;
     private float m_isWaterTempNormal = 0.0f;
-    private float m_isWaterTempWarning = 0.0f;
 
-    private bool m_isOilTempMove = false;
-    private bool m_isOilTempMovePrev = false;
     private float m_isOilTempNormal = 0.0f;
-    private float m_isOilTempWarning = 0.0f;
 
     private Dictionary<AudioClip,float> m_AudioList= new Dictionary<AudioClip,float>();
     List<AudioClip> m_AudioKeys = new List<AudioClip>();
@@ -73,10 +65,10 @@ public class InfoSoundController : MonoBehaviour
         CheckTacho(_meter);
         CheckWaterTemp(_meter);
         CheckOilTemp(_meter);
-        PlaySound();
+        PlaySoundFunc();
     } /* Update */
 
-    private void PlaySound()
+    private void PlaySoundFunc()
     {
         foreach (var _key in m_AudioKeys)
         {
@@ -106,7 +98,15 @@ public class InfoSoundController : MonoBehaviour
                 break;
             }
         }
-    } /* PlaySound */
+    } /* PlaySoundFunc */
+
+    private void AddPlaySound(AudioClip _clip)
+    {
+        if (m_AudioList[_clip] <= 0.0f)
+        {
+            m_AudioList[_clip] = -2.0f;
+        }
+    } /* AddPlaySound */
 
     private void CheckSpeed(MeterUnitController _controller)
     {
@@ -114,10 +114,7 @@ public class InfoSoundController : MonoBehaviour
         float _value = _controller.Speed;
         if (_value > _set.m_highValue )
         {
-            if (m_AudioList[m_WarningSpeedClip] <= 0.0f)
-            {
-                m_AudioList[m_WarningSpeedClip] = -2.0f;
-            }
+            AddPlaySound(m_WarningSpeedClip);
         }
     } /* CheckSpeed */
 
@@ -128,8 +125,6 @@ public class InfoSoundController : MonoBehaviour
 
         if (_value >= _set.m_lowValue)
         {
-            m_isTachoMovePrev = m_isTachoMove;
-            m_isTachoMove = true;
             if (_value >= _set.m_lowValue && _value <= _set.m_highValue)
             {
                 m_isTachoNormal += Time.deltaTime;
@@ -141,10 +136,7 @@ public class InfoSoundController : MonoBehaviour
                     m_isTachoNormal -= Time.deltaTime;
                 }
             }
-        }
-        else {
-            m_isTachoMovePrev = m_isTachoMove;
-            m_isTachoMove = false;
+        } else {
             if (m_isTachoNormal > 0.0f)
             {
                 m_isTachoNormal -= Time.deltaTime;
@@ -159,25 +151,16 @@ public class InfoSoundController : MonoBehaviour
             /* 検知回数が 1秒 を超えた場合 */
             if (m_EngStlCount >= 1.0f) 
             {
-                if (m_AudioList[m_InfoEngStlClip] <= 0.0f)
-                {
-                    m_AudioList[m_InfoEngStlClip] = -2.0f;
-                }
+                AddPlaySound(m_InfoEngStlClip);
             }
         }
         else if (m_isTachoNormal > 1.0f && _value >= _set.m_blinkValue)
         {
-            if (m_AudioList[m_InfoTachoClip] <= 0.0f)
-            {
-                m_AudioList[m_InfoTachoClip] = -2.0f;
-            }
+            AddPlaySound(m_InfoTachoClip);
         }
         else if (m_isTachoNormal > 1.0f && _value >= _set.m_highValue)
         {
-            if (m_AudioList[m_WarningTachoClip] <= 0.0f)
-            {
-                m_AudioList[m_WarningTachoClip] = -2.0f;
-            }
+            AddPlaySound(m_WarningTachoClip);
         }
         else{
             m_EngStlCount = 0.0f;
@@ -193,32 +176,23 @@ public class InfoSoundController : MonoBehaviour
         if (_value >= _set.m_lowValue && _value <= _set.m_highValue)
         {
             /* 温度が適正内の場合 */
-            m_isWaterTempMovePrev = m_isWaterTempMove;
-            m_isWaterTempMove = true;
             m_isWaterTempNormal += Time.deltaTime;
-            m_isWaterTempWarning = 0.0f;
         }
         else
         {
-            m_isWaterTempMovePrev = m_isWaterTempMove;
-            m_isWaterTempMove = false;
-            m_isWaterTempNormal = 0.0f;
-            m_isWaterTempWarning += Time.deltaTime;
+            if (m_isWaterTempNormal > 0.0f)
+            {
+                m_isWaterTempNormal -= Time.deltaTime;
+            }
         }
 
-        if (m_isWaterTempMovePrev == true && _value >= _set.m_highValue)
+        if (m_isWaterTempNormal > 1.0f && _value >= _set.m_highValue)
         {
-            if (m_AudioList[m_WarningWaterHighClip] <= 0.0f)
-            {
-                m_AudioList[m_WarningWaterHighClip] = -2.0f;
-            }
+            AddPlaySound(m_WarningWaterHighClip);
         }
-        else if (m_isWaterTempMovePrev == true && _value <= _set.m_lowValue)
+        else if (m_isWaterTempNormal > 1.0f && _value <= _set.m_lowValue)
         {
-            if (m_AudioList[m_WarningWaterLowClip] <= 0.0f)
-            {
-                m_AudioList[m_WarningWaterLowClip] = -2.0f;
-            }
+            AddPlaySound(m_WarningWaterLowClip);
         }else{
         }
     } /* CheckWaterTemp */
@@ -231,32 +205,23 @@ public class InfoSoundController : MonoBehaviour
         if (_value >= _set.m_lowValue && _value <= _set.m_highValue)
         {
             /* 温度が適正内の場合 */
-            m_isOilTempMovePrev = m_isOilTempMove;
-            m_isOilTempMove = true;
             m_isOilTempNormal += Time.deltaTime;
-            m_isOilTempWarning = 0.0f;
         }
         else
         {
-            m_isOilTempMovePrev = m_isOilTempMove;
-            m_isOilTempMove = false;
-            m_isOilTempNormal = 0.0f;
-            m_isOilTempWarning += Time.deltaTime;
+            if (m_isOilTempNormal > 0.0f)
+            {
+                m_isOilTempNormal -= Time.deltaTime;
+            }
         }
 
-        if (m_isOilTempMovePrev == true && _value >= _set.m_highValue)
+        if (m_isOilTempNormal > 1.0f && _value >= _set.m_highValue)
         {
-            if (m_AudioList[m_WarningOilTHighClip] <= 0.0f)
-            {
-                m_AudioList[m_WarningOilTHighClip] = -2.0f;
-            }
+            AddPlaySound(m_WarningOilTHighClip);
         }
-        else if (m_isOilTempMovePrev == true && _value <= _set.m_lowValue)
+        else if (m_isOilTempNormal > 1.0f && _value <= _set.m_lowValue)
         {
-            if (m_AudioList[m_WarningOilTLowClip] <= 0.0f)
-            {
-                m_AudioList[m_WarningOilTLowClip] = -2.0f;
-            }
+            AddPlaySound(m_WarningOilTLowClip);
         }
         else
         {
