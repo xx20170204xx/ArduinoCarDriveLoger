@@ -312,6 +312,50 @@ static void InterruptSpeedFunc( void )
   g_speedKm = CSPD / g_speedWidth;
 } /* InterruptSpeedFunc */
 
+/*
+  パルスが入らない状態を確認して 0rpmを設定する
+*/
+static void UpdateTachoReset( void ){
+  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f / 2.0f;
+  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
+  unsigned long width = micros() - g_tachoBefore;
+  if( width <= CSPD )
+    return;
+
+  if( width <= 0 )
+  {
+    g_tachoWidth = 0.0f;
+    g_tachoBefore = micros();
+    g_tachoAfter = g_tachoBefore;
+    return;
+  }
+
+  g_tachoWidth = 0.0f;
+  g_tachoRpm = 0.0f;
+
+} /* UpdateTachoReset */
+
+/*
+  パルスが入らない状態を確認して 0Kmを設定する
+*/
+static void UpdateSpeedReset( void ){
+  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
+  unsigned long width = micros() - g_speedBefore;
+  if( width <= CSPD )
+    return;
+
+  if( width <= 0 )
+  {
+    g_speedWidth = 0.0f;
+    g_speedBefore = micros();
+    g_speedAfter = g_speedBefore;
+    return;
+  }
+  g_speedWidth = 0.0f;
+  g_speedKm = 0.0f;
+
+} /* UpdateSpeedReset */
+
 #if USE_LCD == 1
 static void UpdateLCD()
 {
@@ -526,50 +570,6 @@ static void UpdateLCD_Speed(){
 } /* UpdateLCD_Speed */
 
 #endif
-
-/*
-  パルスが入らない状態を確認して 0rpmを設定する
-*/
-static void UpdateTachoReset( void ){
-  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f / 2.0f;
-  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
-  unsigned long width = micros() - g_tachoBefore;
-  if( width <= CSPD )
-    return;
-
-  if( width <= 0 )
-  {
-    g_tachoWidth = 0.0f;
-    g_tachoBefore = micros();
-    g_tachoAfter = g_tachoBefore;
-    return;
-  }
-
-  g_tachoWidth = 0.0f;
-  g_tachoRpm = 0.0f;
-
-} /* UpdateTachoReset */
-
-/*
-  パルスが入らない状態を確認して 0Kmを設定する
-*/
-static void UpdateSpeedReset( void ){
-  const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
-  unsigned long width = micros() - g_speedBefore;
-  if( width <= CSPD )
-    return;
-
-  if( width <= 0 )
-  {
-    g_speedWidth = 0.0f;
-    g_speedBefore = micros();
-    g_speedAfter = g_speedBefore;
-    return;
-  }
-  g_speedWidth = 0.0f;
-  g_speedKm = 0.0f;
-
-} /* UpdateSpeedReset */
 
 static void OutputWarningPin(void)
 {
