@@ -292,6 +292,10 @@ static void InterruptTachoFunc( void )
   g_tachoAfter = micros();//現在の時刻を記録
   g_tachoWidth = g_tachoAfter - g_tachoBefore;//前回と今回の時間の差を計算
   g_tachoBefore = g_tachoAfter;//今回の値を前回の値に代入する
+  if( g_tachoWidth <= 0 )
+  {
+    return;
+  }
   g_tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
 } /* InterruptTachoFunc */
 
@@ -301,6 +305,10 @@ static void InterruptSpeedFunc( void )
   g_speedAfter = micros();//現在の時刻を記録
   g_speedWidth = g_speedAfter - g_speedBefore;//前回と今回の時間の差を計算
   g_speedBefore = g_speedAfter;//今回の値を前回の値に代入する
+  if( g_speedWidth <= 0 )
+  {
+    return;
+  }
   g_speedKm = CSPD / g_speedWidth;
 } /* InterruptSpeedFunc */
 
@@ -523,10 +531,19 @@ static void UpdateLCD_Speed(){
   パルスが入らない状態を確認して 0rpmを設定する
 */
 static void UpdateTachoReset( void ){
+  const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f / 2.0f;
   const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
   unsigned long width = micros() - g_tachoBefore;
   if( width <= CSPD )
     return;
+
+  if( width <= 0 )
+  {
+    g_tachoWidth = 0.0f;
+    g_tachoBefore = micros();
+    g_tachoAfter = g_tachoBefore;
+    return;
+  }
 
   g_tachoWidth = 0.0f;
   g_tachoRpm = 0.0f;
@@ -542,6 +559,13 @@ static void UpdateSpeedReset( void ){
   if( width <= CSPD )
     return;
 
+  if( width <= 0 )
+  {
+    g_speedWidth = 0.0f;
+    g_speedBefore = micros();
+    g_speedAfter = g_speedBefore;
+    return;
+  }
   g_speedWidth = 0.0f;
   g_speedKm = 0.0f;
 
