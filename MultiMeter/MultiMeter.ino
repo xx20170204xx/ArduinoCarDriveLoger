@@ -44,11 +44,11 @@ diode : --|<--
 
 */
 
-#define DEBUG_TACHOSPEED 1
-#define DEBUG_TMP_PRS 1
+#define DEBUG_TACHOSPEED 0
+#define DEBUG_TMP_PRS 0
 #define USE_LCD 0
 
-const char* VERSION_STRING = "20220716XX";
+const char* VERSION_STRING = "20221013XX";
 
 #if USE_LCD == 1
 // include the library code:
@@ -210,13 +210,13 @@ static void OutputSerial( void ){
   dtostrf(g_WaterTmp,    3,4, bufVars[0] );
   dtostrf(g_OilTmp,      3,4, bufVars[1] );
   dtostrf(g_OilPrs,      3,4, bufVars[2] );
-  dtostrf(g_tachoRpm,    5,0, bufVars[3] );
-  dtostrf(g_speedKm,     3,0, bufVars[4] );
-  // dtostrf(g_BoostPrs,    3,4, bufVars[5] );
+  dtostrf(g_BoostPrs,    3,4, bufVars[3] );
+  dtostrf(g_tachoRpm,    5,0, bufVars[4] );
+  dtostrf(g_speedKm,     3,0, bufVars[5] );
 
   Serial.print('D');
   Serial.print(SEP_CHAR);
-  for( int ii = 0; ii < 5; ii++ )
+  for( int ii = 0; ii < 6; ii++ )
   {
     Serial.print(bufVars[ii]);
     Serial.print(SEP_CHAR);
@@ -235,7 +235,7 @@ static void UpdateSensorInfo()
   g_WaterTmp = get_temp(WATER_SENSOR_PIN);
   g_OilTmp = get_temp(OIL_SENSOR_PIN);
   g_OilPrs = get_oil_pressure(PRESSURE_SENSOR_PIN);
-  // g_BoostPrs = get_boost_press(BOOST_SENSOR_PIN);
+  g_BoostPrs = get_boost_press(BOOST_SENSOR_PIN);
 
 } /* UpdateSensorInfo */
 
@@ -277,13 +277,13 @@ static float convert_temp_by_ntc(float r) {
 /* ブースト圧(bar) */
 static float get_boost_press( const int pinNum )
 {
-  return 0.0f; /* TODO : DELETE */
+  double input_for_value = analogReadAvg(pinNum, SENSOR_AVG_COUNT);
 
- double input_for_value = analogReadAvg(pinNum, SENSOR_AVG_COUNT);
+  return (((input_for_value - 102) / 0.1638 ) - 1727) * 0.0001f;
 
   float vo = (float)input_for_value * 5.0f / 1023.0f;
   float ret = (vo - 1.0f ) * 0.88;
-  
+  return ret;
 } /* get_boost_press */
 
 static void InterruptTachoFunc( void )
