@@ -274,16 +274,15 @@ static float convert_temp_by_ntc(float r) {
   return B / (log(r/R25C) + (B/C25)) - K;
 } /* convert_temp_by_ntc */
 
-/* ブースト圧(bar) */
+/* ブースト圧(kPa) */
 static float get_boost_press( const int pinNum )
 {
+  float ret_psi;
+  float ret_kpa;
   double input_for_value = analogReadAvg(pinNum, SENSOR_AVG_COUNT);
-
-  return (((input_for_value - 102) / 0.1638 ) - 1727) * 0.0001f;
-
-  float vo = (float)input_for_value * 5.0f / 1023.0f;
-  float ret = (vo - 1.0f ) * 0.88;
-  return ret;
+  ret_psi=(((input_for_value - 102) / 0.1798f ) - 1535) * 0.01f;
+  ret_kpa = ret_psi * 6.895f;
+  return ret_kpa;
 } /* get_boost_press */
 
 static void InterruptTachoFunc( void )
