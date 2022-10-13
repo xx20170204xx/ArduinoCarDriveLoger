@@ -132,13 +132,13 @@ public class SettingPanel : MonoBehaviour
         m_oilpHighValue.maxValue = 10;
 
         /* Boost Press */
-        m_boostLowValue.stepAmount = 0.1f;
-        m_boostLowValue.minValue = -1;
-        m_boostLowValue.maxValue = 5;
+        m_boostLowValue.stepAmount = 1f;
+        m_boostLowValue.minValue = -100;
+        m_boostLowValue.maxValue = 100;
 
-        m_boostHighValue.stepAmount = 0.1f;
+        m_boostHighValue.stepAmount = 1f;
         m_boostHighValue.minValue = 0;
-        m_boostHighValue.maxValue = 5;
+        m_boostHighValue.maxValue = 300;
     } /* Awake */
 
     void Start()
