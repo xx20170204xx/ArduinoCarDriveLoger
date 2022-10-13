@@ -14,6 +14,9 @@ public class MeterUnitController : MonoBehaviour
     [Tooltip("油圧")]
     [SerializeField]
     private MeterBase oilPressMeter = null;
+    [Tooltip("ブースト圧")]
+    [SerializeField]
+    private MeterBase boostPressMeter = null;
 
     [Tooltip("回転数")]
     [SerializeField]
@@ -30,6 +33,7 @@ public class MeterUnitController : MonoBehaviour
         public float m_waterTemp;
         public float m_oilTemp;
         public float m_oilPress;
+        public float m_boostPress;
         public float m_tacho;
         public float m_speed;
     }
@@ -38,6 +42,7 @@ public class MeterUnitController : MonoBehaviour
     public float WaterTemp { get { return m_data.m_waterTemp; }  }
     public float OilTemp { get { return m_data.m_oilTemp; } }
     public float OilPress { get { return m_data.m_oilPress; } }
+    public float BoostPress { get { return m_data.m_boostPress; } }
     public float Tacho { get { return m_data.m_tacho; } }
     public float Speed { get { return m_data.m_speed; } }
 
@@ -48,13 +53,15 @@ public class MeterUnitController : MonoBehaviour
         m_data.m_waterTemp = float.Parse(values[1]);
         m_data.m_oilTemp = float.Parse(values[2]);
         m_data.m_oilPress = float.Parse(values[3]);
-        m_data.m_tacho = float.Parse(values[4]);
-        m_data.m_speed = float.Parse(values[5]);
+        m_data.m_boostPress = float.Parse(values[4]);
+        m_data.m_tacho = float.Parse(values[5]);
+        m_data.m_speed = float.Parse(values[6]);
 
-        /* 水温・油温・油圧 */
+        /* 水温・油温・油圧・ブースト圧 */
         if (waterTempMeter != null) waterTempMeter.Value = m_data.m_waterTemp;
-        if(oilTempMeter != null) oilTempMeter.Value = m_data.m_oilTemp;
+        if (oilTempMeter != null) oilTempMeter.Value = m_data.m_oilTemp;
         if (oilPressMeter != null) oilPressMeter.Value = m_data.m_oilPress;
+        if (boostPressMeter != null) boostPressMeter.Value = m_data.m_boostPress;
 
         /* 回転数・速度・減速比 */
         if (tachoMeter != null) tachoMeter.Value = m_data.m_tacho;
@@ -70,6 +77,7 @@ public class MeterUnitController : MonoBehaviour
         if (waterTempMeter != null) waterTempMeter.resetValue();
         if (oilTempMeter != null) oilTempMeter.resetValue();
         if (oilPressMeter != null) oilPressMeter.resetValue();
+        if (boostPressMeter != null) boostPressMeter.resetValue();
         if (tachoMeter != null) tachoMeter.resetValue();
         if (speedMeter != null) speedMeter.resetValue();
         if (gearRatioMeter != null) gearRatioMeter.resetValue();
@@ -77,6 +85,7 @@ public class MeterUnitController : MonoBehaviour
         m_data.m_waterTemp = 0;
         m_data.m_oilTemp = 0;
         m_data.m_oilPress = 0;
+        m_data.m_boostPress = 0;
         m_data.m_tacho = 0;
         m_data.m_speed = 0;
 
@@ -115,6 +124,19 @@ public class MeterUnitController : MonoBehaviour
             var _type = MeterBase.MeterType.TYPE_OIL_PRESS;
             var _setting = SerialReceive.Instance.m_MeterSetting[_type];
             var _meter = oilPressMeter;
+            do
+            {
+                _meter.lowValue = _setting.m_lowValue;
+                _meter.highValue = _setting.m_highValue;
+                _meter.lowColor = _setting.m_lowColor;
+                _meter.highColor = _setting.m_highColor;
+            } while (_meter = _meter.subMeter);
+        }
+        if (boostPressMeter != null)
+        {
+            var _type = MeterBase.MeterType.TYPE_BOOST_PRESS;
+            var _setting = SerialReceive.Instance.m_MeterSetting[_type];
+            var _meter = boostPressMeter;
             do
             {
                 _meter.lowValue = _setting.m_lowValue;
@@ -176,6 +198,7 @@ public class MeterUnitController : MonoBehaviour
         float _wtemp = -10.0f;
         float _otemp = -10.0f;
         float _oil_press = 0.0f;
+        float _boost_press = 0.0f;
         float _tacho = 750f;
         float _speed = 0f;
         int _gear = 1;
@@ -201,8 +224,8 @@ public class MeterUnitController : MonoBehaviour
             }
 
             string _mes; ;
-            _mes = string.Format("D\t{0}\t{1}\t{2}\t{3}\t{4}\n",
-                _wtemp, _otemp,_oil_press,_tacho,_speed);
+            _mes = string.Format("D\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n",
+                _wtemp, _otemp,_oil_press, _boost_press, _tacho,_speed);
             SerialReceive.Instance.
             OnDataReceived(_mes);
             if (_gear >= (GEAR_MAX+1)) 
@@ -215,11 +238,12 @@ public class MeterUnitController : MonoBehaviour
             _wtemp = 0;
             _otemp = 0;
             _oil_press = 0;
+            _boost_press = 0;
             _tacho = 0;
             _speed = 0;
             string _mes; ;
-            _mes = string.Format("V\t{0}\t{1}\t{2}\t{3}\t{4}\n",
-                _wtemp, _otemp, _oil_press, _tacho, _speed);
+            _mes = string.Format("V\t{0}\t{1}\t{2}\t{3}\t{4}\t{5}\n",
+                _wtemp, _otemp, _oil_press, _boost_press, _tacho, _speed);
             SerialReceive.Instance.
             OnDataReceived(_mes);
         }
