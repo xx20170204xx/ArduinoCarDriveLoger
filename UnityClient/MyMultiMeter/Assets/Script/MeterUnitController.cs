@@ -29,48 +29,20 @@ public class MeterUnitController : MonoBehaviour
     [SerializeField]
     private MeterBase gearRatioMeter = null;
 
-    struct DataValue{
-        public float m_waterTemp;
-        public float m_oilTemp;
-        public float m_oilPress;
-        public float m_boostPress;
-        public float m_tacho;
-        public float m_speed;
-    }
-    private DataValue m_data;
-
-    public float WaterTemp { get { return m_data.m_waterTemp; }  }
-    public float OilTemp { get { return m_data.m_oilTemp; } }
-    public float OilPress { get { return m_data.m_oilPress; } }
-    public float BoostPress { get { return m_data.m_boostPress; } }
-    public float Tacho { get { return m_data.m_tacho; } }
-    public float Speed { get { return m_data.m_speed; } }
-
-    public void OnDataReceived(string message)
+    public void UpdateData()
     {
-        string[] values = message.Split('\t');
-
-        m_data.m_waterTemp = float.Parse(values[1]);
-        m_data.m_oilTemp = float.Parse(values[2]);
-        m_data.m_oilPress = float.Parse(values[3]);
-        m_data.m_boostPress = float.Parse(values[4]);
-        m_data.m_tacho = float.Parse(values[5]);
-        m_data.m_speed = float.Parse(values[6]);
 
         /* 水温・油温・油圧・ブースト圧 */
-        if (waterTempMeter != null) waterTempMeter.Value = m_data.m_waterTemp;
-        if (oilTempMeter != null) oilTempMeter.Value = m_data.m_oilTemp;
-        if (oilPressMeter != null) oilPressMeter.Value = m_data.m_oilPress;
-        if (boostPressMeter != null) boostPressMeter.Value = m_data.m_boostPress;
+        if (waterTempMeter != null) waterTempMeter.Value = SerialReceive.Instance.WaterTemp;
+        if (oilTempMeter != null) oilTempMeter.Value = SerialReceive.Instance.OilTemp;
+        if (oilPressMeter != null) oilPressMeter.Value = SerialReceive.Instance.OilPress;
+        if (boostPressMeter != null) boostPressMeter.Value = SerialReceive.Instance.BoostPress;
 
         /* 回転数・速度・減速比 */
-        if (tachoMeter != null) tachoMeter.Value = m_data.m_tacho;
-        if (speedMeter != null) speedMeter.Value = m_data.m_speed;
+        if (tachoMeter != null) tachoMeter.Value = SerialReceive.Instance.Tacho;
+        if (speedMeter != null) speedMeter.Value = SerialReceive.Instance.Speed;
         if (gearRatioMeter != null) gearRatioMeter.Value = tachoMeter.Value / speedMeter.Value;
-
-        // SerialReceive.Instance
-
-    } /* OnDataReceived */
+    } /* UpdateData */
 
     public void resetValue()
     {
@@ -81,13 +53,6 @@ public class MeterUnitController : MonoBehaviour
         if (tachoMeter != null) tachoMeter.resetValue();
         if (speedMeter != null) speedMeter.resetValue();
         if (gearRatioMeter != null) gearRatioMeter.resetValue();
-
-        m_data.m_waterTemp = 0;
-        m_data.m_oilTemp = 0;
-        m_data.m_oilPress = 0;
-        m_data.m_boostPress = 0;
-        m_data.m_tacho = 0;
-        m_data.m_speed = 0;
 
         ReloadSetting();
     } /* resetValue */

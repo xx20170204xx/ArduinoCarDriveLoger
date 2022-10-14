@@ -111,7 +111,7 @@ public class InfoSoundController : MonoBehaviour
     private void CheckSpeed(MeterUnitController _controller)
     {
         var _set = SerialReceive.Instance.m_MeterSetting[MeterBase.MeterType.TYPE_SPEED];
-        float _value = _controller.Speed;
+        float _value = SerialReceive.Instance.Speed;
         if (_value > _set.m_highValue )
         {
             AddPlaySound(m_WarningSpeedClip);
@@ -121,7 +121,7 @@ public class InfoSoundController : MonoBehaviour
     private void CheckTacho(MeterUnitController _controller)
     {
         var _set = SerialReceive.Instance.m_MeterSetting[MeterBase.MeterType.TYPE_TACHO];
-        float _value = _controller.Tacho;
+        float _value = SerialReceive.Instance.Tacho;
 
         if (_value >= _set.m_lowValue)
         {
@@ -171,7 +171,7 @@ public class InfoSoundController : MonoBehaviour
     private void CheckWaterTemp(MeterUnitController _controller)
     {
         var _set = SerialReceive.Instance.m_MeterSetting[MeterBase.MeterType.TYPE_WATER_TEMP];
-        float _value = _controller.WaterTemp;
+        float _value = SerialReceive.Instance.WaterTemp;
 
         if (_value >= _set.m_lowValue && _value <= _set.m_highValue)
         {
@@ -200,7 +200,7 @@ public class InfoSoundController : MonoBehaviour
     private void CheckOilTemp(MeterUnitController _controller)
     {
         var _set = SerialReceive.Instance.m_MeterSetting[MeterBase.MeterType.TYPE_OIL_TEMP];
-        float _value = _controller.OilTemp;
+        float _value = SerialReceive.Instance.OilTemp;
 
         if (_value >= _set.m_lowValue && _value <= _set.m_highValue)
         {

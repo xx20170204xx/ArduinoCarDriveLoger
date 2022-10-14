@@ -82,6 +82,24 @@ public class SerialReceive : MonoBehaviour
     private AudioSource m_audioSource;
     private System.DateTime m_lastDate;
 
+    struct DataValue
+    {
+        public float m_waterTemp;
+        public float m_oilTemp;
+        public float m_oilPress;
+        public float m_boostPress;
+        public float m_tacho;
+        public float m_speed;
+    }
+    private DataValue m_data;
+
+    public float WaterTemp { get { return m_data.m_waterTemp; } }
+    public float OilTemp { get { return m_data.m_oilTemp; } }
+    public float OilPress { get { return m_data.m_oilPress; } }
+    public float BoostPress { get { return m_data.m_boostPress; } }
+    public float Tacho { get { return m_data.m_tacho; } }
+    public float Speed { get { return m_data.m_speed; } }
+
     private void Awake()
     {
         m_audioSource = GetComponent<AudioSource>();
@@ -138,7 +156,20 @@ public class SerialReceive : MonoBehaviour
             var data = message.Split(
                     new string[] { "\n" }, System.StringSplitOptions.None);
 
-            controller.OnDataReceived(data[0]);
+            string[] values = data[0].Split('\t');
+
+            m_data.m_waterTemp = float.Parse(values[1]);
+            m_data.m_oilTemp = float.Parse(values[2]);
+            m_data.m_oilPress = float.Parse(values[3]);
+            m_data.m_boostPress = float.Parse(values[4]);
+            m_data.m_tacho = float.Parse(values[5]);
+            m_data.m_speed = float.Parse(values[6]);
+
+            if (controller != null)
+            {
+                controller.UpdateData();
+            }
+
             if (isRecordData == true)
             {
                 SaveRecordData(data[0]);
