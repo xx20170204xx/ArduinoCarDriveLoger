@@ -64,19 +64,12 @@
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\SerialPortUtilityPro.cs" />
     <Compile Include="Assets\Script\Setting\SettingColor.cs" />
     <Compile Include="Assets\Script\ModList\ModListPanel.cs" />
-    <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPDeviceList.cs" />
     <Compile Include="Assets\Script\Setting\SettingValue.cs" />
-    <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
     <Compile Include="Assets\Script\InfoSoundController.cs" />
     <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
-    <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptHTTP.cs" />
     <Compile Include="Assets\Script\Meter\TachoShiftLampMeter.cs" />
     <Compile Include="Assets\Script\SerialReceive.cs" />
-    <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptJSON.cs" />
-    <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptModbus.cs" />
-    <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPProgramming.cs" />
     <Compile Include="Assets\Script\DeviceList\DevInfo.cs" />
-    <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptSimple.cs" />
     <Compile Include="Assets\Script\ModList\ModInfo.cs" />
     <Compile Include="Assets\Script\Opning.cs" />
     <Compile Include="Assets\Script\PanelSelect.cs" />
@@ -86,7 +79,6 @@
     <None Include="Assets\SerialPortUtilityPro\Plugins\x86_64\spap.dll" />
     <None Include="Assets\StreamingAssets\dummy.txt" />
     <None Include="Assets\SerialPortUtilityPro\Readme.txt" />
-    <None Include="Assets\SerialPortUtilityPro\Plugins\x86\spap.dll" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
