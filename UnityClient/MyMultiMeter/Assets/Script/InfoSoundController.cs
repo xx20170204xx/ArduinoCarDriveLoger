@@ -28,6 +28,9 @@ public class InfoSoundController : MonoBehaviour
     private AudioSource m_audioSource;
 
     private float m_updateTime = 5.0f * 60.0f;
+
+    private float m_speedWarning = 0.0f;
+
     private float m_isTachoNormal = 0.0f;
     private float m_EngStlCount = 0.0f;
 
@@ -128,9 +131,17 @@ public class InfoSoundController : MonoBehaviour
     {
         var _set = SerialReceive.Instance.m_MeterSetting[MeterBase.MeterType.TYPE_SPEED];
         float _value = SerialReceive.Instance.Speed;
-        if (_value > _set.m_highValue )
+        if (_value > _set.m_highValue)
         {
-            AddPlaySound(m_WarningSpeedClip);
+            m_speedWarning += Time.deltaTime;
+            if (m_speedWarning > 1.0f)
+            {
+                /* 速度超過状態が1秒以上の場合 */
+                AddPlaySound(m_WarningSpeedClip);
+                m_speedWarning = 0.0f;
+            }
+        } else {
+            m_speedWarning = 0.0f;
         }
     } /* CheckSpeed */
 
