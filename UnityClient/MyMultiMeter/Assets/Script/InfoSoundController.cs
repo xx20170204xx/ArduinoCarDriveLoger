@@ -27,6 +27,7 @@ public class InfoSoundController : MonoBehaviour
 
     private AudioSource m_audioSource;
 
+    private float m_updateTime = 5.0f * 60.0f;
     private float m_isTachoNormal = 0.0f;
     private float m_EngStlCount = 0.0f;
 
@@ -39,6 +40,7 @@ public class InfoSoundController : MonoBehaviour
 
     void Awake()
     {
+        m_updateTime = 5.0f * 60.0f;
         m_audioSource = GetComponent<AudioSource>();
         /* Warning */
         m_AudioList.Add(m_WarningTachoClip, 0.0f);
@@ -61,12 +63,26 @@ public class InfoSoundController : MonoBehaviour
     void Update()
     {
         var _meter = SerialReceive.Instance.controller;
+
         CheckSpeed(_meter);
         CheckTacho(_meter);
         CheckWaterTemp(_meter);
         CheckOilTemp(_meter);
         PlaySoundFunc();
+        UpdateLastDate();
     } /* Update */
+
+    private void UpdateLastDate()
+    {
+        m_updateTime -= Time.deltaTime;
+        if (m_updateTime < 0.0f)
+        {
+            m_updateTime = 5.0f * 60.0f;
+
+            SerialReceive.Instance.SaveLastDate();
+        }
+
+    } /* UpdateLastDate */
 
     private void PlaySoundFunc()
     {

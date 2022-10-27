@@ -129,6 +129,8 @@ public class SerialReceive : MonoBehaviour
 
     private void Start()
     {
+        LoadLastDate();
+        SaveLastDate();
         LoadDeviceInfo();
         OpenDevice();
         StartCoroutine(StartOpeningSE());
@@ -207,6 +209,52 @@ public class SerialReceive : MonoBehaviour
 
     } /* OnSerialEvent */
 
+    public void SaveLastDate()
+    {
+        string _path = Application.persistentDataPath + "/" + "lastdate.xml";
+
+        System.Xml.XmlTextWriter xmlWriter = new System.Xml.XmlTextWriter(_path, System.Text.Encoding.UTF8);
+        xmlWriter.WriteStartDocument();
+        xmlWriter.WriteWhitespace("\r\n");
+        xmlWriter.WriteStartElement("LastUpdate");
+        xmlWriter.WriteStartElement("lastDate");
+        {
+            System.DateTime _now = System.DateTime.Now;
+            xmlWriter.WriteAttributeString("lastDate", _now.ToString("yyyy/MM/dd"));
+        }
+        xmlWriter.WriteEndElement();
+        xmlWriter.WriteWhitespace("\r\n");
+    } /* SaveLastDate */
+
+    public void LoadLastDate()
+    {
+        string _path = Application.persistentDataPath + "/" + "lastdate.xml";
+        System.Xml.XmlTextReader xmlReader = new System.Xml.XmlTextReader(_path);
+        try
+        {
+            while (xmlReader.Read())
+            {
+                Debug.Log(xmlReader.Name);
+                if (xmlReader.Name == "lastDate")
+                {
+                    string lastDate = xmlReader.GetAttribute("lastDate");
+                    System.DateTime.TryParseExact(lastDate, "yyyy/MM/dd", null, System.Globalization.DateTimeStyles.None, out m_lastDate);
+                }
+            }
+
+        }
+        catch (System.Exception _e)
+        {
+            Debug.LogWarning("Exception=[" + _e.Message + "]");
+            xmlReader.Close();
+        }
+        finally
+        {
+            xmlReader.Close();
+        }
+
+    } /* LoadLastDate */
+
     public void SaveDeviceInfo()
     {
         string _path = Application.persistentDataPath + "/" + "setting.xml";
@@ -243,13 +291,6 @@ public class SerialReceive : MonoBehaviour
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\r\n");
         }
-        xmlWriter.WriteStartElement("lastDate");
-        {
-            System.DateTime _now = System.DateTime.Now;
-            xmlWriter.WriteAttributeString("lastDate", _now.ToString("yyyy/MM/dd"));
-        }
-        xmlWriter.WriteEndElement();
-        xmlWriter.WriteWhitespace("\r\n");
         xmlWriter.WriteEndDocument();
         xmlWriter.Close();
 
@@ -315,11 +356,6 @@ public class SerialReceive : MonoBehaviour
                     mSetting.m_lowColor = lowColor;
                     mSetting.m_highColor = highColor;
                     m_MeterSetting[_key] = mSetting;
-                }
-                if (xmlReader.Name == "lastDate")
-                {
-                    string lastDate = xmlReader.GetAttribute("lastDate");
-                    System.DateTime.TryParseExact(lastDate, "yyyy/MM/dd", null,System.Globalization.DateTimeStyles.None, out m_lastDate);
                 }
             }
         }
