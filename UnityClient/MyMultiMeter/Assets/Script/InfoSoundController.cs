@@ -31,6 +31,8 @@ public class InfoSoundController : MonoBehaviour
 
     private float m_speedWarning = 0.0f;
 
+    private float m_tacho1Warning = 0.0f;
+    private float m_tacho2Warning = 0.0f;
     private float m_isTachoNormal = 0.0f;
     private float m_EngStlCount = 0.0f;
 
@@ -183,14 +185,28 @@ public class InfoSoundController : MonoBehaviour
         }
         else if (m_isTachoNormal > 1.0f && _value >= _set.m_blinkValue)
         {
-            AddPlaySound(m_InfoTachoClip);
+            m_tacho1Warning += Time.deltaTime;
+            if (m_tacho1Warning > 0.1f)
+            {
+                /* 回転数超過状態が 0.1秒以上の場合 */
+                AddPlaySound(m_InfoTachoClip);
+                m_tacho1Warning = 0.0f;
+            }
         }
         else if (m_isTachoNormal > 1.0f && _value >= _set.m_highValue)
         {
-            AddPlaySound(m_WarningTachoClip);
+            m_tacho2Warning += Time.deltaTime;
+            if (m_tacho2Warning > 0.1f)
+            {
+                /* 回転数超過状態が 0.1秒以上の場合 */
+                AddPlaySound(m_WarningTachoClip);
+                m_tacho2Warning = 0.0f;
+            }
         }
         else{
             m_EngStlCount = 0.0f;
+            m_tacho1Warning = 0.0f;
+            m_tacho2Warning = 0.0f;
         }
 
     } /* CheckTacho */
