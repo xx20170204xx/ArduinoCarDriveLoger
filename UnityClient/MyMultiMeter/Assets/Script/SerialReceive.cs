@@ -224,6 +224,9 @@ public class SerialReceive : MonoBehaviour
         }
         xmlWriter.WriteEndElement();
         xmlWriter.WriteWhitespace("\r\n");
+        xmlWriter.WriteEndDocument();
+        xmlWriter.Close();
+
     } /* SaveLastDate */
 
     public void LoadLastDate()
