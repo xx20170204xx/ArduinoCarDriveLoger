@@ -48,7 +48,7 @@ diode : --|<--
 #define DEBUG_TMP_PRS 0
 #define USE_LCD 0
 
-const char* VERSION_STRING = "20221013XX";
+const char* VERSION_STRING = "20221127XX";
 
 #if USE_LCD == 1
 // include the library code:
@@ -107,6 +107,8 @@ const int SPEED_PULSE_COUNT = 4;
 
 const float SPEED_WARNING_VALUE = 61.0f;
 const float RPM_WARNING_VALUE = 3000.0f;
+const float SPEED_MAX = 400.0f;
+const float RPM_MAX = 11000.0f;
 
 /*--------------------------------------*/
 
@@ -214,7 +216,7 @@ static void OutputSerial( void ){
   dtostrf(g_tachoRpm,    5,0, bufVars[4] );
   dtostrf(g_speedKm,     3,0, bufVars[5] );
 
-  Serial.print('D');
+  Serial.print("D6");
   Serial.print(SEP_CHAR);
   for( int ii = 0; ii < 6; ii++ )
   {
@@ -232,10 +234,10 @@ static void UpdateSensorInfo()
   float oilP_avg = 0;
 
   // センサーから各温度・圧力を取得
-  g_WaterTmp = get_temp(WATER_SENSOR_PIN);
-  g_OilTmp = get_temp(OIL_SENSOR_PIN);
-  g_OilPrs = get_oil_pressure(PRESSURE_SENSOR_PIN);
-  g_BoostPrs = get_boost_press(BOOST_SENSOR_PIN);
+  g_WaterTmp  = get_temp(WATER_SENSOR_PIN);
+  g_OilTmp    = get_temp(OIL_SENSOR_PIN);
+  g_OilPrs  = get_oil_pressure(PRESSURE_SENSOR_PIN);
+  g_BoostPrs  = get_boost_press(BOOST_SENSOR_PIN);
 
 } /* UpdateSensorInfo */
 
@@ -287,7 +289,11 @@ static float get_boost_press( const int pinNum )
 
 static void InterruptTachoFunc( void )
 {
+//const float SPEED_MAX = 400.0f;
+//const float RPM_MAX = 11000.0f;
   const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f;
+  float _tachoRpm = 0;
+
   g_tachoAfter = micros();//現在の時刻を記録
   g_tachoWidth = g_tachoAfter - g_tachoBefore;//前回と今回の時間の差を計算
   g_tachoBefore = g_tachoAfter;//今回の値を前回の値に代入する
@@ -295,12 +301,22 @@ static void InterruptTachoFunc( void )
   {
     return;
   }
-  g_tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
+  _tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
+
+  /* 回転数の最大値を超えていた場合、誤検知とする */
+  if( _tachoRpm >= RPM_MAX )
+  {
+    return;
+  }
+
+  g_tachoRpm = _tachoRpm;
 } /* InterruptTachoFunc */
 
 static void InterruptSpeedFunc( void )
 {
   const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
+  float _speedKm = 0;
+
   g_speedAfter = micros();//現在の時刻を記録
   g_speedWidth = g_speedAfter - g_speedBefore;//前回と今回の時間の差を計算
   g_speedBefore = g_speedAfter;//今回の値を前回の値に代入する
@@ -308,7 +324,20 @@ static void InterruptSpeedFunc( void )
   {
     return;
   }
-  g_speedKm = CSPD / g_speedWidth;
+  _speedKm = CSPD / g_speedWidth;
+  /* 速度の最大値を超えていた場合、誤検知とする */
+  if( _speedKm >= SPEED_MAX )
+  {
+    return;
+  }
+  
+  /* 加速度が10を超えていた場合、誤検知とする */
+  if( fabs(g_speedKm - _speedKm) > 10 )
+  {
+    return;
+  }
+
+  g_speedKm = _speedKm;
 } /* InterruptSpeedFunc */
 
 /*
