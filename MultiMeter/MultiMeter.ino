@@ -145,15 +145,19 @@ typedef struct {
   float z;
 } Vector3;
 
+bool    g_mpu6050_init = false;
 Vector3 g_acc;
 Vector3 g_angle;
 Vector3 g_gyro;
+float   g_mpu6050_temp;
 
 void setup() {
+  static int error = 0;
 
   memset(&g_acc, 0, sizeof(g_acc) );
   memset(&g_angle, 0, sizeof(g_angle) );
   memset(&g_gyro, 0, sizeof(g_gyro) );
+  g_mpu6050_temp = 0;
 
 #if DEBUG_TACHOSPEED == 0
   /* Tacho */
@@ -169,11 +173,32 @@ void setup() {
 
   Wire.begin();
   Serial.begin(115200);
+  error = InitMPU6050();
+  if( error != 0 )
+  {
+    Serial.print("E\tReadMPU6050 Init error=");
+    Serial.print(error);
+    Serial.println("");
+  }
 
+  if( error == 0 )
+  {
+    g_mpu6050_init = true;
+  }
 }
 
 void loop() {
-  ReadMPU6050(&g_acc, &g_angle, &g_gyro);
+  static int error = 0;
+  if( g_mpu6050_init == true )
+  {
+    error = ReadMPU6050(&g_acc, &g_angle, &g_gyro, &g_mpu6050_temp);
+    if( error != 0 )
+    {
+      Serial.print("E\tReadMPU6050 error=");
+      Serial.print(error);
+      Serial.println("");
+    }
+  }
 
   ReadSerialCommand();
 #if DEBUG_TMP_PRS == 0
@@ -191,22 +216,37 @@ void loop() {
   delay(UPDATE_DELAY);
 } /* loop */
 
-static void InitMPU6050()
+static int InitMPU6050()
 {
   int error;
   uint8_t cc;
   // 初回の読み出し
   error = MPU6050_read(MPU6050_WHO_AM_I, &cc, 1);
+  if( error != 0 )
+  {
+    return error;
+  }
 
   // 動作モードの読み出し
   error = MPU6050_read(MPU6050_PWR_MGMT_1, &cc, 1);
+  if( error != 0 )
+  {
+    return error;
+  }
 
   // MPU6050動作開始
-  MPU6050_write_reg(MPU6050_PWR_MGMT_1, 0);
+  error = MPU6050_write_reg(MPU6050_PWR_MGMT_1, 0);
 
+  return error;
 } /* InitMPU6050 */
 
-static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro)
+/*
+pAcc    [ o]
+pAngle  [ o]  Degree
+pGyro   [ o]
+pTemp   [ o]  Degree
+*/
+static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro, float *pTemp)
 {
   int error = 0;
   uint8_t swap;
@@ -214,6 +254,14 @@ static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro)
   accel_t_gyro_union *pData = &accel_t_gyro;
 
   error = MPU6050_read(MPU6050_ACCEL_XOUT_H, (uint8_t *)pData, sizeof(accel_t_gyro));
+  if( error != 0 )
+  {
+    memset( pAcc, 0x00, sizeof(Vector3) );
+    memset( pAngle, 0x00, sizeof(Vector3) );
+    memset( pGyro, 0x00, sizeof(Vector3) );
+    *pTemp = 0;
+    return error;
+  }
 #define SWAP(x,y) swap = x; x = y; y = swap
   SWAP (pData->reg.x_accel_h, pData->reg.x_accel_l);
   SWAP (pData->reg.y_accel_h, pData->reg.y_accel_l);
@@ -229,6 +277,7 @@ static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro)
   pAcc->z = pData->value.z_accel / 16384.0;
 
   // 加速度からセンサ対地角を求める
+  // Degree
   pAngle->x = atan2(pAcc->x, pAcc->z) * 360 / 2.0 / PI;
   pAngle->y = atan2(pAcc->y, pAcc->z) * 360 / 2.0 / PI;
   pAngle->z = atan2(pAcc->x, pAcc->y) * 360 / 2.0 / PI;
@@ -237,6 +286,8 @@ static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro)
   pGyro->x = pData->value.x_gyro / 131.0;
   pGyro->y = pData->value.y_gyro / 131.0;
   pGyro->z = pData->value.z_gyro / 131.0;
+
+  *pTemp = ( (float) accel_t_gyro.value.temperature + 12412.0f) / 340.0f;
 
   return error;
 } /* ReadMPU6050 */
@@ -259,7 +310,7 @@ static void ReadSerialCommand()
 } /* ReadSerialCommand */
 
 static void OutputSerial( void ){
-  char bufVars[6][10+1];
+  char bufVars[0x10][10+1];
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
@@ -270,9 +321,21 @@ static void OutputSerial( void ){
   dtostrf(g_tachoRpm,    5,0, bufVars[4] );
   dtostrf(g_speedKm,     3,0, bufVars[5] );
 
-  Serial.print("D6");
+  dtostrf(g_acc.x,       1,5, bufVars[6] );
+  dtostrf(g_acc.y,       1,5, bufVars[7] );
+  dtostrf(g_acc.z,       1,5, bufVars[8] );
+  dtostrf(g_angle.x,     4,5, bufVars[9] );
+  dtostrf(g_angle.y,     4,5, bufVars[10] );
+  dtostrf(g_angle.z,     4,5, bufVars[11] );
+  dtostrf(g_angle.x,     4,5, bufVars[12] );
+  dtostrf(g_angle.y,     4,5, bufVars[13] );
+  dtostrf(g_angle.z,     4,5, bufVars[14] );
+  dtostrf(g_mpu6050_temp,3,5, bufVars[15] );
+
+  /* G = 16 */
+  Serial.print("DG");
   Serial.print(SEP_CHAR);
-  for( int ii = 0; ii < 6; ii++ )
+  for( int ii = 0; ii < 0x10; ii++ )
   {
     Serial.print(bufVars[ii]);
     Serial.print(SEP_CHAR);
