@@ -243,7 +243,7 @@ static int InitMPU6050()
 /*
 pAcc    [ o]
 pAngle  [ o]  Degree
-pGyro   [ o]
+pGyro   [ o]  Degree per second.
 pTemp   [ o]  Degree
 */
 static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro, float *pTemp)
@@ -270,6 +270,7 @@ static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro, float *pT
   SWAP (pData->reg.x_gyro_h,  pData->reg.x_gyro_l);
   SWAP (pData->reg.y_gyro_h,  pData->reg.y_gyro_l);
   SWAP (pData->reg.z_gyro_h,  pData->reg.z_gyro_l);
+#undef SWAP
 
   // 取得した加速度値を分解能で割って加速度(G)に変換する
   pAcc->x = pData->value.x_accel / 16384.0;
@@ -321,21 +322,25 @@ static void OutputSerial( void ){
   dtostrf(g_tachoRpm,    5,0, bufVars[4] );
   dtostrf(g_speedKm,     3,0, bufVars[5] );
 
-  dtostrf(g_acc.x,       1,5, bufVars[6] );
-  dtostrf(g_acc.y,       1,5, bufVars[7] );
-  dtostrf(g_acc.z,       1,5, bufVars[8] );
-  dtostrf(g_angle.x,     4,5, bufVars[9] );
-  dtostrf(g_angle.y,     4,5, bufVars[10] );
-  dtostrf(g_angle.z,     4,5, bufVars[11] );
-  dtostrf(g_gyro.x,      4,5, bufVars[12] );
-  dtostrf(g_gyro.y,      4,5, bufVars[13] );
-  dtostrf(g_gyro.z,      4,5, bufVars[14] );
-  dtostrf(g_mpu6050_temp,3,5, bufVars[15] );
+  dtostrf(g_mpu6050_temp,3,5, bufVars[6] );
+  dtostrf(g_acc.x,       2,5, bufVars[7] );
+  dtostrf(g_acc.y,       2,5, bufVars[8] );
+  dtostrf(g_acc.z,       2,5, bufVars[9] );
+  dtostrf(g_angle.x,     4,5, bufVars[10] );
+  dtostrf(g_angle.y,     4,5, bufVars[11] );
+  dtostrf(g_angle.z,     4,5, bufVars[12] );
+  // dtostrf(g_gyro.x,      4,5, bufVars[13] );
+  // dtostrf(g_gyro.y,      4,5, bufVars[14] );
+  // dtostrf(g_gyro.z,      4,5, bufVars[15] );
 
+  /* A = 10 */
+  /* C = 12 */
+  /* D = 13 */
+  /* F = 15 */
   /* G = 16 */
-  Serial.print("DG");
+  Serial.print("DD");
   Serial.print(SEP_CHAR);
-  for( int ii = 0; ii < 0x10; ii++ )
+  for( int ii = 0; ii < 0x0D; ii++ )
   {
     Serial.print(bufVars[ii]);
     Serial.print(SEP_CHAR);
