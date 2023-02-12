@@ -327,9 +327,9 @@ static void OutputSerial( void ){
   dtostrf(g_angle.x,     4,5, bufVars[9] );
   dtostrf(g_angle.y,     4,5, bufVars[10] );
   dtostrf(g_angle.z,     4,5, bufVars[11] );
-  dtostrf(g_angle.x,     4,5, bufVars[12] );
-  dtostrf(g_angle.y,     4,5, bufVars[13] );
-  dtostrf(g_angle.z,     4,5, bufVars[14] );
+  dtostrf(g_gyro.x,      4,5, bufVars[12] );
+  dtostrf(g_gyro.y,      4,5, bufVars[13] );
+  dtostrf(g_gyro.z,      4,5, bufVars[14] );
   dtostrf(g_mpu6050_temp,3,5, bufVars[15] );
 
   /* G = 16 */
