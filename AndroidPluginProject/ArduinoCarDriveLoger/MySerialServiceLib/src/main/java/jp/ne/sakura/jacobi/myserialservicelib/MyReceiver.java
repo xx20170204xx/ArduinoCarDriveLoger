@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 public class MyReceiver extends BroadcastReceiver {
 
-    public static String buf;
+    public static String dataline;
     public static float waterTemp = 0.0f;
     public static float oilTemp = 0.0f;
     public static float oilPress = 0.0f;
@@ -16,7 +16,7 @@ public class MyReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        buf = intent.getStringExtra(MySerialService.C_INTENT_DEBUGBUF);
+        dataline = intent.getStringExtra(MySerialService.C_INTENT_DATALINE);
         waterTemp = intent.getFloatExtra(MySerialService.C_INTENT_WATER_TEMP, 0.0f);
         oilTemp = intent.getFloatExtra(MySerialService.C_INTENT_OIL_TEMP, 0.0f);
         oilPress = intent.getFloatExtra(MySerialService.C_INTENT_OIL_PRESS, 0.0f);

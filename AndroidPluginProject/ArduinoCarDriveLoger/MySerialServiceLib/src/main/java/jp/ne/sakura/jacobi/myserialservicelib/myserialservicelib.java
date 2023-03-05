@@ -33,9 +33,29 @@ public class myserialservicelib {
         Toast.makeText(context, "startForegroundService - end",Toast.LENGTH_LONG).show();
     } /* OnStartService */
 
+    public static String GetDataLine()
+    {
+        return MyReceiver.dataline;
+    } /* GetDataLine */
+
     public static float GetWaterTmp()
     {
         return MyReceiver.waterTemp;
     } /* GetWaterTmp */
+
+    public static float GetOilTmp()
+    {
+        return MyReceiver.oilTemp;
+    } /* GetOilTmp */
+
+    public static float GetOilPress()
+    {
+        return MyReceiver.oilPress;
+    } /* GetOilPress */
+
+    public static float GetBoostPress()
+    {
+        return MyReceiver.boostPress;
+    } /* GetOilPress */
 
 }/* class myserialservicelib */

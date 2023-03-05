@@ -20,7 +20,7 @@ import java.util.List;
 public class MySerialService extends IntentService {
     public static final String ACTION_DEVID = "DEVID";
     public static final String C_ACTION_NEWDATA="ActionNewData";
-    public static final String C_INTENT_DEBUGBUF= "IntentDebugBuf";
+    public static final String C_INTENT_DATALINE     = "IntentDataLine";
     public static final String C_INTENT_WATER_TEMP   = "IntentWaterTemp";
     public static final String C_INTENT_OIL_TEMP     = "IntentOilTemp";
     public static final String C_INTENT_OIL_PRESS    = "IntentOilPress";
@@ -144,7 +144,7 @@ public class MySerialService extends IntentService {
         String[] lines = buf.split("\n");
         if( lines.length > 2 ) {
             String[] strValues = lines[1].split("\t");
-            String strOutput = "";
+            String strOutput = lines[1];
             buf = "";
             float _waterTmp = Float.parseFloat(strValues[1]);
             float _oilTmp = Float.parseFloat(strValues[2]);
@@ -153,15 +153,14 @@ public class MySerialService extends IntentService {
             float _rpm = Float.parseFloat(strValues[5]);
             float _speedKm = Float.parseFloat(strValues[6]);
 
-            strOutput += "回転：" + _rpm + "rpm ";
-            strOutput += "速度：" + _speedKm + "Km ";
-            strOutput += "水温：" + _waterTmp + "℃ ";
-            strOutput += "油温：" + _oilTmp + "℃ ";
-            strOutput += "油圧：" + _oilPress + "Kpa ";
-
+            // strOutput += "回転：" + _rpm + "rpm ";
+            // strOutput += "速度：" + _speedKm + "Km ";
+            // strOutput += "水温：" + _waterTmp + "℃ ";
+            // strOutput += "油温：" + _oilTmp + "℃ ";
+            // strOutput += "油圧：" + _oilPress + "Kpa ";
 
             Intent broadcastIntent = new Intent(MySerialService.C_ACTION_NEWDATA);
-            broadcastIntent.putExtra(C_INTENT_DEBUGBUF, strOutput);
+            broadcastIntent.putExtra(C_INTENT_DATALINE, strOutput);
             broadcastIntent.putExtra(C_INTENT_WATER_TEMP,  _waterTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_TEMP,    _oilTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_PRESS,   _oilPress);
