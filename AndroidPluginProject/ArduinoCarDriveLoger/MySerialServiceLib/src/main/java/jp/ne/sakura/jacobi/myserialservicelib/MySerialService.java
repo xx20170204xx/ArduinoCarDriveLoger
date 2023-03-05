@@ -1,8 +1,10 @@
 package jp.ne.sakura.jacobi.myserialservicelib;
 
+import android.app.IntentService;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.os.IBinder;
@@ -14,105 +16,61 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
-public class MySerialService extends Service implements SerialInputOutputManager.Listener  {
+public class MySerialService extends IntentService {
     public static final String ACTION_DEVID = "DEVID";
-    public static final String ACTION_WATER = "WaterTmp";
-    public static final String ACTION_OIL_TEMP = "OilTemp";
-    public static final String ACTION_OIL_PRESS = "OilPress";
-    public static final String ACTION_BOOST = "Boost";
-    public static final String ACTION_TACHO = "Tacho";
-    public static final String ACTION_SPEED = "Speed";
+    public static final String C_ACTION_NEWDATA="ActionNewData";
+    public static final String C_INTENT_DEBUGBUF= "IntentDebugBuf";
+    public static final String C_INTENT_WATER_TEMP   = "IntentWaterTemp";
+    public static final String C_INTENT_OIL_TEMP     = "IntentOilTemp";
+    public static final String C_INTENT_OIL_PRESS    = "IntentOilPress";
+    public static final String C_INTENT_BOOST_PRESS  = "IntentBoostPress";
 
     /* USB Serial */
-    private UsbSerialPort port = null;
+    private static UsbSerialPort port = null;
     private String buf = "";
 
-    private float m_waterTmp;
-    private float m_oilTmp;
-    private float m_oilPress;
-    private float m_boostPress;
-    private float m_tacho;
-    private float m_speedKm;
+    private MyReceiver mReceiver;
+    private IntentFilter mIntentFilter;
 
     public MySerialService() {
+        super("MySerialService");
     }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+    } /* onHandleIntent */
 
     @Override
     public void onCreate() {
         super.onCreate();
-    }
+        registerScreenReceiver();
+    } /* onCreate */
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        String DevID = intent.getStringExtra(ACTION_DEVID);
-
-        ScheduledExecutorService
-                schedule = Executors.newSingleThreadScheduledExecutor();
-        schedule.scheduleAtFixedRate(() -> {
-            intent.putExtra(ACTION_WATER,m_waterTmp);
-            intent.putExtra(ACTION_OIL_TEMP,m_oilTmp);
-            intent.putExtra(ACTION_OIL_PRESS,m_oilPress);
-            intent.putExtra(ACTION_BOOST,m_boostPress);
-            intent.putExtra(ACTION_TACHO,m_tacho);
-            intent.putExtra(ACTION_SPEED,m_speedKm);
-            sendBroadcast(intent);
-
-        },0,250,TimeUnit.MILLISECONDS);
-
         this.openDevice();
-
-        return START_NOT_STICKY;
-    }
+        return START_STICKY;
+    } /* onStartCommand */
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        this.closeDevice();
-    }
+        unregisterReceiver(mReceiver);
+    } /* onDestroy */
 
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
+    } /* onBind */
 
-    @Override
-    public void onNewData(byte[] data) {
-        buf = buf.concat(new String(data));
-        String[] lines = buf.split("\n");
-        if( lines.length > 2 )
-        {
-            String[] strValues = lines[1].split("\t");
-            m_waterTmp = Float.parseFloat(strValues[3]);
-            m_oilTmp = Float.parseFloat(strValues[4]);
-            m_oilPress = Float.parseFloat(strValues[5]);
-            m_boostPress  = Float.parseFloat(strValues[6]);
-            m_tacho = Float.parseFloat(strValues[7]);
-            m_speedKm = Float.parseFloat(strValues[8]);
-/*
-            String strOutput = "";
-            buf="";
-            strOutput += "回転：" + m_tacho + "rpm ";
-            strOutput += "速度：" + m_speedKm + "Km ";
-            strOutput += "水温：" + m_waterTmp + "℃ ";
-            strOutput += "油温：" + m_oilTmp + "℃ ";
-            strOutput += "油圧：" + m_oilPress + "bar ";
-            strOutput += "ブースト圧：" + m_boostPress + "Kpa ";*/
-
-
-        }else{
-        }
-    } /* onNewData */
-
-    @Override
-    public void onRunError(Exception e) {
-        // Toast.makeText(this, e.getMessage(),Toast.LENGTH_LONG).show();
-
-    } /* onRunError */
-
+    // receiverを登録
+    private void registerScreenReceiver() {
+        mReceiver = new MyReceiver();
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction(MySerialService.C_ACTION_NEWDATA);
+        registerReceiver(mReceiver, mIntentFilter);
+    } /* registerScreenReceiver */
 
     public void openDevice(){
 
@@ -142,14 +100,26 @@ public class MySerialService extends Service implements SerialInputOutputManager
         buf = "";
         try {
             port.open(connection);
-            port.setParameters(19200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+            port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
         }catch (Exception _e)
         {
             Toast.makeText(this, _e.getMessage(), Toast.LENGTH_LONG).show();
         }
 
-        SerialInputOutputManager usbIoManager = new SerialInputOutputManager(port, this);
+        SerialInputOutputManager usbIoManager = new SerialInputOutputManager(port, new SerialInputOutputManager.Listener() {
+            @Override
+            public void onNewData(byte[] data) {
+                updateReceivedData(data);
+
+            }
+
+            @Override
+            public void onRunError(Exception e) {
+                Toast.makeText(getBaseContext(),e.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
         usbIoManager.start();
+        Toast.makeText(this, "openDevice - Success.",Toast.LENGTH_LONG).show();
 
     } /* openDevice */
 
@@ -168,6 +138,38 @@ public class MySerialService extends Service implements SerialInputOutputManager
             }
         }
     } /* closeDevice */
+
+    private void updateReceivedData(byte[] data) {
+        buf = buf.concat(new String(data));
+        String[] lines = buf.split("\n");
+        if( lines.length > 2 ) {
+            String[] strValues = lines[1].split("\t");
+            String strOutput = "";
+            buf = "";
+            float _waterTmp = Float.parseFloat(strValues[1]);
+            float _oilTmp = Float.parseFloat(strValues[2]);
+            float _oilPress = Float.parseFloat(strValues[3]);
+            float _boostPress = Float.parseFloat(strValues[4]);
+            float _rpm = Float.parseFloat(strValues[5]);
+            float _speedKm = Float.parseFloat(strValues[6]);
+
+            strOutput += "回転：" + _rpm + "rpm ";
+            strOutput += "速度：" + _speedKm + "Km ";
+            strOutput += "水温：" + _waterTmp + "℃ ";
+            strOutput += "油温：" + _oilTmp + "℃ ";
+            strOutput += "油圧：" + _oilPress + "Kpa ";
+
+
+            Intent broadcastIntent = new Intent(MySerialService.C_ACTION_NEWDATA);
+            broadcastIntent.putExtra(C_INTENT_DEBUGBUF, strOutput);
+            broadcastIntent.putExtra(C_INTENT_WATER_TEMP,  _waterTmp);
+            broadcastIntent.putExtra(C_INTENT_OIL_TEMP,    _oilTmp);
+            broadcastIntent.putExtra(C_INTENT_OIL_PRESS,   _oilPress);
+            broadcastIntent.putExtra(C_INTENT_BOOST_PRESS, _boostPress);
+            getBaseContext().sendBroadcast(broadcastIntent);
+        }
+
+    } /* updateReceivedData */
 
 
 }
