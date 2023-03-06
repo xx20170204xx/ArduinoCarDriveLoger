@@ -9,11 +9,31 @@ import android.os.Build;
 import android.widget.Toast;
 
 public class myserialservicelib {
+    public static String AppPath;
 
-    public static void Toast( Activity context, String message )
+    public static void Toast( Context context, String message )
     {
         Toast.makeText(context, message,Toast.LENGTH_LONG).show();
     } /* Toast */
+
+    public static Context getApplicationContext( Activity context )
+    {
+        if( context == null )
+        {
+            return null;
+        }
+
+        return context.getApplicationContext();
+    } /* getApplicationContext */
+
+    public static void setApplicationDirectory(String _AppPath)
+    {
+        if( _AppPath == null )
+        {
+            return;
+        }
+        AppPath = _AppPath;
+    } /* setApplicationDirectory */
 
     public static void StartService(Context context, String devID )
     {
@@ -23,7 +43,7 @@ public class myserialservicelib {
         }
         Toast.makeText(context, "StartService - start",Toast.LENGTH_LONG).show();
 
-        Intent intent = new Intent(context.getApplicationContext(), MySerialService.class);
+        Intent intent = new Intent(context, MySerialService.class);
         // intent.putExtra(MySerialService.ACTION_DEVID, devID);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent);
@@ -31,7 +51,7 @@ public class myserialservicelib {
             context.startService(intent);
         }
         Toast.makeText(context, "startForegroundService - end",Toast.LENGTH_LONG).show();
-    } /* OnStartService */
+    } /* StartService */
 
     public static String GetDataLine()
     {

@@ -15,6 +15,9 @@ import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 
 public class MySerialService extends IntentService {
@@ -33,6 +36,28 @@ public class MySerialService extends IntentService {
     private MyReceiver mReceiver;
     private IntentFilter mIntentFilter;
 
+    protected class MySerialListener implements SerialInputOutputManager.Listener {
+        @Override
+        public void onNewData(byte[] data) {
+            updateReceivedData(data);
+        }
+
+        @Override
+        public void onRunError(Exception e) {
+            String p = myserialservicelib.AppPath + "/file.txt";
+            try {
+                FileWriter file = new FileWriter(p,true);
+                if (file != null) {
+                    file.write("Exception - " + e.getMessage());
+                    file.close();
+                }
+            }catch (Exception _ee){
+
+            }
+        }
+
+    } /* MySerialListener */
+
     public MySerialService() {
         super("MySerialService");
     }
@@ -49,7 +74,7 @@ public class MySerialService extends IntentService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        this.openDevice();
+        this.openDevice(intent);
         return START_STICKY;
     } /* onStartCommand */
 
@@ -72,7 +97,7 @@ public class MySerialService extends IntentService {
         registerReceiver(mReceiver, mIntentFilter);
     } /* registerScreenReceiver */
 
-    public void openDevice(){
+    public void openDevice(Intent intent) {
 
         if( port != null ) {
             /* 接続済み */
@@ -83,7 +108,7 @@ public class MySerialService extends IntentService {
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
         if (availableDrivers.isEmpty()) {
             /* 接続できるデバイスなし */
-            Toast.makeText(this, "No Device",Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "No Device", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -92,7 +117,7 @@ public class MySerialService extends IntentService {
         UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
         if (connection == null) {
             /* 接続失敗 */
-            Toast.makeText(this, "Connection Error.",Toast.LENGTH_LONG).show();
+            Toast.makeText(getBaseContext(), "Connection Error.", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -101,25 +126,55 @@ public class MySerialService extends IntentService {
         try {
             port.open(connection);
             port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
-        }catch (Exception _e)
-        {
-            Toast.makeText(this, _e.getMessage(), Toast.LENGTH_LONG).show();
+        } catch (Exception _e) {
+            Toast.makeText(getBaseContext(), _e.getMessage(), Toast.LENGTH_LONG).show();
+            return;
         }
 
-        SerialInputOutputManager usbIoManager = new SerialInputOutputManager(port, new SerialInputOutputManager.Listener() {
-            @Override
-            public void onNewData(byte[] data) {
-                updateReceivedData(data);
+
+        {
+            String p = myserialservicelib.AppPath + "/file.txt";
+            try {
+                FileWriter file = new FileWriter(p, true);
+                if (file != null) {
+                    file.write("step");
+                    file.close();
+                }
+            } catch (Exception _ee) {
 
             }
+        }
 
-            @Override
-            public void onRunError(Exception e) {
-                Toast.makeText(getBaseContext(),e.getMessage(), Toast.LENGTH_LONG).show();
+        /* ここから先で落ちる */
+        try {
+            SerialInputOutputManager usbIoManager = new SerialInputOutputManager(port, new MySerialListener());
+            {
+                String p = myserialservicelib.AppPath + "/file.txt";
+                try {
+                    FileWriter file = new FileWriter(p, true);
+                    if (file != null) {
+                        file.write("step2");
+                        file.close();
+                    }
+                } catch (Exception _ee) {
+
+                }
             }
-        });
-        usbIoManager.start();
-        Toast.makeText(this, "openDevice - Success.",Toast.LENGTH_LONG).show();
+            usbIoManager.start();
+        }catch (Exception _e){
+            String p = myserialservicelib.AppPath + "/file.txt";
+            try {
+                FileWriter file = new FileWriter(p,true);
+                if (file != null) {
+                    file.write("Exception - " + _e.getMessage());
+                    file.close();
+                }
+            }catch (Exception _ee){
+
+            }
+            return;
+        }
+        Toast.makeText(getBaseContext(), "openDevice - Success.",Toast.LENGTH_LONG).show();
 
     } /* openDevice */
 
