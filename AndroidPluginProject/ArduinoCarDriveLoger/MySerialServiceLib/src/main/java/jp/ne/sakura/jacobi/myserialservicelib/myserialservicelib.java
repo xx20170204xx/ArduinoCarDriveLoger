@@ -35,7 +35,7 @@ public class myserialservicelib {
         AppPath = _AppPath;
     } /* setApplicationDirectory */
 
-    public static void StartService(Context context, String devID )
+    public static void StartService(Context context, String devID , int interval)
     {
         if( context == null )
         {
@@ -45,6 +45,7 @@ public class myserialservicelib {
 
         Intent intent = new Intent(context, MySerialService.class);
         // intent.putExtra(MySerialService.ACTION_DEVID, devID);
+        intent.putExtra(MySerialService.ACTION_INTERVAL, interval);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent);
         }else{
@@ -55,27 +56,50 @@ public class myserialservicelib {
 
     public static String GetDataLine()
     {
-        return MyReceiver.dataline;
+        return MySerialService.dataline;
     } /* GetDataLine */
 
     public static float GetWaterTmp()
     {
-        return MyReceiver.waterTemp;
+        return MySerialService.waterTemp;
     } /* GetWaterTmp */
 
     public static float GetOilTmp()
     {
-        return MyReceiver.oilTemp;
+        return MySerialService.oilTemp;
     } /* GetOilTmp */
 
     public static float GetOilPress()
     {
-        return MyReceiver.oilPress;
+        return MySerialService.oilPress;
     } /* GetOilPress */
 
     public static float GetBoostPress()
     {
-        return MyReceiver.boostPress;
-    } /* GetOilPress */
+        return MySerialService.boostPress;
+    } /* GetBoostPress */
+
+    public static float GetRPM()
+    {
+        return MySerialService.rpm;
+    } /* GetRPM */
+
+    public static float GetSpeed()
+    {
+        return MySerialService.speed;
+    } /* GetSpeed */
+
+    public static float GetRoomTemp()
+    {
+        return MySerialService.roomTemp;
+    } /* GetRoomTemp */
+
+    public static float GetAccX() { return MySerialService.acc_x; } /* GetAccX */
+    public static float GetAccY() { return MySerialService.acc_y; } /* GetAccY */
+    public static float GetAccZ() { return MySerialService.acc_z; } /* GetAccZ */
+
+    public static float GetAngleX() { return MySerialService.angle_x; } /* GetAngleX */
+    public static float GetAngleY() { return MySerialService.angle_y; } /* GetAngleY */
+    public static float GetAngleZ() { return MySerialService.angle_z; } /* GetAngleZ */
 
 }/* class myserialservicelib */

@@ -2,6 +2,7 @@ package jp.ne.sakura.jacobi.myserialservicelib;
 
 import android.app.IntentService;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -19,44 +20,72 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MySerialService extends IntentService {
     public static final String ACTION_DEVID = "DEVID";
+    public static final String ACTION_INTERVAL = "INTERVAL";
     public static final String C_ACTION_NEWDATA="ActionNewData";
     public static final String C_INTENT_DATALINE     = "IntentDataLine";
     public static final String C_INTENT_WATER_TEMP   = "IntentWaterTemp";
     public static final String C_INTENT_OIL_TEMP     = "IntentOilTemp";
     public static final String C_INTENT_OIL_PRESS    = "IntentOilPress";
     public static final String C_INTENT_BOOST_PRESS  = "IntentBoostPress";
+    public static final String C_INTENT_RPM  = "IntentRpm";
+    public static final String C_INTENT_SPEED  = "IntentSpeed";
+    public static final String C_INTENT_ROOM_TEMP  = "IntentRoomTemp";
+    public static final String C_INTENT_ACC_X  = "IntentAccX";
+    public static final String C_INTENT_ACC_Y  = "IntentAccY";
+    public static final String C_INTENT_ACC_Z  = "IntentAccZ";
+    public static final String C_INTENT_ANGLE_X  = "IntentAngleX";
+    public static final String C_INTENT_ANGLE_Y  = "IntentAngleY";
+    public static final String C_INTENT_ANGLE_Z  = "IntentAngleZ";
 
     /* USB Serial */
     private static UsbSerialPort port = null;
     private String buf = "";
+    Timer timer = new Timer();
 
     private MyReceiver mReceiver;
     private IntentFilter mIntentFilter;
 
-    protected class MySerialListener implements SerialInputOutputManager.Listener {
-        @Override
-        public void onNewData(byte[] data) {
-            updateReceivedData(data);
-        }
+    public static String dataline;
+    public static float waterTemp = 0.0f;
+    public static float oilTemp = 0.0f;
+    public static float oilPress = 0.0f;
+    public static float boostPress = 0.0f;
+    public static float rpm = 0.0f;
+    public static float speed = 0.0f;
+    public static float roomTemp = 0.0f;
+    public static float acc_x = 0.0f;
+    public static float acc_y = 0.0f;
+    public static float acc_z = 0.0f;
+    public static float angle_x = 0.0f;
+    public static float angle_y = 0.0f;
+    public static float angle_z = 0.0f;
+
+    public class MyReceiver extends BroadcastReceiver {
+
 
         @Override
-        public void onRunError(Exception e) {
-            String p = myserialservicelib.AppPath + "/file.txt";
-            try {
-                FileWriter file = new FileWriter(p,true);
-                if (file != null) {
-                    file.write("Exception - " + e.getMessage());
-                    file.close();
-                }
-            }catch (Exception _ee){
-
-            }
-        }
-
-    } /* MySerialListener */
+        public void onReceive(Context context, Intent intent) {
+            dataline = intent.getStringExtra(MySerialService.C_INTENT_DATALINE);
+            waterTemp = intent.getFloatExtra(MySerialService.C_INTENT_WATER_TEMP, 0.0f);
+            oilTemp = intent.getFloatExtra(MySerialService.C_INTENT_OIL_TEMP, 0.0f);
+            oilPress = intent.getFloatExtra(MySerialService.C_INTENT_OIL_PRESS, 0.0f);
+            boostPress = intent.getFloatExtra(MySerialService.C_INTENT_BOOST_PRESS, 0.0f);
+            rpm = intent.getFloatExtra(MySerialService.C_INTENT_RPM, 0.0f);
+            speed = intent.getFloatExtra(MySerialService.C_INTENT_SPEED, 0.0f);
+            roomTemp = intent.getFloatExtra(MySerialService.C_INTENT_ROOM_TEMP, 0.0f);
+            acc_x = intent.getFloatExtra(MySerialService.C_INTENT_ACC_X, 0.0f);
+            acc_y = intent.getFloatExtra(MySerialService.C_INTENT_ACC_Y, 0.0f);
+            acc_z = intent.getFloatExtra(MySerialService.C_INTENT_ACC_Z, 0.0f);
+            angle_x = intent.getFloatExtra(MySerialService.C_INTENT_ANGLE_X, 0.0f);
+            angle_y = intent.getFloatExtra(MySerialService.C_INTENT_ANGLE_Y, 0.0f);
+            angle_z = intent.getFloatExtra(MySerialService.C_INTENT_ANGLE_Z, 0.0f);
+        } /* onReceive */
+    }
 
     public MySerialService() {
         super("MySerialService");
@@ -98,11 +127,14 @@ public class MySerialService extends IntentService {
     } /* registerScreenReceiver */
 
     public void openDevice(Intent intent) {
+        int interval = 250;
 
         if( port != null ) {
             /* 接続済み */
             return;
         }
+
+        interval = intent.getIntExtra(ACTION_INTERVAL,interval);
 
         UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
         List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(manager);
@@ -131,51 +163,12 @@ public class MySerialService extends IntentService {
             return;
         }
 
-
-        {
-            String p = myserialservicelib.AppPath + "/file.txt";
-            try {
-                FileWriter file = new FileWriter(p, true);
-                if (file != null) {
-                    file.write("step");
-                    file.close();
-                }
-            } catch (Exception _ee) {
-
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                read();
             }
-        }
-
-        /* ここから先で落ちる */
-        try {
-            SerialInputOutputManager usbIoManager = new SerialInputOutputManager(port, new MySerialListener());
-            {
-                String p = myserialservicelib.AppPath + "/file.txt";
-                try {
-                    FileWriter file = new FileWriter(p, true);
-                    if (file != null) {
-                        file.write("step2");
-                        file.close();
-                    }
-                } catch (Exception _ee) {
-
-                }
-            }
-            usbIoManager.start();
-        }catch (Exception _e){
-            String p = myserialservicelib.AppPath + "/file.txt";
-            try {
-                FileWriter file = new FileWriter(p,true);
-                if (file != null) {
-                    file.write("Exception - " + _e.getMessage());
-                    file.close();
-                }
-            }catch (Exception _ee){
-
-            }
-            return;
-        }
-        Toast.makeText(getBaseContext(), "openDevice - Success.",Toast.LENGTH_LONG).show();
-
+        },0, interval);
     } /* openDevice */
 
     public void closeDevice() {
@@ -194,6 +187,17 @@ public class MySerialService extends IntentService {
         }
     } /* closeDevice */
 
+    public void read()
+    {
+        try{
+            byte[] buffer = new byte[8192];
+            int len = port.read(buffer, 2000);
+            updateReceivedData(buffer);
+        }catch (Exception _E){
+
+        }
+    } /* read */
+
     private void updateReceivedData(byte[] data) {
         buf = buf.concat(new String(data));
         String[] lines = buf.split("\n");
@@ -208,18 +212,31 @@ public class MySerialService extends IntentService {
             float _rpm = Float.parseFloat(strValues[5]);
             float _speedKm = Float.parseFloat(strValues[6]);
 
-            // strOutput += "回転：" + _rpm + "rpm ";
-            // strOutput += "速度：" + _speedKm + "Km ";
-            // strOutput += "水温：" + _waterTmp + "℃ ";
-            // strOutput += "油温：" + _oilTmp + "℃ ";
-            // strOutput += "油圧：" + _oilPress + "Kpa ";
-
             Intent broadcastIntent = new Intent(MySerialService.C_ACTION_NEWDATA);
             broadcastIntent.putExtra(C_INTENT_DATALINE, strOutput);
             broadcastIntent.putExtra(C_INTENT_WATER_TEMP,  _waterTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_TEMP,    _oilTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_PRESS,   _oilPress);
             broadcastIntent.putExtra(C_INTENT_BOOST_PRESS, _boostPress);
+            broadcastIntent.putExtra(C_INTENT_RPM, _rpm);
+            broadcastIntent.putExtra(C_INTENT_SPEED, _speedKm);
+            if( strValues[0] == "DD" )
+            {
+                float _mpu6050_temp = Float.parseFloat(strValues[7]);
+                float _mpu6050_acc_x = Float.parseFloat(strValues[8]);
+                float _mpu6050_acc_y = Float.parseFloat(strValues[9]);
+                float _mpu6050_acc_z = Float.parseFloat(strValues[10]);
+                float _mpu6050_angle_x = Float.parseFloat(strValues[11]);
+                float _mpu6050_angle_y = Float.parseFloat(strValues[12]);
+                float _mpu6050_angle_z = Float.parseFloat(strValues[13]);
+                broadcastIntent.putExtra(C_INTENT_SPEED, _mpu6050_temp);
+                broadcastIntent.putExtra(C_INTENT_ACC_X, _mpu6050_acc_x);
+                broadcastIntent.putExtra(C_INTENT_ACC_Y, _mpu6050_acc_y);
+                broadcastIntent.putExtra(C_INTENT_ACC_Z, _mpu6050_acc_z);
+                broadcastIntent.putExtra(C_INTENT_ANGLE_X, _mpu6050_angle_x);
+                broadcastIntent.putExtra(C_INTENT_ANGLE_Y, _mpu6050_angle_y);
+                broadcastIntent.putExtra(C_INTENT_ANGLE_Z, _mpu6050_angle_z);
+            }
             getBaseContext().sendBroadcast(broadcastIntent);
         }
 
