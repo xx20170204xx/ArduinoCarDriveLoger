@@ -9,7 +9,17 @@ public class SerialServiceAndroid : MonoBehaviour
     public const string CCLASS_ID = "jp.ne.sakura.jacobi.myserialservicelib.myserialservicelib";
 
     [SerializeField]
+    private Text m_IsOpenText = null;
+    [SerializeField]
     private Text m_WaterTmpText = null;
+    [SerializeField]
+    private Text m_OilTmpText = null;
+    [SerializeField]
+    private Text m_OilPressText = null;
+    [SerializeField]
+    private Text m_BoostPressText = null;
+    [SerializeField]
+    private Text m_RoomTempText = null;
 
     [SerializeField]
     private Text m_DebugText = null;
@@ -22,10 +32,33 @@ public class SerialServiceAndroid : MonoBehaviour
 
     private void Update()
     {
-        float _tmp = GetWaterTmp();
+        if (m_IsOpenText != null)
+        {
+            m_IsOpenText.text = (GetIsDeviceOpen() ? "O" : "C");
+        }
         if (m_WaterTmpText != null)
         {
-            m_WaterTmpText.text = _tmp.ToString();
+            m_WaterTmpText.text = "W:" + GetWaterTmp();
+        }
+        if (m_OilTmpText != null)
+        {
+            m_OilTmpText.text = "O:" + GetOilTmp();
+        }
+        if (m_OilPressText != null)
+        {
+            m_OilPressText.text = "o:" + GetOilPress();
+        }
+        if (m_BoostPressText != null)
+        {
+            m_BoostPressText.text = "B:" + GetBoostPress();
+        }
+        if (m_RoomTempText != null)
+        {
+            m_RoomTempText.text = "R:" + GetRoomTemp() + " " +
+               "X:" + GetAngleX() + " " +
+               "Y:" + GetAngleY() + " " +
+               "Z:" + GetAngleZ()
+                ;
         }
         if (m_DebugText != null)
         {
@@ -63,7 +96,7 @@ public class SerialServiceAndroid : MonoBehaviour
         using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
         {
             var _context = GetAndroidContext();
-            AndroidJavaObject _javaString = new AndroidJavaObject("java.lang.String", "ToastText");
+            AndroidJavaObject _javaString = new AndroidJavaObject("java.lang.String", "DevID");
             androidJavaClass.CallStatic("StartService", _context, _javaString, 8);
         }
 #else
@@ -141,6 +174,20 @@ public class SerialServiceAndroid : MonoBehaviour
 #endif
     } /* GetBoostPress */
 
+    public float GetRoomTemp()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            return androidJavaClass.CallStatic<float>("GetRoomTemp");
+        }
+#else
+        /* nop */
+        Debug.Log("GetRoomTemp - nop.");
+        return -273.0f;
+#endif
+    } /* GetRoomTemp */
+
     public string GetDataLine()
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -154,6 +201,63 @@ public class SerialServiceAndroid : MonoBehaviour
         return string.Empty;
 #endif
     } /* GetDataLine */
+
+    public float GetAngleX()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            return androidJavaClass.CallStatic<float>("GetAngleX");
+        }
+#else
+        /* nop */
+        Debug.Log("GetAngleX - nop.");
+        return 0.0f;
+#endif
+    } /* GetAngleX */
+
+    public float GetAngleY()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            return androidJavaClass.CallStatic<float>("GetAngleY");
+        }
+#else
+        /* nop */
+        Debug.Log("GetAngleY - nop.");
+        return 0.0f;
+#endif
+    } /* GetAngleY */
+
+    public float GetAngleZ()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            return androidJavaClass.CallStatic<float>("GetAngleZ");
+        }
+#else
+        /* nop */
+        Debug.Log("GetAngleZ - nop.");
+        return 0.0f;
+#endif
+    } /* GetAngleZ */
+
+
+    public bool GetIsDeviceOpen()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            return androidJavaClass.CallStatic<bool>("GetIsDeviceOpen");
+        }
+#else
+        /* nop */
+        Debug.Log("GetIsDeviceOpen - nop.");
+        return false;
+#endif
+    } /* GetIsDeviceOpen */
 
     public void OnToast()
     {

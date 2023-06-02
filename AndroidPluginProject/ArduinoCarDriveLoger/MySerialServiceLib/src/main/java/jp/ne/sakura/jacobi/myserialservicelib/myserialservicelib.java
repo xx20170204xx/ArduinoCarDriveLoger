@@ -1,10 +1,10 @@
 package jp.ne.sakura.jacobi.myserialservicelib;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
+//import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+//import android.content.IntentFilter;
 import android.os.Build;
 import android.widget.Toast;
 
@@ -13,7 +13,8 @@ public class myserialservicelib {
 
     public static void Toast( Context context, String message )
     {
-        Toast.makeText(context, message,Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, message,Toast.LENGTH_LONG).show();
+        Toast.makeText(context, MySerialService.dataline,Toast.LENGTH_LONG).show();
     } /* Toast */
 
     public static Context getApplicationContext( Activity context )
@@ -44,7 +45,7 @@ public class myserialservicelib {
         Toast.makeText(context, "StartService - start",Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(context, MySerialService.class);
-        // intent.putExtra(MySerialService.ACTION_DEVID, devID);
+        intent.putExtra(MySerialService.ACTION_DEVID, devID);
         intent.putExtra(MySerialService.ACTION_INTERVAL, interval);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(intent);
@@ -54,7 +55,9 @@ public class myserialservicelib {
         Toast.makeText(context, "startForegroundService - end",Toast.LENGTH_LONG).show();
     } /* StartService */
 
-    public static String GetDataLine()
+    public static boolean GetIsDeviceOpen() { return MySerialService.isDeviceOpen(); } /* GetIsDeviceOpen */
+
+    public static string GetDataLine()
     {
         return MySerialService.dataline;
     } /* GetDataLine */

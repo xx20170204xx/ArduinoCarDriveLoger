@@ -1,7 +1,7 @@
 package jp.ne.sakura.jacobi.myserialservicelib;
 
 import android.app.IntentService;
-import android.app.Service;
+//import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,11 +14,7 @@ import android.widget.Toast;
 import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
-import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,7 +44,6 @@ public class MySerialService extends IntentService {
     Timer timer = new Timer();
 
     private MyReceiver mReceiver;
-    private IntentFilter mIntentFilter;
 
     public static String dataline;
     public static float waterTemp = 0.0f;
@@ -65,7 +60,17 @@ public class MySerialService extends IntentService {
     public static float angle_y = 0.0f;
     public static float angle_z = 0.0f;
 
-    public class MyReceiver extends BroadcastReceiver {
+    public static  boolean isDeviceOpen()
+    {
+        if( port == null )
+        {
+            return false;
+        }
+
+        return port.isOpen();
+    } /* isDeviceOpen */
+
+    public static class MyReceiver extends BroadcastReceiver {
 
 
         @Override
@@ -121,7 +126,7 @@ public class MySerialService extends IntentService {
     // receiverを登録
     private void registerScreenReceiver() {
         mReceiver = new MyReceiver();
-        mIntentFilter = new IntentFilter();
+        IntentFilter mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(MySerialService.C_ACTION_NEWDATA);
         registerReceiver(mReceiver, mIntentFilter);
     } /* registerScreenReceiver */
@@ -166,6 +171,11 @@ public class MySerialService extends IntentService {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
+                if( port == null )
+                {
+                    return;
+                }
+
                 read();
             }
         },0, interval);
@@ -176,7 +186,7 @@ public class MySerialService extends IntentService {
         if( port == null ) {
             return;
         }
-        if( port.isOpen() == true) {
+        if(port.isOpen()) {
             try{
                 port.close();
                 port = null;
@@ -191,7 +201,7 @@ public class MySerialService extends IntentService {
     {
         try{
             byte[] buffer = new byte[8192];
-            int len = port.read(buffer, 2000);
+            port.read(buffer, 2000);
             updateReceivedData(buffer);
         }catch (Exception _E){
 
@@ -213,14 +223,14 @@ public class MySerialService extends IntentService {
             float _speedKm = Float.parseFloat(strValues[6]);
 
             Intent broadcastIntent = new Intent(MySerialService.C_ACTION_NEWDATA);
-            broadcastIntent.putExtra(C_INTENT_DATALINE, strOutput);
+            broadcastIntent.putExtra(C_INTENT_DATALINE, strValues[0]);
             broadcastIntent.putExtra(C_INTENT_WATER_TEMP,  _waterTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_TEMP,    _oilTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_PRESS,   _oilPress);
             broadcastIntent.putExtra(C_INTENT_BOOST_PRESS, _boostPress);
             broadcastIntent.putExtra(C_INTENT_RPM, _rpm);
             broadcastIntent.putExtra(C_INTENT_SPEED, _speedKm);
-            if( strValues[0] == "DD" )
+            //if( strValues[0].startsWith("DD"))
             {
                 float _mpu6050_temp = Float.parseFloat(strValues[7]);
                 float _mpu6050_acc_x = Float.parseFloat(strValues[8]);
@@ -229,7 +239,7 @@ public class MySerialService extends IntentService {
                 float _mpu6050_angle_x = Float.parseFloat(strValues[11]);
                 float _mpu6050_angle_y = Float.parseFloat(strValues[12]);
                 float _mpu6050_angle_z = Float.parseFloat(strValues[13]);
-                broadcastIntent.putExtra(C_INTENT_SPEED, _mpu6050_temp);
+                broadcastIntent.putExtra(C_INTENT_ROOM_TEMP, _mpu6050_temp);
                 broadcastIntent.putExtra(C_INTENT_ACC_X, _mpu6050_acc_x);
                 broadcastIntent.putExtra(C_INTENT_ACC_Y, _mpu6050_acc_y);
                 broadcastIntent.putExtra(C_INTENT_ACC_Z, _mpu6050_acc_z);
