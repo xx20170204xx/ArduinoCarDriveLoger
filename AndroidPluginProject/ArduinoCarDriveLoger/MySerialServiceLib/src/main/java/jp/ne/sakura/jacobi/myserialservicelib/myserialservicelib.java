@@ -15,8 +15,7 @@ public class myserialservicelib {
 
     public static void Toast( Context context, String message )
     {
-        //Toast.makeText(context, message,Toast.LENGTH_LONG).show();
-        Toast.makeText(context, MySerialService.dataline,Toast.LENGTH_LONG).show();
+        Toast.makeText(context, message,Toast.LENGTH_LONG).show();
     } /* Toast */
 
     public static Context getApplicationContext( Activity context )
