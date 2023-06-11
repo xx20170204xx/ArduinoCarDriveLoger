@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 //import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.widget.Toast;
 
@@ -57,7 +59,12 @@ public class myserialservicelib {
 
     public static boolean GetIsDeviceOpen() { return MySerialService.isDeviceOpen(); } /* GetIsDeviceOpen */
 
-    public static string GetDataLine()
+    public static int GetRecvCount()
+    {
+        return MySerialService.recvCount;
+    } /* GetRecvCount */
+
+    public static String GetDataLine()
     {
         return MySerialService.dataline;
     } /* GetDataLine */
@@ -104,5 +111,29 @@ public class myserialservicelib {
     public static float GetAngleX() { return MySerialService.angle_x; } /* GetAngleX */
     public static float GetAngleY() { return MySerialService.angle_y; } /* GetAngleY */
     public static float GetAngleZ() { return MySerialService.angle_z; } /* GetAngleZ */
+
+    public static String getFilePath(){ return MySerialService.filepath; } /* getFilePath */
+    public static String getStringTest(){ return "getStringTest Android."; } /* getStringTest */
+    public static String getPluginVersion(Context context)
+    {
+        String _out="";
+        try {
+            // Java パッケージ名を取得
+            // android.content.Context#getPackageName
+            String name = context.getPackageName();
+
+            // インストールされているアプリケーションパッケージの
+            // 情報を取得するためのオブジェクトを取得
+            // android.content.Context#getPackageManager
+            PackageManager pm = context.getPackageManager();
+
+            // アプリケーションパッケージの情報を取得
+            PackageInfo info = pm.getPackageInfo(name, PackageManager.GET_META_DATA);
+            _out = info.versionName;
+
+        }catch (Exception _e){
+        }
+        return _out;
+    } /**/
 
 }/* class myserialservicelib */

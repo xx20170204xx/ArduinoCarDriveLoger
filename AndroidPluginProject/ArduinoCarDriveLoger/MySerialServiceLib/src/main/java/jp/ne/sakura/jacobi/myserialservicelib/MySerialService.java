@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
+import android.os.Environment;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -15,6 +16,12 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver;
 import com.hoho.android.usbserial.driver.UsbSerialPort;
 import com.hoho.android.usbserial.driver.UsbSerialProber;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,6 +30,7 @@ public class MySerialService extends IntentService {
     public static final String ACTION_DEVID = "DEVID";
     public static final String ACTION_INTERVAL = "INTERVAL";
     public static final String C_ACTION_NEWDATA="ActionNewData";
+    public static final String C_INTENT_RECVCOUNT    = "IntentRecvCount";
     public static final String C_INTENT_DATALINE     = "IntentDataLine";
     public static final String C_INTENT_WATER_TEMP   = "IntentWaterTemp";
     public static final String C_INTENT_OIL_TEMP     = "IntentOilTemp";
@@ -45,6 +53,7 @@ public class MySerialService extends IntentService {
 
     private MyReceiver mReceiver;
 
+    public static int recvCount = 0;
     public static String dataline;
     public static float waterTemp = 0.0f;
     public static float oilTemp = 0.0f;
@@ -59,6 +68,9 @@ public class MySerialService extends IntentService {
     public static float angle_x = 0.0f;
     public static float angle_y = 0.0f;
     public static float angle_z = 0.0f;
+    public static String filepath;
+    public static PrintWriter pw_newdata = null;
+    public static PrintWriter pw_data = null;
 
     public static  boolean isDeviceOpen()
     {
@@ -75,7 +87,7 @@ public class MySerialService extends IntentService {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            dataline = intent.getStringExtra(MySerialService.C_INTENT_DATALINE);
+            // dataline = intent.getStringExtra(MySerialService.C_INTENT_DATALINE);
             waterTemp = intent.getFloatExtra(MySerialService.C_INTENT_WATER_TEMP, 0.0f);
             oilTemp = intent.getFloatExtra(MySerialService.C_INTENT_OIL_TEMP, 0.0f);
             oilPress = intent.getFloatExtra(MySerialService.C_INTENT_OIL_PRESS, 0.0f);
@@ -179,10 +191,36 @@ public class MySerialService extends IntentService {
                 read();
             }
         },0, interval);
+
+        { /* Debug用にファイル出力 */
+            try {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    LocalDateTime date = LocalDateTime.now();
+                    filepath = getApplicationContext().getExternalFilesDir(null) + "/" + date.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "_data.txt";
+                    pw_data = new PrintWriter(new FileWriter(filepath));
+                    filepath = getApplicationContext().getExternalFilesDir(null) + "/" + date.format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + "_nd.txt";
+                    pw_newdata = new PrintWriter(new FileWriter(filepath));
+                }
+            } catch (IOException ee) {
+                ee.printStackTrace();
+            }
+
+        }
+
+        recvCount = 0;
     } /* openDevice */
 
     public void closeDevice() {
 
+        /* Debug用のファイルを閉じる */
+        if( pw_newdata != null ){
+            pw_newdata.close();
+            pw_newdata = null;
+        }
+        if( pw_data != null ){
+            pw_data.close();
+            pw_data = null;
+        }
         if( port == null ) {
             return;
         }
@@ -200,21 +238,41 @@ public class MySerialService extends IntentService {
     public void read()
     {
         try{
-            byte[] buffer = new byte[8192];
-            port.read(buffer, 2000);
-            updateReceivedData(buffer);
+            byte[] buffer = new byte[2000];
+            int timeOut = 2000;
+            int readSize = port.read(buffer, timeOut);
+            updateReceivedData(buffer,readSize);
         }catch (Exception _E){
 
         }
     } /* read */
 
-    private void updateReceivedData(byte[] data) {
-        buf = buf.concat(new String(data));
+    private void updateReceivedData(byte[] data,int readSize) {
+        String newbnf = new String(data);
+        newbnf = newbnf.substring(0,readSize);
+        buf = buf.concat(newbnf);
         String[] lines = buf.split("\n");
-        if( lines.length > 2 ) {
-            String[] strValues = lines[1].split("\t");
+        dataline = "*" + buf + "*";
+
+        /* デバック用出力 */
+        if( pw_newdata != null )
+        {
+            pw_newdata.print(recvCount);
+            pw_newdata.println("[" + newbnf + "]");
+        }
+
+        if( lines.length > 1 ) {
+            /* デバック用出力 */
+            if( pw_data != null )
+            {
+                pw_data.print(recvCount);
+                pw_data.println("[" + lines[0] + "]");
+            }
+
+            recvCount = recvCount + 1;
+            String[] strValues = lines[0].split("\t");
             String strOutput = lines[1];
-            buf = "";
+            buf = buf.substring(0, lines[0].length()+1);
             float _waterTmp = Float.parseFloat(strValues[1]);
             float _oilTmp = Float.parseFloat(strValues[2]);
             float _oilPress = Float.parseFloat(strValues[3]);
@@ -222,8 +280,10 @@ public class MySerialService extends IntentService {
             float _rpm = Float.parseFloat(strValues[5]);
             float _speedKm = Float.parseFloat(strValues[6]);
 
+
             Intent broadcastIntent = new Intent(MySerialService.C_ACTION_NEWDATA);
-            broadcastIntent.putExtra(C_INTENT_DATALINE, strValues[0]);
+            broadcastIntent.putExtra(C_INTENT_RECVCOUNT, recvCount);
+            // broadcastIntent.putExtra(C_INTENT_DATALINE, lines[1]);
             broadcastIntent.putExtra(C_INTENT_WATER_TEMP,  _waterTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_TEMP,    _oilTmp);
             broadcastIntent.putExtra(C_INTENT_OIL_PRESS,   _oilPress);
@@ -247,7 +307,7 @@ public class MySerialService extends IntentService {
                 broadcastIntent.putExtra(C_INTENT_ANGLE_Y, _mpu6050_angle_y);
                 broadcastIntent.putExtra(C_INTENT_ANGLE_Z, _mpu6050_angle_z);
             }
-            getBaseContext().sendBroadcast(broadcastIntent);
+            // getBaseContext().sendBroadcast(broadcastIntent);
         }
 
     } /* updateReceivedData */

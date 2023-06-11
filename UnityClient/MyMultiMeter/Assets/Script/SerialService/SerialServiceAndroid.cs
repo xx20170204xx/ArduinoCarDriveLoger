@@ -24,6 +24,9 @@ public class SerialServiceAndroid : MonoBehaviour
     [SerializeField]
     private Text m_DebugText = null;
 
+    [SerializeField]
+    private Text m_DebugText2 = null;
+
     private void OnDestroy()
     {
         OnStopService();
@@ -59,11 +62,11 @@ public class SerialServiceAndroid : MonoBehaviour
                "Y:" + GetAngleY() + " " +
                "Z:" + GetAngleZ()
                 ;
-        }
+        }/*
         if (m_DebugText != null)
         {
-            // m_DebugText.text = GetDataLine();
-        }
+            m_DebugText.text = GetDataLine();
+        }*/
     } /* Update */
 
     private AndroidJavaObject GetAndroidContext()
@@ -273,6 +276,76 @@ public class SerialServiceAndroid : MonoBehaviour
         Debug.Log("OnToast - nop.");
 #endif
     } /* OnToast */
+
+    public void OnGetStringTest()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            string _str = androidJavaClass.CallStatic<string>("getStringTest");
+            if( m_DebugText != null )
+            {
+                m_DebugText.text = _str;
+            }
+        }
+#else
+        /* nop */
+        Debug.Log("OnGetStringTest - nop.");
+#endif
+    } /* OnGetStringTest */
+
+    public void OnGetFilePath()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            string _str = androidJavaClass.CallStatic<string>("getFilePath");
+            if( m_DebugText2 != null )
+            {
+                m_DebugText2.text = _str;
+            }
+        }
+#else
+        /* nop */
+        Debug.Log("OnGetFilePath - nop.");
+#endif
+    } /* OnGetFilePath */
+
+    public void OnGetPluginVersion()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            var _context = GetAndroidContext();
+            string _str = androidJavaClass.CallStatic<string>("getPluginVersion",_context);
+            if( m_DebugText != null )
+            {
+                m_DebugText.text = _str;
+            }
+        }
+#else
+        /* nop */
+        Debug.Log("OnGetPluginVersion - nop.");
+#endif
+    } /* OnGetPluginVersion */
+
+    public void OnGetDataLine()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass androidJavaClass = new AndroidJavaClass(CCLASS_ID))
+        {
+            int _recvCount = androidJavaClass.CallStatic<int>("GetRecvCount");
+            string _str = androidJavaClass.CallStatic<string>("GetDataLine");
+            if( m_DebugText2 != null )
+            {
+                m_DebugText2.text = "**" + _recvCount + ":" + _str + "**";
+            }
+        }
+#else
+        /* nop */
+        Debug.Log("GetDataLine - nop.");
+#endif
+    } /* OnGetStringTest */
 
 
 } /* class */
