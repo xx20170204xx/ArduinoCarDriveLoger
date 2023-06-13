@@ -46,32 +46,10 @@ diode : --|<--
 
 #define DEBUG_TACHOSPEED 0
 #define DEBUG_TMP_PRS 0
-#define USE_LCD 0
 
-const char* VERSION_STRING = "20221013XX";
+const char* VERSION_STRING = "20221127XX";
 
-#if USE_LCD == 1
-// include the library code:
-#include <LiquidCrystal.h>
-
-/* LCD操作ボタン */
-enum LCD_BUTTONS {
-  LCD_BUTTON_NONE,
-  LCD_BUTTON_UP,
-  LCD_BUTTON_DOWN,
-  LCD_BUTTON_LEFT,
-  LCD_BUTTON_RIGHT,
-  LCD_BUTTON_SELECT  
-};
-#endif
-
-/* LCD Button 各抵抗値 */
-const int LCD_BUTTON_VAR_NONE=1024;
-const int LCD_BUTTON_VAR_SELECT=721;
-const int LCD_BUTTON_VAR_LEFT=479;
-const int LCD_BUTTON_VAR_DOWN=308;
-const int LCD_BUTTON_VAR_UP=132;
-const int LCD_BUTTON_VAR_RIGHT=0;
+#include <Wire.h>
 
 const char SEP_CHAR= '\t';
 
@@ -90,10 +68,6 @@ const int BOOST_SENSOR_PIN = 4;
 const int TACHO_PULSE_PIN = 2;
 /* 車速取得用ピン(デジタル/割り込み可能) */
 const int SPEED_PULSE_PIN = 3;
-/* 設定速度超過用ピン */
-// const int SPEED_WARNING_PIN=10;
-/* 設定回転数超過用ピン */
-// const int RPM_WARNING_PIN=11;
 
 /*--------------------------------------*/
 const int R25C   = 10000; // R25℃ = Ω
@@ -107,6 +81,8 @@ const int SPEED_PULSE_COUNT = 4;
 
 const float SPEED_WARNING_VALUE = 61.0f;
 const float RPM_WARNING_VALUE = 3000.0f;
+const float SPEED_MAX = 400.0f;
+const float RPM_MAX = 11000.0f;
 
 /*--------------------------------------*/
 
@@ -129,20 +105,59 @@ volatile unsigned long g_speedAfter = 0;
 volatile unsigned long g_speedWidth = 0;
 volatile float g_speedKm = 0;//車速[Km/h]
 
+// レジスタアドレス
+#define MPU6050_ACCEL_XOUT_H 0x3B  // R  
+#define MPU6050_WHO_AM_I     0x75  // R
+#define MPU6050_PWR_MGMT_1   0x6B  // R/W
+#define MPU6050_I2C_ADDRESS  0x68
+// 構造体定義
+typedef union accel_t_gyro_union {
+  struct {
+    uint8_t x_accel_h;
+    uint8_t x_accel_l;
+    uint8_t y_accel_h;
+    uint8_t y_accel_l;
+    uint8_t z_accel_h;
+    uint8_t z_accel_l;
+    uint8_t t_h;
+    uint8_t t_l;
+    uint8_t x_gyro_h;
+    uint8_t x_gyro_l;
+    uint8_t y_gyro_h;
+    uint8_t y_gyro_l;
+    uint8_t z_gyro_h;
+    uint8_t z_gyro_l;
+  } reg;
+  struct {
+    int16_t x_accel;
+    int16_t y_accel;
+    int16_t z_accel;
+    int16_t temperature;
+    int16_t x_gyro;
+    int16_t y_gyro;
+    int16_t z_gyro;
+  } value;
+};
 
-#if USE_LCD == 1
-// initialize the library by associating any needed LCD interface pin
-// with the arduino pin number it is connected to
-const int rs = 8, en = 9, d4 = 4, d5 = 5, d6 = 6, d7 = 7;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
-/* 表示モード */
-int g_LCDmode=0;
-#endif
+typedef struct {
+  float x;
+  float y;
+  float z;
+} Vector3;
+
+bool    g_mpu6050_init = false;
+Vector3 g_acc;
+Vector3 g_angle;
+Vector3 g_gyro;
+float   g_mpu6050_temp;
 
 void setup() {
+  static int error = 0;
 
-//  pinMode(SPEED_WARNING_PIN, OUTPUT);
-//  pinMode(RPM_WARNING_PIN, OUTPUT);
+  memset(&g_acc, 0, sizeof(g_acc) );
+  memset(&g_angle, 0, sizeof(g_angle) );
+  memset(&g_gyro, 0, sizeof(g_gyro) );
+  g_mpu6050_temp = 0;
 
 #if DEBUG_TACHOSPEED == 0
   /* Tacho */
@@ -156,16 +171,35 @@ void setup() {
   /* nop */
 #endif
 
+  Wire.begin();
   Serial.begin(115200);
+  error = InitMPU6050();
+  if( error != 0 )
+  {
+    Serial.print("E\tReadMPU6050 Init error=");
+    Serial.print(error);
+    Serial.println("");
+  }
 
-#if USE_LCD == 1
-  // set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
-  lcd.clear();
-#endif
+  if( error == 0 )
+  {
+    g_mpu6050_init = true;
+  }
 }
 
 void loop() {
+  static int error = 0;
+  if( g_mpu6050_init == true )
+  {
+    error = ReadMPU6050(&g_acc, &g_angle, &g_gyro, &g_mpu6050_temp);
+    if( error != 0 )
+    {
+      Serial.print("E\tReadMPU6050 error=");
+      Serial.print(error);
+      Serial.println("");
+    }
+  }
+
   ReadSerialCommand();
 #if DEBUG_TMP_PRS == 0
   UpdateSensorInfo();
@@ -179,12 +213,86 @@ void loop() {
   UpdateDebugTachoSpeed();
 #endif
   OutputSerial();
-  OutputWarningPin();
-#if USE_LCD == 1
-  UpdateLCD();
-#endif
   delay(UPDATE_DELAY);
 } /* loop */
+
+static int InitMPU6050()
+{
+  int error;
+  uint8_t cc;
+  // 初回の読み出し
+  error = MPU6050_read(MPU6050_WHO_AM_I, &cc, 1);
+  if( error != 0 )
+  {
+    return error;
+  }
+
+  // 動作モードの読み出し
+  error = MPU6050_read(MPU6050_PWR_MGMT_1, &cc, 1);
+  if( error != 0 )
+  {
+    return error;
+  }
+
+  // MPU6050動作開始
+  error = MPU6050_write_reg(MPU6050_PWR_MGMT_1, 0);
+
+  return error;
+} /* InitMPU6050 */
+
+/*
+pAcc    [ o]
+pAngle  [ o]  Degree
+pGyro   [ o]  Degree per second.
+pTemp   [ o]  Degree
+*/
+static int ReadMPU6050(Vector3 *pAcc, Vector3 *pAngle, Vector3 *pGyro, float *pTemp)
+{
+  int error = 0;
+  uint8_t swap;
+  accel_t_gyro_union accel_t_gyro;
+  accel_t_gyro_union *pData = &accel_t_gyro;
+
+  error = MPU6050_read(MPU6050_ACCEL_XOUT_H, (uint8_t *)pData, sizeof(accel_t_gyro));
+  if( error != 0 )
+  {
+    memset( pAcc, 0x00, sizeof(Vector3) );
+    memset( pAngle, 0x00, sizeof(Vector3) );
+    memset( pGyro, 0x00, sizeof(Vector3) );
+    *pTemp = 0;
+    return error;
+  }
+#define SWAP(x,y) swap = x; x = y; y = swap
+  SWAP (pData->reg.x_accel_h, pData->reg.x_accel_l);
+  SWAP (pData->reg.y_accel_h, pData->reg.y_accel_l);
+  SWAP (pData->reg.z_accel_h, pData->reg.z_accel_l);
+  SWAP (pData->reg.t_h,       pData->reg.t_l);
+  SWAP (pData->reg.x_gyro_h,  pData->reg.x_gyro_l);
+  SWAP (pData->reg.y_gyro_h,  pData->reg.y_gyro_l);
+  SWAP (pData->reg.z_gyro_h,  pData->reg.z_gyro_l);
+#undef SWAP
+
+  // 取得した加速度値を分解能で割って加速度(G)に変換する
+  pAcc->x = pData->value.x_accel / 16384.0;
+  pAcc->y = pData->value.y_accel / 16384.0;
+  pAcc->z = pData->value.z_accel / 16384.0;
+
+  // 加速度からセンサ対地角を求める
+  // Degree
+  pAngle->x = atan2(pAcc->x, pAcc->z) * 360 / 2.0 / PI;
+  pAngle->y = atan2(pAcc->y, pAcc->z) * 360 / 2.0 / PI;
+  pAngle->z = atan2(pAcc->x, pAcc->y) * 360 / 2.0 / PI;
+
+  // 取得した角速度値を分解能で割って角速度(degrees per sec)に変換する
+  pGyro->x = pData->value.x_gyro / 131.0;
+  pGyro->y = pData->value.y_gyro / 131.0;
+  pGyro->z = pData->value.z_gyro / 131.0;
+
+  *pTemp = ( (float) accel_t_gyro.value.temperature + 12412.0f) / 340.0f;
+
+  return error;
+} /* ReadMPU6050 */
+
 
 static void ReadSerialCommand()
 {
@@ -203,7 +311,7 @@ static void ReadSerialCommand()
 } /* ReadSerialCommand */
 
 static void OutputSerial( void ){
-  char bufVars[6][10+1];
+  char bufVars[0x10][10+1];
   memset( bufVars, 0x00, sizeof(bufVars) );
 
   // 浮動小数点を文字列に変換
@@ -214,9 +322,25 @@ static void OutputSerial( void ){
   dtostrf(g_tachoRpm,    5,0, bufVars[4] );
   dtostrf(g_speedKm,     3,0, bufVars[5] );
 
-  Serial.print('D');
+  dtostrf(g_mpu6050_temp,3,5, bufVars[6] );
+  dtostrf(g_acc.x,       2,5, bufVars[7] );
+  dtostrf(g_acc.y,       2,5, bufVars[8] );
+  dtostrf(g_acc.z,       2,5, bufVars[9] );
+  dtostrf(g_angle.x,     4,5, bufVars[10] );
+  dtostrf(g_angle.y,     4,5, bufVars[11] );
+  dtostrf(g_angle.z,     4,5, bufVars[12] );
+  // dtostrf(g_gyro.x,      4,5, bufVars[13] );
+  // dtostrf(g_gyro.y,      4,5, bufVars[14] );
+  // dtostrf(g_gyro.z,      4,5, bufVars[15] );
+
+  /* A = 10 */
+  /* C = 12 */
+  /* D = 13 */
+  /* F = 15 */
+  /* G = 16 */
+  Serial.print("DD");
   Serial.print(SEP_CHAR);
-  for( int ii = 0; ii < 6; ii++ )
+  for( int ii = 0; ii < 0x0D; ii++ )
   {
     Serial.print(bufVars[ii]);
     Serial.print(SEP_CHAR);
@@ -232,10 +356,10 @@ static void UpdateSensorInfo()
   float oilP_avg = 0;
 
   // センサーから各温度・圧力を取得
-  g_WaterTmp = get_temp(WATER_SENSOR_PIN);
-  g_OilTmp = get_temp(OIL_SENSOR_PIN);
-  g_OilPrs = get_oil_pressure(PRESSURE_SENSOR_PIN);
-  g_BoostPrs = get_boost_press(BOOST_SENSOR_PIN);
+  g_WaterTmp  = get_temp(WATER_SENSOR_PIN);
+  g_OilTmp    = get_temp(OIL_SENSOR_PIN);
+  g_OilPrs  = get_oil_pressure(PRESSURE_SENSOR_PIN);
+  g_BoostPrs  = get_boost_press(BOOST_SENSOR_PIN);
 
 } /* UpdateSensorInfo */
 
@@ -287,7 +411,11 @@ static float get_boost_press( const int pinNum )
 
 static void InterruptTachoFunc( void )
 {
+//const float SPEED_MAX = 400.0f;
+//const float RPM_MAX = 11000.0f;
   const float ONE_MIN_USEC = 60.0f * 1000.0f * 1000.0f;
+  float _tachoRpm = 0;
+
   g_tachoAfter = micros();//現在の時刻を記録
   g_tachoWidth = g_tachoAfter - g_tachoBefore;//前回と今回の時間の差を計算
   g_tachoBefore = g_tachoAfter;//今回の値を前回の値に代入する
@@ -295,12 +423,22 @@ static void InterruptTachoFunc( void )
   {
     return;
   }
-  g_tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
+  _tachoRpm = ONE_MIN_USEC / (g_tachoWidth * 2.0f);//タイヤの回転数[rpm]を計算
+
+  /* 回転数の最大値を超えていた場合、誤検知とする */
+  if( _tachoRpm >= RPM_MAX )
+  {
+    return;
+  }
+
+  g_tachoRpm = _tachoRpm;
 } /* InterruptTachoFunc */
 
 static void InterruptSpeedFunc( void )
 {
   const float CSPD = 60.0 * 60 / (637 * SPEED_PULSE_COUNT) * 1000 * 1000;
+  float _speedKm = 0;
+
   g_speedAfter = micros();//現在の時刻を記録
   g_speedWidth = g_speedAfter - g_speedBefore;//前回と今回の時間の差を計算
   g_speedBefore = g_speedAfter;//今回の値を前回の値に代入する
@@ -308,7 +446,20 @@ static void InterruptSpeedFunc( void )
   {
     return;
   }
-  g_speedKm = CSPD / g_speedWidth;
+  _speedKm = CSPD / g_speedWidth;
+  /* 速度の最大値を超えていた場合、誤検知とする */
+  if( _speedKm >= SPEED_MAX )
+  {
+    return;
+  }
+  
+  /* 加速度が10を超えていた場合、誤検知とする */
+  if( fabs(g_speedKm - _speedKm) > 10 )
+  {
+    return;
+  }
+
+  g_speedKm = _speedKm;
 } /* InterruptSpeedFunc */
 
 /*
@@ -354,242 +505,6 @@ static void UpdateSpeedReset( void ){
   g_speedKm = 0.0f;
 
 } /* UpdateSpeedReset */
-
-#if USE_LCD == 1
-static void UpdateLCD()
-{
-  const unsigned int SEL_MAX = 6;
-  int btn = getLCDButton(0);
-  switch( btn )
-  {
-    case LCD_BUTTON_UP:
-    case LCD_BUTTON_LEFT:
-    g_LCDmode -= 1;
-    break;
-    case LCD_BUTTON_DOWN:
-    case LCD_BUTTON_RIGHT:
-    g_LCDmode += 1;
-    break;
-  }
-  if( g_LCDmode < 0 ) g_LCDmode = SEL_MAX;
-  if( g_LCDmode > SEL_MAX ) g_LCDmode = 0;
-
-  lcd.clear();
-  switch( g_LCDmode ){
-    case 0:
-      UpdateLCD_TachoSpeed();
-      break;
-    case 1:
-      UpdateLCD_Tmps();
-      break;
-    case 2:
-      UpdateLCD_WaterTemp();
-      break;
-    case 3:
-      UpdateLCD_OilTemp();
-      break;
-    case 4:
-      UpdateLCD_OilPress();
-      break;
-    case 5:
-      UpdateLCD_Tacho();
-      break;
-    case 6:
-      UpdateLCD_Speed();
-      break;
-  }
-} /* UpdateLCD */
-
-static void UpdateLCD_Tmps()
-{
-  char buf1[16+1];
-  char buf2[16+1];
-
-  char bufVars[3][10+1];
-
-  memset( buf1, 0x00, sizeof(buf1) );
-  memset( buf2, 0x00, sizeof(buf2) );
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  //  小数点以下なし
-  dtostrf(g_OilTmp, 3,0, bufVars[0] );
-  dtostrf(g_WaterTmp, 3,0, bufVars[1] );
-  dtostrf(g_OilPrs, 3,4, bufVars[2] );
-
-  snprintf( buf1, sizeof(buf1), "TMP O:%3.3s W:%3.3s", bufVars[0], bufVars[1] );
-  snprintf( buf2, sizeof(buf2), "PRS O:%7.7sbar", bufVars[2] );
-
-  lcd.setCursor(0,0);
-  lcd.print(buf1);
-  lcd.setCursor(0,1);
-  lcd.print(buf2);
-} /* UpdateLCD_Tmps */
-
-
-static void UpdateLCD_WaterTemp()
-{
-  char buf1[16+1];
-  char buf2[16+1];
-
-  char bufVars[3][10+1];
-
-  memset( buf1, 0x00, sizeof(buf1) );
-  memset( buf2, 0x00, sizeof(buf2) );
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  //  小数点以下1
-  dtostrf(g_WaterTmp, 3,1, bufVars[1] );
-
-  snprintf( buf1, sizeof(buf1), "Water Temp" );
-  snprintf( buf2, sizeof(buf2), "      %8.8s C", bufVars[1] );
-
-  lcd.setCursor(0,0);
-  lcd.print(buf1);
-  lcd.setCursor(0,1);
-  lcd.print(buf2);
-
-} /* UpdateLCD_WaterTemp */
-
-static void UpdateLCD_OilTemp()
-{
-  char buf1[16+1];
-  char buf2[16+1];
-
-  char bufVars[3][10+1];
-
-  memset( buf1, 0x00, sizeof(buf1) );
-  memset( buf2, 0x00, sizeof(buf2) );
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  //  小数点以下1
-  dtostrf(g_OilTmp, 3,1, bufVars[0] );
-
-  snprintf( buf1, sizeof(buf1), "Oil Temp" );
-  snprintf( buf2, sizeof(buf2), "      %8.8s C", bufVars[0] );
-
-  lcd.setCursor(0,0);
-  lcd.print(buf1);
-  lcd.setCursor(0,1);
-  lcd.print(buf2);
-} /* UpdateLCD_OilTemp */
-
-static void UpdateLCD_OilPress(){
-  char buf1[16+1];
-  char buf2[16+1];
-
-  char bufVars[3][10+1];
-
-  memset( buf1, 0x00, sizeof(buf1) );
-  memset( buf2, 0x00, sizeof(buf2) );
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  //  小数点以下4
-  dtostrf(g_OilPrs, 3,4, bufVars[2] );
-
-  snprintf( buf1, sizeof(buf1), "Oil Press" );
-  snprintf( buf2, sizeof(buf2), "    %8.8s bar", bufVars[2] );
-
-  lcd.setCursor(0,0);
-  lcd.print(buf1);
-  lcd.setCursor(0,1);
-  lcd.print(buf2);
-} /* UpdateLCD_OilPress */
-
-static void UpdateLCD_TachoSpeed(){
-  char buf1[16+1];
-  char buf2[16+1];
-
-  char bufVars[3][10+1];
-
-  memset( buf1, 0x00, sizeof(buf1) );
-  memset( buf2, 0x00, sizeof(buf2) );
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  dtostrf(g_tachoRpm, 4,0, bufVars[0] );
-  dtostrf(g_speedKm,  3,0, bufVars[1] );
-
-  snprintf( buf1, sizeof(buf1), "Tacho  :%4.4s rpm", bufVars[0] );
-  snprintf( buf2, sizeof(buf2), "Speed  : %3.3s Km", bufVars[1] );
-
-  lcd.setCursor(0,0);
-  lcd.print(buf1);
-  lcd.setCursor(0,1);
-  lcd.print(buf2);
-} /* UpdateLCD_TachoSpeed */
-
-static void UpdateLCD_Tacho(){
-  char buf1[16+1];
-  char buf2[16+1];
-
-  char bufVars[3][10+1];
-
-  memset( buf1, 0x00, sizeof(buf1) );
-  memset( buf2, 0x00, sizeof(buf2) );
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  dtostrf(g_tachoRpm, 4,0, bufVars[0] );
-  dtostrf(g_tachoWidth, 16,0, bufVars[1] );
-
-  snprintf( buf1, sizeof(buf1), "Tacho:%4.4s rpm", bufVars[0] );
-  snprintf( buf2, sizeof(buf2), "%16.16s", bufVars[1] );
-
-  lcd.setCursor(0,0);
-  lcd.print(buf1);
-  lcd.setCursor(0,1);
-  lcd.print(buf2);
-} /* UpdateLCD_Tacho */
-
-static void UpdateLCD_Speed(){
-  char buf1[16+1];
-  char buf2[16+1];
-
-  char bufVars[3][10+1];
-
-  memset( buf1, 0x00, sizeof(buf1) );
-  memset( buf2, 0x00, sizeof(buf2) );
-  memset( bufVars, 0x00, sizeof(bufVars) );
-
-  // 浮動小数点を文字列に変換
-  dtostrf(g_speedKm,  3,0, bufVars[0] );
-  dtostrf(g_speedWidth, 16,0, bufVars[1] );
-
-  snprintf( buf1, sizeof(buf1), "Speed: %4.4s Km", bufVars[0] );
-  snprintf( buf2, sizeof(buf2), "%16.16s", bufVars[1] );
-
-  lcd.setCursor(0,0);
-  lcd.print(buf1);
-  lcd.setCursor(0,1);
-  lcd.print(buf2);
-} /* UpdateLCD_Speed */
-
-#endif
-
-static void OutputWarningPin(void)
-{
-//  digitalWrite(SPEED_WARNING_PIN, (g_speedKm >= SPEED_WARNING_VALUE));
-//  digitalWrite(RPM_WARNING_PIN, (g_tachoRpm >= RPM_WARNING_VALUE));
-  
-} /* OutputWarningPin */
-
-#if USE_LCD == 1
-static int getLCDButton( int pinNum )
-{
-  int var = analogRead(pinNum);
-  if( var <= LCD_BUTTON_VAR_RIGHT ) return LCD_BUTTON_RIGHT;
-  if( var <= LCD_BUTTON_VAR_UP ) return LCD_BUTTON_UP;
-  if( var <= LCD_BUTTON_VAR_DOWN ) return LCD_BUTTON_DOWN;
-  if( var <= LCD_BUTTON_VAR_LEFT ) return LCD_BUTTON_LEFT;
-  if( var <= LCD_BUTTON_VAR_SELECT ) return LCD_BUTTON_SELECT;
-
-  return LCD_BUTTON_NONE;
-} /* getLCDButton */
-#endif
 
 // 指定したアナログピンを指定回数取得した平均を返す
 static double analogReadAvg( int pinNum , int count )
@@ -661,5 +576,55 @@ float g_BoostPrs = 0;  // ブースト圧
 
 } /* UpdateDebugSensorInfo */
 
+// MPU6050_read
+int MPU6050_read(int start, uint8_t *buffer, int size) {
+  int ii, nn, error;
+  Wire.beginTransmission(MPU6050_I2C_ADDRESS);
+  nn = Wire.write(start);
+  if (nn != 1) {
+    return (-10);
+  }
+  nn = Wire.endTransmission(false);// hold the I2C-bus
+  if (nn != 0) {
+    return (nn);
+  }
+  // Third parameter is true: relase I2C-bus after data is read.
+  Wire.requestFrom(MPU6050_I2C_ADDRESS, size, true);
+  ii = 0;
+  while (Wire.available() && ii < size) {
+    buffer[ii++] = Wire.read();
+  }
+  if ( ii != size) {
+    return (-11);
+  }
+  return (0); // return : no error
+} /* MPU6050_read */
+
+// MPU6050_write
+int MPU6050_write(int start, const uint8_t *pData, int size) {
+  int nn, error;
+  Wire.beginTransmission(MPU6050_I2C_ADDRESS);
+  nn = Wire.write(start);// write the start address
+  if (nn != 1) {
+    return (-20);
+  }
+  nn = Wire.write(pData, size);// write data bytes
+  if (nn != size) {
+    return (-21);
+  }
+  error = Wire.endTransmission(true); // release the I2C-bus
+  if (error != 0) {
+    return (error);
+  }
+
+  return (0);// return : no error
+} /* MPU6050_write */
+
+// MPU6050_write_reg
+int MPU6050_write_reg(int reg, uint8_t data) {
+  int error;
+  error = MPU6050_write(reg, &data, 1);
+  return (error);
+} /* MPU6050_write_reg */
 
 /* EOF */
