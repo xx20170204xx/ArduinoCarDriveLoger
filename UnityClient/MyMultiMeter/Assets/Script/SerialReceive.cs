@@ -540,6 +540,8 @@ public class SerialReceive : MonoBehaviour
 
         m_infoSound.AddPlaySound(_clip);
 
+        yield return new WaitForSeconds(0);
+
         if (m_lastDate.Date == _now.Date)
         {
             int num = Random.Range(0, m_infoSound.m_opOnePoint.Count);
@@ -550,7 +552,7 @@ public class SerialReceive : MonoBehaviour
             m_infoSound.AddPlaySound(m_infoSound.m_opDayOnce);
         }
 
-        return null;
+        // return null;
 
     } /* StartOpeningSE */
 

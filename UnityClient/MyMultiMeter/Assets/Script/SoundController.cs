@@ -54,6 +54,9 @@ public class SoundController : MonoBehaviour
 
     private AudioSource m_audioSource;
 
+    [HideInInspector]
+    public bool m_sportsMode = false;
+
     private float m_updateTime = 5.0f * 60.0f;
 
     private float m_speedWarning = 0.0f;
@@ -94,6 +97,10 @@ public class SoundController : MonoBehaviour
         m_AudioList.Add(m_InfoEngStlClip, 0.0f);
         m_AudioList.Add(m_InfoDevConSuccess, 0.0f);
         m_AudioList.Add(m_InfoDevConError, 0.0f);
+
+        /* OnePoint */
+        for( int ii = 0; ii < m_opOnePoint.Count; ii++ )
+            m_AudioList.Add(m_opOnePoint[ii], 0.0f);
 
         foreach (var _key in m_AudioList.Keys)
         {
@@ -171,6 +178,13 @@ public class SoundController : MonoBehaviour
     {
         var _set = SerialReceive.Instance.m_MeterSetting[MeterBase.MeterType.TYPE_SPEED];
         float _value = SerialReceive.Instance.Speed;
+
+        /* スポーツモードの場合、処理を抜ける */
+        if (m_sportsMode == true)
+        {
+            return;
+        }
+
         if (_value > _set.m_highValue)
         {
             m_speedWarning += Time.deltaTime;
@@ -210,6 +224,23 @@ public class SoundController : MonoBehaviour
             }
         }
 
+        if (m_isTachoNormal > 1.0f && _value >= _set.m_highValue)
+        {
+            m_tacho2Warning += Time.deltaTime;
+            if (m_tacho2Warning > 0.1f)
+            {
+                /* 回転数超過状態が 0.1秒以上の場合 */
+                AddPlaySound(m_WarningTachoClip);
+                m_tacho2Warning = 0.0f;
+            }
+        }
+
+        /* スポーツモードの場合、処理を抜ける */
+        if (m_sportsMode == true)
+        {
+            return;
+        }
+
         /* エンスト検知 */
         /* 適正状態が 1秒 以上かつ 現在値が 0 以下の場合 */
         if (m_isTachoNormal > 1.0f && _value <= 0f)
@@ -241,7 +272,8 @@ public class SoundController : MonoBehaviour
                 m_tacho2Warning = 0.0f;
             }
         }
-        else{
+        else
+        {
             m_EngStlCount = 0.0f;
             m_tacho1Warning = 0.0f;
             m_tacho2Warning = 0.0f;
@@ -336,6 +368,12 @@ public class SoundController : MonoBehaviour
         return null;
     } /* GetOpeningSE */
 
+    public void OnSwitchSportsMode()
+    {
+        Debug.Log("OnSwitchSportsMode");
+        m_sportsMode = (m_sportsMode ? false : true);
+        Debug.Log("sports mode:" + m_sportsMode);
 
+    } /* OnSwitchSportsMode */
 
 } /* class */

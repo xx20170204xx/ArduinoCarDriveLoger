@@ -68,6 +68,7 @@
     <Compile Include="Assets\Script\Setting\SettingValue.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
     <Compile Include="Assets\Script\SoundController.cs" />
+    <Compile Include="Assets\Script\Setting\SettingBoolean.cs" />
     <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptHTTP.cs" />
     <Compile Include="Assets\Script\Meter\TachoShiftLampMeter.cs" />
@@ -82,7 +83,6 @@
     <Compile Include="Assets\Script\Opning.cs" />
     <Compile Include="Assets\Script\PanelSelect.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\Scripts\DebugConsole.cs" />
-    <Compile Include="Assets\Script\Setting\SettingBoolean.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\SerialPortUtilityPro\Plugins\x86_64\spap.dll" />
