@@ -67,7 +67,7 @@
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPDeviceList.cs" />
     <Compile Include="Assets\Script\Setting\SettingValue.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptGObj.cs" />
-    <Compile Include="Assets\Script\InfoSoundController.cs" />
+    <Compile Include="Assets\Script\SoundController.cs" />
     <Compile Include="Assets\Script\Meter\AnalogMeter.cs" />
     <Compile Include="Assets\SerialPortUtilityPro\ExampleScenes\Scripts\SPUPTestScriptHTTP.cs" />
     <Compile Include="Assets\Script\Meter\TachoShiftLampMeter.cs" />

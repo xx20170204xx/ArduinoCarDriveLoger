@@ -17,6 +17,8 @@ public class MeterBase : MonoBehaviour
         TYPE_OIL_TEMP,
         TYPE_OIL_PRESS,
         TYPE_BOOST_PRESS,
+
+        TYPE_SPEED_FIX = 100,
     }
     public enum MeterValueType 
     {

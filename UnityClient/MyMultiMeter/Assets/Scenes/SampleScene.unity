@@ -1606,7 +1606,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 837788063}
   m_HandleRect: {fileID: 837788062}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -2324,7 +2324,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1583142840}
   m_HandleRect: {fileID: 1583142839}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -15128,10 +15128,10 @@ MonoBehaviour:
       m_Calls: []
   m_FontData:
     m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 98
+    m_FontSize: 30
     m_FontStyle: 0
     m_BestFit: 0
-    m_MinSize: 10
+    m_MinSize: 3
     m_MaxSize: 98
     m_Alignment: 6
     m_AlignByGeometry: 0
@@ -16924,7 +16924,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 99918998}
   m_HandleRect: {fileID: 99918997}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -18981,7 +18981,7 @@ MonoBehaviour:
   StopBit: 0
   DataBit: 8
   RecvDiscardNull: 0
-  AutoRTSCTSHandshake: 0
+  AutoRTSCTSHandshake: 1
   StartEnableDTR: 1
   DtrEnabled: 0
   RtsEnabled: 0
@@ -19031,9 +19031,9 @@ MonoBehaviour:
   EnableTrans: 1
   DebugConsoleMonitor: 0
   ExternalConfig: 0
-  ExpandConfig: 1
+  ExpandConfig: 0
   ExpandSPMonitor: 0
-  ExpandEventConfig: 1
+  ExpandEventConfig: 0
   LicenseEmail: 
   LicenseCode: 
 --- !u!4 &1702349611
@@ -19076,14 +19076,6 @@ MonoBehaviour:
   recoedSprite: {fileID: -1290855366162983238, guid: 6a94b40b72c2ca64686bdbb8b7042ed3,
     type: 3}
   stopSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
-  m_recStartClip: {fileID: 8300000, guid: 76de3a5a78423f744b77d881fa5ce04d, type: 3}
-  m_recStopClip: {fileID: 8300000, guid: 02d251f68525f5142af514deb81bde1c, type: 3}
-  m_conLostClip: {fileID: 8300000, guid: e45795a0cdf400a4191ac43a9032b53a, type: 3}
-  m_opMoningClip: {fileID: 8300000, guid: 63bd8a307fbc5a049a3aafee926f4617, type: 3}
-  m_opNoonClip: {fileID: 8300000, guid: 657609f49ff1c654788c758a12f1d791, type: 3}
-  m_opEveningClip: {fileID: 8300000, guid: 7909005c7b8dced4ab0f366d460c9dba, type: 3}
-  m_opNightClip: {fileID: 8300000, guid: 313a94d8eab54fb42aa49be69421f449, type: 3}
-  m_opDayOnce: {fileID: 8300000, guid: e9749cdf2aca52940a82d0851fe86ebe, type: 3}
   m_debugText: {fileID: 1310681989}
 --- !u!114 &1702349613
 MonoBehaviour:
@@ -19118,8 +19110,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ef687a785b85fe42a4e6b2d6466e2f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_recStartClip: {fileID: 8300000, guid: 76de3a5a78423f744b77d881fa5ce04d, type: 3}
+  m_recStopClip: {fileID: 8300000, guid: 02d251f68525f5142af514deb81bde1c, type: 3}
+  m_conLostClip: {fileID: 8300000, guid: e45795a0cdf400a4191ac43a9032b53a, type: 3}
+  m_opMoningClip: {fileID: 8300000, guid: 63bd8a307fbc5a049a3aafee926f4617, type: 3}
+  m_opNoonClip: {fileID: 8300000, guid: 657609f49ff1c654788c758a12f1d791, type: 3}
+  m_opEveningClip: {fileID: 8300000, guid: 7909005c7b8dced4ab0f366d460c9dba, type: 3}
+  m_opNightClip: {fileID: 8300000, guid: 313a94d8eab54fb42aa49be69421f449, type: 3}
+  m_opDayOnce: {fileID: 8300000, guid: e9749cdf2aca52940a82d0851fe86ebe, type: 3}
+  m_opOnePoint:
+  - {fileID: 8300000, guid: b61e6906e46185d468f0f91c9958c352, type: 3}
+  - {fileID: 8300000, guid: 3966f5d1c2937324da87bed8c2a925a8, type: 3}
   m_InfoTachoClip: {fileID: 8300000, guid: 2f0734dc17bd14448a8fec42296f7877, type: 3}
   m_InfoEngStlClip: {fileID: 8300000, guid: 05b750ada6f4367449a3e3c06052bc60, type: 3}
+  m_InfoDevConSuccess: {fileID: 8300000, guid: e038f8023497ca84cb5bb79de60f0b03, type: 3}
+  m_InfoDevConError: {fileID: 8300000, guid: d12291e94458cbe49a58e5ca9294a9e6, type: 3}
   m_WarningTachoClip: {fileID: 8300000, guid: 0361a226158987146a1c7ce9604fa545, type: 3}
   m_WarningSpeedClip: {fileID: 8300000, guid: 19715c249775b904f80ff0e76024defa, type: 3}
   m_WarningWaterLowClip: {fileID: 8300000, guid: 6f9c02ad2c1e8b44ea6b3dc6b4078e62,
@@ -19650,7 +19655,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2089007422}
   m_HandleRect: {fileID: 2089007421}
   m_Direction: 0
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -20989,7 +20994,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1823801659}
   m_Direction: 2
   m_Value: 1
-  m_Size: 0.17955068
+  m_Size: 0.17955066
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

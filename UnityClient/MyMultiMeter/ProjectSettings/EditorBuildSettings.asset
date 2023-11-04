@@ -6,12 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/AndroidLibTest.unity
-    guid: 11ff7340e024e114cb4bf54828be0d36
-  - enabled: 1
     path: Assets/Scenes/opening.unity
     guid: 1a265c90139211b47bdbb596d8438540
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
     guid: 51e9d6503e2f27b4481a31d3da669f82
+  - enabled: 1
+    path: Assets/Scenes/AndroidLibTest.unity
+    guid: 11ff7340e024e114cb4bf54828be0d36
+  - enabled: 1
+    path: Assets/SerialPortUtilityPro/ExampleScenes/ExampleDeviceList.unity
+    guid: f4330fa1c3658da41885cd392ce6efdc
   m_configObjects: {}

@@ -20,6 +20,7 @@ public class SerialReceive : MonoBehaviour
         public float m_blinkValue;
         public Color m_lowColor;
         public Color m_highColor;
+        public bool m_enable;
     }
     public Dictionary<MeterBase.MeterType, MeterSetting> m_MeterSetting = null;
 
@@ -57,29 +58,11 @@ public class SerialReceive : MonoBehaviour
     private Sprite recoedSprite = null;
     [SerializeField]
     private Sprite stopSprite = null;
-    [SerializeField]
-    private AudioClip m_recStartClip = null;
-    [SerializeField]
-    private AudioClip m_recStopClip = null;
-    [SerializeField]
-    private AudioClip m_conLostClip = null;
-
-    [Header("Opening SE")]
-    [SerializeField]
-    private AudioClip m_opMoningClip = null;
-    [SerializeField]
-    private AudioClip m_opNoonClip = null;
-    [SerializeField]
-    private AudioClip m_opEveningClip = null;
-    [SerializeField]
-    private AudioClip m_opNightClip = null;
-    [SerializeField]
-    private AudioClip m_opDayOnce = null;
-
 
     public Text m_debugText = null;
 
-    private AudioSource m_audioSource;
+    private SoundController m_infoSound;
+
     private System.DateTime m_lastDate;
 
     struct DataValue
@@ -102,7 +85,7 @@ public class SerialReceive : MonoBehaviour
 
     private void Awake()
     {
-        m_audioSource = GetComponent<AudioSource>();
+        m_infoSound = GetComponent<SoundController>();
         m_lastDate = System.DateTime.Now;
         Instance = this;
 
@@ -117,6 +100,8 @@ public class SerialReceive : MonoBehaviour
             m_MeterSetting.Add(MeterBase.MeterType.TYPE_OIL_TEMP, new MeterSetting());
             m_MeterSetting.Add(MeterBase.MeterType.TYPE_OIL_PRESS, new MeterSetting());
             m_MeterSetting.Add(MeterBase.MeterType.TYPE_BOOST_PRESS, new MeterSetting());
+
+            m_MeterSetting.Add(MeterBase.MeterType.TYPE_SPEED_FIX, new MeterSetting());
 
         }
         StartCoroutine(StartLocationService());
@@ -167,6 +152,12 @@ public class SerialReceive : MonoBehaviour
             m_data.m_tacho = float.Parse(values[5]);
             m_data.m_speed = float.Parse(values[6]);
 
+            /* TODO:速度を1割増しで設定 */
+            if (m_MeterSetting[MeterBase.MeterType.TYPE_SPEED_FIX].m_enable == true)
+            {
+                m_data.m_speed *= 1.1f;
+            }
+
             if (controller != null)
             {
                 controller.UpdateData();
@@ -193,21 +184,79 @@ public class SerialReceive : MonoBehaviour
         {
             string message = "OnSerialEvent :" + _data;
             AddDebugText(message);
-            message = "  " + serialHandler.OpenMethod;   AddDebugText(message);
-            message = "  " + serialHandler.VendorID; AddDebugText(message);
-            message = "  " + serialHandler.ProductID; AddDebugText(message);
-            message = "  " + serialHandler.SerialNumber; AddDebugText(message);
+            // message = "  " + serialHandler.OpenMethod;   AddDebugText(message);
+            // message = "  " + serialHandler.VendorID; AddDebugText(message);
+            // message = "  " + serialHandler.ProductID; AddDebugText(message);
+            // message = "  " + serialHandler.SerialNumber; AddDebugText(message);
+            serialHandler.Close();
         }
         if (_data == "DISCONNECT_ERROR")
         {
             /* SEを出力する */
-            if (m_audioSource != null && m_conLostClip != null)
-            {
-                m_audioSource.PlayOneShot(m_conLostClip);
-            }
+            m_infoSound.AddPlaySound(m_infoSound.m_conLostClip);
+            /* 再接続を実施(コルーチン) */
+            StartCoroutine(ReConnectDevice());
         }
 
     } /* OnSerialEvent */
+
+    /*
+        再接続時のコルーチン
+    */
+    IEnumerator ReConnectDevice() 
+    {
+        string msg;
+        bool l_flag = true;
+        int l_Count = 5;
+
+        AddDebugText("ReConnectDevice Start");
+
+        if (serialHandler.IsConnected() == true)
+        {
+            AddDebugText("ReConnectDevice End(IsConnected==true)");
+            yield return null;
+        }
+
+        while (l_flag == true) 
+        {
+            /* 1秒待つ */
+            yield return new WaitForSeconds(1.0f);
+
+            AddDebugText("this.OpenDevice();");
+            /* 再接続を実施 */
+            this.OpenDevice();
+
+            /* 1秒待つ */
+            yield return new WaitForSeconds(1.0f);
+
+            msg = "IsOpn:" + serialHandler.IsOpened().ToString();
+            msg += "IsCon:"+serialHandler.IsConnected().ToString();
+            AddDebugText(msg);
+
+            if (serialHandler.IsOpened() == true)
+            {
+                /* 再接続成功 */
+                m_infoSound.AddPlaySound(m_infoSound.m_InfoDevConSuccess);
+                l_flag = false;
+            }
+            else
+            {
+                /* 再接続失敗 */
+                l_Count -= 1;
+                if (l_Count == 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        if (l_flag == true)
+        {
+            m_infoSound.AddPlaySound(m_infoSound.m_InfoDevConError);
+        }
+
+        AddDebugText("ReConnectDevice End");
+    } /* ReConnectDevice */
 
     public void SaveLastDate()
     {
@@ -290,6 +339,7 @@ public class SerialReceive : MonoBehaviour
                 xmlWriter.WriteAttributeString("blinkValue", values.m_blinkValue.ToString());
                 xmlWriter.WriteAttributeString("lowColor", "#"+ColorUtility.ToHtmlStringRGBA(values.m_lowColor));
                 xmlWriter.WriteAttributeString("highColor", "#" + ColorUtility.ToHtmlStringRGBA(values.m_highColor));
+                xmlWriter.WriteAttributeString("enable", values.m_enable.ToString());
             }
             xmlWriter.WriteEndElement();
             xmlWriter.WriteWhitespace("\r\n");
@@ -332,13 +382,15 @@ public class SerialReceive : MonoBehaviour
                     string blinkValue = xmlReader.GetAttribute("blinkValue");
                     string lowColorStr = xmlReader.GetAttribute("lowColor");
                     string highColorStr = xmlReader.GetAttribute("highColor");
+                    string enableStr = xmlReader.GetAttribute("enable");
 
                     Debug.Log("Type=" + meter_type.ToString() +
                         " lowValue=" + lowValue +
                         " highValue=" + highValue +
                         " blinkValue=" + blinkValue +
                         " lowColor=" + lowColorStr +
-                        " highColor=" + highColorStr
+                        " highColor=" + highColorStr +
+                        " enable=" + enableStr
                         );
                     MeterBase.MeterType _key = (MeterBase.MeterType)int.Parse(meter_type);
                     MeterSetting mSetting;
@@ -358,6 +410,7 @@ public class SerialReceive : MonoBehaviour
                     mSetting.m_blinkValue = int.Parse(blinkValue);
                     mSetting.m_lowColor = lowColor;
                     mSetting.m_highColor = highColor;
+                    mSetting.m_enable = bool.Parse(enableStr);
                     m_MeterSetting[_key] = mSetting;
                 }
             }
@@ -394,10 +447,7 @@ public class SerialReceive : MonoBehaviour
                 recoedImage.sprite = stopSprite;
             }
             /* SEを出力する */
-            if (m_audioSource != null && m_recStartClip != null)
-            {
-                m_audioSource.PlayOneShot(m_recStartClip);
-            }
+            m_infoSound.AddPlaySound(m_infoSound.m_recStartClip);
         } else {
             /* データ記録をしている場合、 */
             isRecordData = false;
@@ -408,10 +458,7 @@ public class SerialReceive : MonoBehaviour
                 recoedImage.sprite = recoedSprite;
             }
             /* SEを出力する */
-            if (m_audioSource != null && m_recStopClip != null)
-            {
-                m_audioSource.PlayOneShot(m_recStopClip);
-            }
+            m_infoSound.AddPlaySound(m_infoSound.m_recStopClip);
         }
         Debug.Log("isRecordData : " + isRecordData.ToString());
         AddDebugText("isRecordData : " + isRecordData.ToString());
@@ -489,58 +536,23 @@ public class SerialReceive : MonoBehaviour
         AudioClip _clip = null;
         System.DateTime _now = System.DateTime.Now;
 
-        _clip = GetOpeningSE();
+        _clip = m_infoSound.GetOpeningSE();
 
-        if (m_audioSource != null && _clip != null)
-        {
-            m_audioSource.PlayOneShot(_clip);
-        }
-
-        /* SEの終了待ち */
-        while (m_audioSource.isPlaying) 
-        {
-            yield return new WaitForSeconds(0.1f);
-        }
+        m_infoSound.AddPlaySound(_clip);
 
         if (m_lastDate.Date == _now.Date)
         {
-            yield break;
+            int num = Random.Range(0, m_infoSound.m_opOnePoint.Count);
+            m_infoSound.AddPlaySound(m_infoSound.m_opOnePoint[num]);
         }
-
-
-        if (m_audioSource != null && m_opDayOnce != null)
+        else
         {
-            m_audioSource.PlayOneShot(m_opDayOnce);
+            m_infoSound.AddPlaySound(m_infoSound.m_opDayOnce);
         }
+
+        return null;
 
     } /* StartOpeningSE */
-
-    private AudioClip GetOpeningSE()
-    {
-        System.DateTime _dateTime = System.DateTime.Now;
-
-        if (_dateTime.Hour < 5) 
-        {
-            return m_opNightClip;
-        }
-        if (_dateTime.Hour >= 5 && _dateTime.Hour < 12)
-        {
-            return m_opMoningClip;
-        }
-        if (_dateTime.Hour >= 12 && _dateTime.Hour < 18)
-        {
-            return m_opNoonClip;
-        }
-        if (_dateTime.Hour >= 18 && _dateTime.Hour < 22)
-        {
-            return m_opEveningClip;
-        }
-        if (_dateTime.Hour >= 22)
-        {
-            return m_opNightClip;
-        }
-        return null;
-    } /* GetOpeningSE */
 
 
 
