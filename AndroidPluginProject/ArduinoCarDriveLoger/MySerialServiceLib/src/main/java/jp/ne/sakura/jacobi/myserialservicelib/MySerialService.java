@@ -185,6 +185,18 @@ public class MySerialService extends IntentService {
         try{
             byte[] buffer = new byte[2000];
             int timeOut = 2000;
+
+            if( port == null )
+            {
+                return;
+            }
+
+            if( port.isOpen() == false )
+            {
+
+                return;
+            }
+
             int readSize = port.read(buffer, timeOut);
             updateReceivedData(buffer,readSize);
         }catch (Exception _E){

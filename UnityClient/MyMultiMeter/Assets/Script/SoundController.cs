@@ -3,27 +3,54 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(AudioSource))]
-public class InfoSoundController : MonoBehaviour
+public class SoundController : MonoBehaviour
 {
+
+    [Header("Recode")]
+    public AudioClip m_recStartClip = null;
+    [SerializeField]
+    public AudioClip m_recStopClip = null;
+    [SerializeField]
+    public AudioClip m_conLostClip = null;
+
+    [Header("Opening SE")]
+    [SerializeField]
+    public AudioClip m_opMoningClip = null;
+    [SerializeField]
+    public AudioClip m_opNoonClip = null;
+    [SerializeField]
+    public AudioClip m_opEveningClip = null;
+    [SerializeField]
+    public AudioClip m_opNightClip = null;
+    [SerializeField]
+    public AudioClip m_opDayOnce = null;
+    [SerializeField]
+    public List<AudioClip> m_opOnePoint = new List<AudioClip>();
+
+
     [Header("Info")]
     [SerializeField]
-    private AudioClip m_InfoTachoClip;
+    public AudioClip m_InfoTachoClip;
     [SerializeField]
-    private AudioClip m_InfoEngStlClip;
+    public AudioClip m_InfoEngStlClip;
+    [SerializeField]
+    public AudioClip m_InfoDevConSuccess;
+    [SerializeField]
+    public AudioClip m_InfoDevConError;
 
     [Header("Warning")]
     [SerializeField]
-    private AudioClip m_WarningTachoClip;
+    public AudioClip m_WarningTachoClip;
     [SerializeField]
-    private AudioClip m_WarningSpeedClip;
+    public AudioClip m_WarningSpeedClip;
     [SerializeField]
-    private AudioClip m_WarningWaterLowClip;
+    public AudioClip m_WarningWaterLowClip;
     [SerializeField]
-    private AudioClip m_WarningWaterHighClip;
+    public AudioClip m_WarningWaterHighClip;
     [SerializeField]
-    private AudioClip m_WarningOilTLowClip;
+    public AudioClip m_WarningOilTLowClip;
     [SerializeField]
-    private AudioClip m_WarningOilTHighClip;
+    public AudioClip m_WarningOilTHighClip;
 
     private AudioSource m_audioSource;
 
@@ -47,6 +74,14 @@ public class InfoSoundController : MonoBehaviour
     {
         m_updateTime = 5.0f * 60.0f;
         m_audioSource = GetComponent<AudioSource>();
+        m_AudioList.Add(m_recStartClip, 0.0f);
+        m_AudioList.Add(m_recStopClip, 0.0f);
+        m_AudioList.Add(m_conLostClip, 0.0f);
+        m_AudioList.Add(m_opMoningClip, 0.0f);
+        m_AudioList.Add(m_opNoonClip, 0.0f);
+        m_AudioList.Add(m_opEveningClip, 0.0f);
+        m_AudioList.Add(m_opNightClip, 0.0f);
+        m_AudioList.Add(m_opDayOnce, 0.0f);
         /* Warning */
         m_AudioList.Add(m_WarningTachoClip, 0.0f);
         m_AudioList.Add(m_WarningSpeedClip, 0.0f);
@@ -57,6 +92,9 @@ public class InfoSoundController : MonoBehaviour
         /* Info */
         m_AudioList.Add(m_InfoTachoClip, 0.0f);
         m_AudioList.Add(m_InfoEngStlClip, 0.0f);
+        m_AudioList.Add(m_InfoDevConSuccess, 0.0f);
+        m_AudioList.Add(m_InfoDevConError, 0.0f);
+
         foreach (var _key in m_AudioList.Keys)
         {
             m_AudioKeys.Add(_key);
@@ -121,7 +159,7 @@ public class InfoSoundController : MonoBehaviour
         }
     } /* PlaySoundFunc */
 
-    private void AddPlaySound(AudioClip _clip)
+    public void AddPlaySound(AudioClip _clip)
     {
         if (m_AudioList[_clip] <= 0.0f)
         {
@@ -270,6 +308,33 @@ public class InfoSoundController : MonoBehaviour
         {
         }
     } /* CheckOilTemp */
+
+    public AudioClip GetOpeningSE()
+    {
+        System.DateTime _dateTime = System.DateTime.Now;
+
+        if (_dateTime.Hour < 5)
+        {
+            return m_opNightClip;
+        }
+        if (_dateTime.Hour >= 5 && _dateTime.Hour < 12)
+        {
+            return m_opMoningClip;
+        }
+        if (_dateTime.Hour >= 12 && _dateTime.Hour < 18)
+        {
+            return m_opNoonClip;
+        }
+        if (_dateTime.Hour >= 18 && _dateTime.Hour < 22)
+        {
+            return m_opEveningClip;
+        }
+        if (_dateTime.Hour >= 22)
+        {
+            return m_opNightClip;
+        }
+        return null;
+    } /* GetOpeningSE */
 
 
 
