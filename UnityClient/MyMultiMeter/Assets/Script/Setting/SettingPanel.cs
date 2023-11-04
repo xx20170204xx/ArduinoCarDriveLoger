@@ -26,6 +26,8 @@ public class SettingPanel : MonoBehaviour
     private SettingColor m_speedLowColor;
     [SerializeField]
     private SettingColor m_speedHighColor;
+    [SerializeField]
+    private SettingBoolean m_speedFix;
 
     [Space]
     [Header("WaterTemp")]
@@ -159,6 +161,7 @@ public class SettingPanel : MonoBehaviour
             m_speedHighValue.Value = _speed.m_highValue;
             m_speedLowColor.SetColor(_speed.m_lowColor);
             m_speedHighColor.SetColor(_speed.m_highColor);
+            m_speedFix.Value = _speed.m_enable;
         }
 
         {
@@ -217,6 +220,7 @@ public class SettingPanel : MonoBehaviour
             _speed.m_highValue = m_speedHighValue.Value;
             _speed.m_lowColor = m_speedLowColor.Color;
             _speed.m_highColor = m_speedHighColor.Color;
+            _speed.m_enable = m_speedFix.Value;
             SerialReceive.Instance.m_MeterSetting[_type] = _speed;
         }
 
