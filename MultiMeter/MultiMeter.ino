@@ -30,22 +30,10 @@ R= 1Kohm
  |   |  |
  |   |  |
 +5V GND A4
-
-                       +-- ||---GND
-                       |
-+5V----------|<--------+---|<---GND
-                       |
-SpeedPulse---1Kohm-----+--------D2 or D3
-    or
-TachoPulse
-
-diode : --|<--
-        1N4148
-
 */
 
-#define DEBUG_TACHOSPEED 0
-#define DEBUG_TMP_PRS 0
+#define DEBUG_TACHOSPEED 1
+#define DEBUG_TMP_PRS 1
 
 const char* VERSION_STRING = "20221127XX";
 
@@ -57,13 +45,16 @@ const char SEP_CHAR= '\t';
 const int UPDATE_DELAY = 100;
 
 /* アナログピンの値を取得する際の回数 */
-const int SENSOR_AVG_COUNT = 100;
+const int SENSOR_AVG_COUNT = 75;
 
 /* 各センサーのアナログピン番号 */
+/* 4, 5 はI2Cのため使用禁止 */
 const int WATER_SENSOR_PIN = 1;
 const int OIL_SENSOR_PIN = 2;
 const int PRESSURE_SENSOR_PIN = 3;
-const int BOOST_SENSOR_PIN = 4;
+const int BOOST_SENSOR_PIN = 6;
+const int THROTTLE_SENSOR_PIN = 7;
+
 /* 回転数取得用ピン(デジタル/割り込み可能) */
 const int TACHO_PULSE_PIN = 2;
 /* 車速取得用ピン(デジタル/割り込み可能) */
@@ -104,6 +95,8 @@ volatile unsigned long g_speedBefore = 0;
 volatile unsigned long g_speedAfter = 0;
 volatile unsigned long g_speedWidth = 0;
 volatile float g_speedKm = 0;//車速[Km/h]
+
+float g_Throttle = 0; /* スロットル開度 */
 
 // レジスタアドレス
 #define MPU6050_ACCEL_XOUT_H 0x3B  // R  
@@ -318,17 +311,19 @@ static void OutputSerial( void ){
   dtostrf(g_WaterTmp,    3,4, bufVars[0] );
   dtostrf(g_OilTmp,      3,4, bufVars[1] );
   dtostrf(g_OilPrs,      3,4, bufVars[2] );
-  dtostrf(g_BoostPrs,    3,4, bufVars[3] );
+  dtostrf(g_BoostPrs+1.0f,    3,4, bufVars[3] );
   dtostrf(g_tachoRpm,    5,0, bufVars[4] );
   dtostrf(g_speedKm,     3,0, bufVars[5] );
+  dtostrf(g_Throttle,    3,0, bufVars[6] );
+  
 
-  dtostrf(g_mpu6050_temp,3,5, bufVars[6] );
-  dtostrf(g_acc.x,       2,5, bufVars[7] );
-  dtostrf(g_acc.y,       2,5, bufVars[8] );
-  dtostrf(g_acc.z,       2,5, bufVars[9] );
-  dtostrf(g_angle.x,     4,5, bufVars[10] );
-  dtostrf(g_angle.y,     4,5, bufVars[11] );
-  dtostrf(g_angle.z,     4,5, bufVars[12] );
+  dtostrf(g_mpu6050_temp,3,5, bufVars[7] );
+  dtostrf(g_acc.x,       2,5, bufVars[8] );
+  dtostrf(g_acc.y,       2,5, bufVars[9] );
+  dtostrf(g_acc.z,       2,5, bufVars[10] );
+  dtostrf(g_angle.x,     4,5, bufVars[11] );
+  dtostrf(g_angle.y,     4,5, bufVars[12] );
+  dtostrf(g_angle.z,     4,5, bufVars[13] );
   // dtostrf(g_gyro.x,      4,5, bufVars[13] );
   // dtostrf(g_gyro.y,      4,5, bufVars[14] );
   // dtostrf(g_gyro.z,      4,5, bufVars[15] );
@@ -340,7 +335,7 @@ static void OutputSerial( void ){
   /* G = 16 */
   Serial.print("DD");
   Serial.print(SEP_CHAR);
-  for( int ii = 0; ii < 0x0D; ii++ )
+  for( int ii = 0; ii < 14; ii++ )
   {
     Serial.print(bufVars[ii]);
     Serial.print(SEP_CHAR);
@@ -358,8 +353,9 @@ static void UpdateSensorInfo()
   // センサーから各温度・圧力を取得
   g_WaterTmp  = get_temp(WATER_SENSOR_PIN);
   g_OilTmp    = get_temp(OIL_SENSOR_PIN);
-  g_OilPrs  = get_oil_pressure(PRESSURE_SENSOR_PIN);
+  g_OilPrs    = get_oil_pressure(PRESSURE_SENSOR_PIN);
   g_BoostPrs  = get_boost_press(BOOST_SENSOR_PIN);
+  g_Throttle  = analogReadAvg(THROTTLE_SENSOR_PIN, SENSOR_AVG_COUNT);
 
 } /* UpdateSensorInfo */
 
@@ -561,11 +557,16 @@ float g_BoostPrs = 0;  // ブースト圧
     static float PRS_MIN = -1.5f;
     static float PRS_MAX = 12.0f;
 
+    /* kpa */
+    static float BPRS_MIN = -100.0f;
+    static float BPRS_MAX = 150.0f;
+
     g_OilTmp += TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
     g_WaterTmp += TMP_MAX * 0.1f * ( 100.0f / 1000.0f );
 
     g_OilPrs += PRS_MAX * 0.1f * ( 100.0f / 1000.0f );
 
+    g_BoostPrs += BPRS_MIN * 0.1f * ( 100.0f / 1000.0f )+0.1f;
 
 
     if( g_OilTmp >= TMP_MAX ){ g_OilTmp = TMP_MIN; }
@@ -573,6 +574,7 @@ float g_BoostPrs = 0;  // ブースト圧
 
     if( g_OilPrs >= PRS_MAX ){ g_OilPrs = PRS_MIN; }
 
+    if( g_BoostPrs <= BPRS_MIN ){ g_BoostPrs = BPRS_MAX; }
 
 } /* UpdateDebugSensorInfo */
 
