@@ -32,8 +32,8 @@ R= 1Kohm
 +5V GND A4
 */
 
-#define DEBUG_TACHOSPEED 1
-#define DEBUG_TMP_PRS 1
+#define DEBUG_TACHOSPEED 0
+#define DEBUG_TMP_PRS 0
 
 const char* VERSION_STRING = "20221127XX";
 
@@ -331,9 +331,10 @@ static void OutputSerial( void ){
   /* A = 10 */
   /* C = 12 */
   /* D = 13 */
+  /* E = 14 */
   /* F = 15 */
   /* G = 16 */
-  Serial.print("DD");
+  Serial.print("DE");
   Serial.print(SEP_CHAR);
   for( int ii = 0; ii < 14; ii++ )
   {
