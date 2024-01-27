@@ -85,6 +85,8 @@ typedef struct
   SVECTOR3 angle;
 } SRECVDATA;
 
+volatile char g_mode = 'B';
+
 SRECVDATA g_recvData;
 
 void setup() {
@@ -155,12 +157,10 @@ void setup() {
 }
 
 void loop() {
-  char mode = 'a';
 
   recvSerial();
 
-
-  switch(mode)
+  switch(g_mode)
   {
     case 'S':
     displaySpeed(g_recvData.speed);
@@ -244,7 +244,7 @@ void recvSerial()
   g_recvData.waterTemp  = data[0];
   g_recvData.oilTemp    = data[1];
   g_recvData.oilPress   = data[2];
-  g_recvData.boostPress = data[11];
+  g_recvData.boostPress = data[3];
 
   g_recvData.tacho    = data[4];
   g_recvData.speed    = data[5];
