@@ -20,6 +20,7 @@
 
 #include <SPI.h>
 #include <Wire.h>
+#include <EEPROM.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -62,6 +63,8 @@ const float BOOST_MAX   = 150.0f;
 const int8_t RECVDATA_MAX = 14;
 const float THROTTLE_MAX   = 1024.0f;
 
+#define BTN01_PIN 2
+
 typedef struct
 {
   float x;
@@ -86,9 +89,34 @@ typedef struct
   SVECTOR3 angle;
 } SRECVDATA;
 
+typedef struct
+{
+  size_t  size;
+  char    m_mode;
+  int     m_szThrLow;
+  int     m_szThrHigh;
+} EEPROMDATA;
+
+static void InitRomData( EEPROMDATA* pRom );
+static void writeRomData( EEPROMDATA* pRom );
+static void buttonCheck(void);
+
+char g_mode_table[] = { 
+'S', /* Speed */
+'T', /* Tacho */
+'W',
+'O',
+'o',
+'B',
+'t',
+'A',
+'a',
+};
+
 volatile char g_mode = 't';
 
 SRECVDATA g_recvData;
+EEPROMDATA g_EEPEOM;
 
 void setup() {
 
@@ -110,56 +138,49 @@ void setup() {
 
   // Clear the buffer
   display.clearDisplay();
-/*
-  // Draw a single pixel in white
-  display.drawPixel(10, 10, SSD1306_WHITE);
 
-  // Show the display buffer on the screen. You MUST call display() after
-  // drawing commands to make them visible on screen!
-  display.display();
-  delay(2000);
-  // display.display() is NOT necessary after every single drawing command,
-  // unless that's what you want...rather, you can batch up a bunch of
-  // drawing operations and then update the screen all at once by calling
-  // display.display(). These examples demonstrate both approaches...
-  testdrawline();      // Draw many lines
+  {
+    int ii;
+    int rom_len = EEPROM.length();
+    char* pBuf = (char*)&g_EEPEOM;
 
-  testdrawrect();      // Draw rectangles (outlines)
+    for( ii = 0; ii < sizeof(g_EEPEOM); ii++ )
+    {
+      pBuf[ii] = EEPROM.read(ii);
+    }
+    
+    Serial.print("Size:");
+    Serial.println(g_EEPEOM.size);
 
-  testfillrect();      // Draw rectangles (filled)
+    Serial.print("Mode:");
+    Serial.println(g_mode_table[g_EEPEOM.m_mode]);
 
-  testdrawcircle();    // Draw circles (outlines)
+    Serial.print("Low:");
+    Serial.println(g_EEPEOM.m_szThrLow);
 
-  testfillcircle();    // Draw circles (filled)
+    Serial.print("High:");
+    Serial.println(g_EEPEOM.m_szThrHigh);
 
-  testdrawroundrect(); // Draw rounded rectangles (outlines)
+    if( g_EEPEOM.size != sizeof(EEPROMDATA) )
+    {
+      /* init ROMDATA */
+      InitRomData(&g_EEPEOM);
+      for( ii = 0; ii < sizeof(g_EEPEOM); ii++ )
+      {
+        EEPROM.write(ii, pBuf[ii]);
+      }
+    }
+    g_mode = g_mode_table[g_EEPEOM.m_mode];
+  }
 
-  testfillroundrect(); // Draw rounded rectangles (filled)
-
-  testdrawtriangle();  // Draw triangles (outlines)
-
-  testfilltriangle();  // Draw triangles (filled)
-
-  testdrawchar();      // Draw characters of the default font
-
-  testdrawstyles();    // Draw 'stylized' characters
-
-  testscrolltext();    // Draw scrolling text
-
-  testdrawbitmap();    // Draw a small bitmap image
-*/
-  // Invert and restore display, pausing in-between
-  // display.invertDisplay(true);
-  // delay(1000);
-  // display.invertDisplay(false);
-  // delay(1000);
-
-  //testanimate(logo_bmp, LOGO_WIDTH, LOGO_HEIGHT); // Animate bitmaps
+  pinMode(BTN01_PIN, INPUT);
+  digitalWrite(BTN01_PIN, HIGH);
 }
 
 void loop() {
 
   recvSerial();
+  buttonCheck();
 
   switch(g_mode)
   {
@@ -852,3 +873,58 @@ void testanimate(const uint8_t *bitmap, uint8_t w, uint8_t h) {
   }
 }
 #endif
+
+static void InitRomData( EEPROMDATA* pRom )
+{
+  if( pRom == NULL )
+  {
+    return;
+  }
+  
+  pRom->size = sizeof(EEPROMDATA);
+  pRom->m_mode = 0;
+  pRom->m_szThrLow = 0;
+  pRom->m_szThrHigh = 0;
+  //
+} /* InitRomData */
+
+static void writeRomData( EEPROMDATA* pRom )
+{
+  int ii;
+  char* pBuf = (char*)pRom;
+  if( pRom == NULL )
+  {
+    return;
+  }
+
+  for( ii = 0; ii < sizeof(EEPROMDATA); ii++ )
+  {
+    EEPROM.write(ii, pBuf[ii]);
+  }
+
+} /* writeRomData */
+
+static void buttonCheck(void)
+{
+  static int btn01 = 0x00;
+
+  btn01 = (btn01 << 1);
+  btn01 = btn01 & 0xFE;
+
+  if(digitalRead(BTN01_PIN) == LOW)
+  {
+    btn01 = btn01 | 0x01;
+  }
+
+  if( (btn01 & 0x7F) == 0x7F )
+  {
+    g_EEPEOM.m_mode += 1;
+    if( g_EEPEOM.m_mode >= sizeof(g_mode_table) )
+    {
+      g_EEPEOM.m_mode = 0;
+    }
+    g_mode = g_mode_table[g_EEPEOM.m_mode];
+    writeRomData( &g_EEPEOM );
+  }
+
+} /* buttonCheck */
