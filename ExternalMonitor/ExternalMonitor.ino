@@ -173,8 +173,7 @@ void setup() {
     g_mode = g_mode_table[g_EEPEOM.m_mode];
   }
 
-  pinMode(BTN01_PIN, INPUT);
-  digitalWrite(BTN01_PIN, HIGH);
+  pinMode(BTN01_PIN, INPUT_PULLUP);
 }
 
 void loop() {
@@ -906,17 +905,17 @@ static void writeRomData( EEPROMDATA* pRom )
 
 static void buttonCheck(void)
 {
-  static int btn01 = 0x00;
-
+  static int btn01 = 0x0000;
   btn01 = (btn01 << 1);
-  btn01 = btn01 & 0xFE;
+  btn01 = btn01 & 0xFFFE;
 
-  if(digitalRead(BTN01_PIN) == LOW)
+  if( !digitalRead(BTN01_PIN) )
   {
-    btn01 = btn01 | 0x01;
+    btn01 = btn01 | 0x0001;
   }
 
-  if( (btn01 & 0x7F) == 0x7F )
+  if( (btn01 & 0x7FFF) == 0x7FFF &&
+      (btn01 & 0x8000) == 0 )
   {
     g_EEPEOM.m_mode += 1;
     if( g_EEPEOM.m_mode >= sizeof(g_mode_table) )
