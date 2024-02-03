@@ -60,6 +60,7 @@ static const unsigned char PROGMEM logo_bmp[] =
 const float BOOST_MIN   =-100.0f;
 const float BOOST_MAX   = 150.0f;
 const int8_t RECVDATA_MAX = 14;
+const float THROTTLE_MAX   = 1024.0f;
 
 typedef struct
 {
@@ -85,7 +86,7 @@ typedef struct
   SVECTOR3 angle;
 } SRECVDATA;
 
-volatile char g_mode = 'B';
+volatile char g_mode = 't';
 
 SRECVDATA g_recvData;
 
@@ -184,6 +185,10 @@ void loop() {
 
     case 'B':
     displayBoostPress(g_recvData.boostPress);
+    break;
+
+    case 't':
+    displayThrottle(g_recvData.throttle);
     break;
 
     case 'A':
@@ -430,6 +435,45 @@ void displayBoostPress(float boost)
   
   display.display();
 } /* displayBoostPress */
+
+void displayThrottle(float throttle)
+{
+  int16_t width_p = display.width() / 3;
+  int16_t xx,yy = 8;
+  int16_t width = 0;
+  int16_t height = display.height() - 8;
+
+  char buf[10+1];
+  char throttleBuf[10+1];
+
+  memset( buf, 0x00, sizeof(buf) );
+  memset( throttleBuf, 0x00, sizeof(throttleBuf) );
+
+  dtostrf(throttle,    4,0, throttleBuf ); // ZZZ9
+  sprintf(buf,"%6.6s",throttleBuf);
+
+  display.clearDisplay();
+
+  display.setTextSize(1);             // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_WHITE);        // Draw white text
+  display.setCursor(0,0);             // Start at top-left corner
+  display.println("Throttle");
+
+  display.drawRect(0, 8, display.width(), height, SSD1306_WHITE);
+
+  width = display.width() * (throttle / THROTTLE_MAX);
+
+  display.fillRect(xx, yy, width, height, SSD1306_WHITE);
+
+  display.setTextSize(3);             // Normal 1:1 pixel scale
+  display.setTextColor(SSD1306_INVERSE);        // Draw white text
+  display.setCursor(16,8);             // Start at top-left corner
+  display.println(buf);
+
+  display.display();
+
+} /* displayThrottle */
+
 
 void displayAcc(PVECTOR3 acc)
 {
