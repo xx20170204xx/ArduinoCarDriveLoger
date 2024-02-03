@@ -63,7 +63,8 @@ const float BOOST_MAX   = 150.0f;
 const int8_t RECVDATA_MAX = 14;
 const float THROTTLE_MAX   = 1024.0f;
 
-#define BTN01_PIN 2
+#define BTN01_PIN A3
+#define BTN02_PIN A6
 
 typedef struct
 {
@@ -92,7 +93,7 @@ typedef struct
 typedef struct
 {
   size_t  size;
-  char    m_mode;
+  char    m_modeNum;
   int     m_szThrLow;
   int     m_szThrHigh;
 } EEPROMDATA;
@@ -101,6 +102,8 @@ static void InitRomData( EEPROMDATA* pRom );
 static void writeRomData( EEPROMDATA* pRom );
 static void buttonCheck(void);
 
+#define MODE_THROTTLE 't'
+
 char g_mode_table[] = { 
 'S', /* Speed */
 'T', /* Tacho */
@@ -108,7 +111,7 @@ char g_mode_table[] = {
 'O',
 'o',
 'B',
-'t',
+MODE_THROTTLE,
 'A',
 'a',
 };
@@ -153,7 +156,7 @@ void setup() {
     Serial.println(g_EEPEOM.size);
 
     Serial.print("Mode:");
-    Serial.println(g_mode_table[g_EEPEOM.m_mode]);
+    Serial.println(g_mode_table[g_EEPEOM.m_modeNum]);
 
     Serial.print("Low:");
     Serial.println(g_EEPEOM.m_szThrLow);
@@ -170,10 +173,11 @@ void setup() {
         EEPROM.write(ii, pBuf[ii]);
       }
     }
-    g_mode = g_mode_table[g_EEPEOM.m_mode];
+    g_mode = g_mode_table[g_EEPEOM.m_modeNum];
   }
 
   pinMode(BTN01_PIN, INPUT_PULLUP);
+  pinMode(BTN02_PIN, INPUT_PULLUP);
 }
 
 void loop() {
@@ -207,7 +211,7 @@ void loop() {
     displayBoostPress(g_recvData.boostPress);
     break;
 
-    case 't':
+    case MODE_THROTTLE:
     displayThrottle(g_recvData.throttle);
     break;
 
@@ -458,18 +462,24 @@ void displayBoostPress(float boost)
 
 void displayThrottle(float throttle)
 {
+  char buf[10+1];
+  char throttleBuf[10+1];
   int16_t width_p = display.width() / 3;
   int16_t xx,yy = 8;
   int16_t width = 0;
   int16_t height = display.height() - 8;
+  float per = throttle;
 
-  char buf[10+1];
-  char throttleBuf[10+1];
+  per = per - g_EEPEOM.m_szThrLow;
+  per = per / (g_EEPEOM.m_szThrHigh - g_EEPEOM.m_szThrLow);
+  per = per * 100;
+  per = (per < 0.0f ? 0.0f : per);
+  per = (per > 100.0f ? 100.0f : per);
 
   memset( buf, 0x00, sizeof(buf) );
   memset( throttleBuf, 0x00, sizeof(throttleBuf) );
 
-  dtostrf(throttle,    4,0, throttleBuf ); // ZZZ9
+  dtostrf(per,    3,0, throttleBuf ); // ZZ9
   sprintf(buf,"%6.6s",throttleBuf);
 
   display.clearDisplay();
@@ -481,7 +491,7 @@ void displayThrottle(float throttle)
 
   display.drawRect(0, 8, display.width(), height, SSD1306_WHITE);
 
-  width = display.width() * (throttle / THROTTLE_MAX);
+  width = display.width() * per;
 
   display.fillRect(xx, yy, width, height, SSD1306_WHITE);
 
@@ -881,9 +891,9 @@ static void InitRomData( EEPROMDATA* pRom )
   }
   
   pRom->size = sizeof(EEPROMDATA);
-  pRom->m_mode = 0;
+  pRom->m_modeNum = 0;
   pRom->m_szThrLow = 0;
-  pRom->m_szThrHigh = 0;
+  pRom->m_szThrHigh = 1024;
   //
 } /* InitRomData */
 
@@ -906,24 +916,52 @@ static void writeRomData( EEPROMDATA* pRom )
 static void buttonCheck(void)
 {
   static int btn01 = 0x0000;
+  static int btn02 = 0x0000;
+  
   btn01 = (btn01 << 1);
   btn01 = btn01 & 0xFFFE;
+
+  btn02 = (btn02 << 1);
+  btn02 = btn02 & 0xFFFE;
 
   if( !digitalRead(BTN01_PIN) )
   {
     btn01 = btn01 | 0x0001;
   }
 
+  if( !digitalRead(BTN02_PIN) )
+  {
+    btn02 = btn02 | 0x0001;
+  }
+
+
   if( (btn01 & 0x7FFF) == 0x7FFF &&
       (btn01 & 0x8000) == 0 )
   {
-    g_EEPEOM.m_mode += 1;
-    if( g_EEPEOM.m_mode >= sizeof(g_mode_table) )
+    g_EEPEOM.m_modeNum += 1;
+    if( g_EEPEOM.m_modeNum >= sizeof(g_mode_table) )
     {
-      g_EEPEOM.m_mode = 0;
+      g_EEPEOM.m_modeNum = 0;
     }
-    g_mode = g_mode_table[g_EEPEOM.m_mode];
+    g_mode = g_mode_table[g_EEPEOM.m_modeNum];
     writeRomData( &g_EEPEOM );
   }
+
+  if( (btn02 & 0x7FFF) == 0x7FFF &&
+      (btn02 & 0x8000) == 0 )
+  {
+    /* Init */
+    g_EEPEOM.m_szThrLow = g_recvData.throttle;
+    g_EEPEOM.m_szThrHigh = g_recvData.throttle;
+  }else if( (btn02 & 0xFFFF) ){
+    if( g_EEPEOM.m_szThrLow > g_recvData.throttle ){ g_EEPEOM.m_szThrLow = g_recvData.throttle; }
+    if( g_EEPEOM.m_szThrHigh < g_recvData.throttle ){ g_EEPEOM.m_szThrHigh = g_recvData.throttle; }
+
+  }else if( (btn02 & 0x8000) == 0x8000 &&
+            (btn02 & 0x7FFF) == 0x0000 ){
+    writeRomData( &g_EEPEOM );
+  }else{
+  }
+
 
 } /* buttonCheck */
