@@ -469,17 +469,18 @@ void displayThrottle(float throttle)
   int16_t width = 0;
   int16_t height = display.height() - 8;
   float per = throttle;
+  float per2;
 
-  per = per - g_EEPEOM.m_szThrLow;
-  per = per / (g_EEPEOM.m_szThrHigh - g_EEPEOM.m_szThrLow);
-  per = per * 100;
-  per = (per < 0.0f ? 0.0f : per);
-  per = (per > 100.0f ? 100.0f : per);
+  per = per - 0;
+  per = per / (g_EEPEOM.m_szThrHigh - 0);
+  per2 = per * 100;
+  per2 = (per2 < 0.0f ? 0.0f : per);
+  per2 = (per2 > 100.0f ? 100.0f : per);
 
   memset( buf, 0x00, sizeof(buf) );
   memset( throttleBuf, 0x00, sizeof(throttleBuf) );
 
-  dtostrf(per,    3,0, throttleBuf ); // ZZ9
+  dtostrf(per2,    3,1, throttleBuf ); // ZZ9.9
   sprintf(buf,"%6.6s",throttleBuf);
 
   display.clearDisplay();
