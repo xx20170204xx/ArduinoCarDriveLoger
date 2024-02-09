@@ -64,7 +64,7 @@ const int8_t RECVDATA_MAX = 14;
 const float THROTTLE_MAX   = 1024.0f;
 
 #define BTN01_PIN A3
-#define BTN02_PIN A6
+#define BTN02_PIN 3
 
 typedef struct
 {
@@ -239,7 +239,7 @@ void recvSerial()
   float data[14];
   int ii = 0;
 
-#if 0
+#if 1
   /* 受信データが存在しない場合、処理を抜ける */
   if(Serial.available() <= 0) { return; }
 #endif  
@@ -915,8 +915,8 @@ static void writeRomData( EEPROMDATA* pRom )
 
 static void buttonCheck(void)
 {
-  static int btn01 = 0x0000;
-  static int btn02 = 0x0000;
+  static unsigned int btn01 = 0x0000;
+  static unsigned int btn02 = 0x0000;
   
   btn01 = (btn01 << 1);
   btn01 = btn01 & 0xFFFE;
@@ -929,8 +929,9 @@ static void buttonCheck(void)
     btn01 = btn01 | 0x0001;
   }
 
-  if( !digitalRead(BTN02_PIN) )
+  if( digitalRead(BTN02_PIN)==0 )
   {
+    // Serial.println("throttle Push.");
     btn02 = btn02 | 0x0001;
   }
 
@@ -951,14 +952,18 @@ static void buttonCheck(void)
       (btn02 & 0x8000) == 0 )
   {
     /* Init */
+    // Serial.println("throttle Init.");
     g_EEPEOM.m_szThrLow = g_recvData.throttle;
     g_EEPEOM.m_szThrHigh = g_recvData.throttle;
-  }else if( (btn02 & 0xFFFF) ){
+  }else if( (btn02 & 0xFFFF) == 0xFFFF ){
+    // Serial.print("throttle ");
+    // Serial.println(btn02);
     if( g_EEPEOM.m_szThrLow > g_recvData.throttle ){ g_EEPEOM.m_szThrLow = g_recvData.throttle; }
     if( g_EEPEOM.m_szThrHigh < g_recvData.throttle ){ g_EEPEOM.m_szThrHigh = g_recvData.throttle; }
 
   }else if( (btn02 & 0x8000) == 0x8000 &&
             (btn02 & 0x7FFF) == 0x0000 ){
+    // Serial.println("throttle Write.");
     writeRomData( &g_EEPEOM );
   }else{
   }
