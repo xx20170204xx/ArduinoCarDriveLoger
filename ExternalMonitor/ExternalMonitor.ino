@@ -168,10 +168,7 @@ void setup() {
     {
       /* init ROMDATA */
       InitRomData(&g_EEPEOM);
-      for( ii = 0; ii < sizeof(g_EEPEOM); ii++ )
-      {
-        EEPROM.write(ii, pBuf[ii]);
-      }
+      writeRomData(&g_EEPEOM);
     }
     g_mode = g_mode_table[g_EEPEOM.m_modeNum];
   }
