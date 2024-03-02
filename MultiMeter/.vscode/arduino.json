@@ -1,0 +1,7 @@
+{
+    "configuration": "cpu=atmega328old",
+    "board": "arduino:avr:nano",
+    "sketch": "MultiMeter.ino",
+    "port": "COM3",
+    "output": "./Output"
+}
