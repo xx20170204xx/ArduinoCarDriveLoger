@@ -260,7 +260,7 @@ void recvSerial()
    * throttle       : Z6<TAB>0.0000
    * mpu6050 Temp   : Z7<TAB>0.0000
    * mpu6050 Acc    : Z8<TAB>0.0000<TAB>0.0000<TAB>0.0000
-   * mpu6050 Angle  : Z0<TAB>0.0000<TAB>0.0000<TAB>0.0000
+   * mpu6050 Angle  : Z9<TAB>0.0000<TAB>0.0000<TAB>0.0000
   */
   case 'Z':
     recvSerial_DummyData(recvBuf);
