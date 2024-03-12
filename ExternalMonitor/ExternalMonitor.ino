@@ -232,9 +232,6 @@ void loop() {
 void recvSerial()
 {
   char recvBuf[256];
-  char *ptr;
-  float data[14];
-  int ii = 0;
 
 #if 1
   /* 受信データが存在しない場合、処理を抜ける */
@@ -247,12 +244,41 @@ void recvSerial()
   /* データ受信＆分割 */
   Serial.readBytesUntil('\n',recvBuf, sizeof(recvBuf) );
 
-  if( recvBuf[0] != 'D' )
+  switch (recvBuf[0])
   {
-    return;
+  case 'D':
+    recvSerial_NormalData(recvBuf);
+    break;
+  
+  /*
+   * Water Temp     : Z0<TAB>0.0000
+   * Oil Temp       : Z1<TAB>0.0000
+   * Oil Press      : Z2<TAB>0.0000
+   * Boost Press    : Z3<TAB>0.0000
+   * Tacho          : Z4<TAB>0.0000
+   * Speed          : Z5<TAB>0.0000
+   * throttle       : Z6<TAB>0.0000
+   * mpu6050 Temp   : Z7<TAB>0.0000
+   * mpu6050 Acc    : Z8<TAB>0.0000<TAB>0.0000<TAB>0.0000
+   * mpu6050 Angle  : Z0<TAB>0.0000<TAB>0.0000<TAB>0.0000
+  */
+  case 'Z':
+    recvSerial_DummyData(recvBuf);
+    break;
+
+  default:
+    break;
   }
 
-  ptr = strtok(recvBuf, "\t");
+
+} /* recvSerial */
+
+void recvSerial_NormalData(char* pData)
+{
+  char *ptr;
+  float data[14];
+  int ii = 0;
+  ptr = strtok(pData, "\t");
 
   while( ptr != NULL )
   {
@@ -285,9 +311,79 @@ void recvSerial()
   g_recvData.angle.x = data[11];
   g_recvData.angle.y = data[12];
   g_recvData.angle.z = data[13];
+} /* recvSerial_NormalData */
 
-} /* recvSerial */
+void recvSerial_DummyData(char* pData)
+{
+  char *ptr;
+  float data[14];
+  int ii = 0;
+  ptr = strtok(pData, "\t");
 
+  memset( data, 0x00, sizeof(data) );
+
+  while( ptr != NULL )
+  {
+    ptr = strtok(NULL, "\t");
+    if( ptr == NULL )
+    {
+      break;
+    }
+
+    data[ii++] = atof(ptr);
+    if(ii==14)break;
+  }
+
+  switch (pData[1])
+  {
+  case '0':
+    g_recvData.waterTemp = data[0];
+    break;
+  
+  case '1':
+    g_recvData.oilTemp = data[0];
+    break;
+  
+  case '2':
+    g_recvData.oilPress = data[0];
+    break;
+  
+  case '3':
+    g_recvData.boostPress = data[0];
+    break;
+
+  case '4':
+    g_recvData.tacho = data[0];
+    break;
+  case '5':
+    g_recvData.speed = data[0];
+    break;
+  case '6':
+    g_recvData.throttle = data[0];
+    break;
+
+  case '7':
+    g_recvData.mpu6050Temp = data[0];
+    break;
+
+  case '8':
+    g_recvData.acc.x = data[0];
+    g_recvData.acc.y = data[1];
+    g_recvData.acc.z = data[2];
+    break;
+
+  case '9':
+    g_recvData.angle.x = data[0];
+    g_recvData.angle.y = data[1];
+    g_recvData.angle.z = data[2];
+    break;
+
+
+  default:
+    break;
+  }
+
+} /* recvSerial_DummyData */
 
 void displayTacho(float tacho)
 {
