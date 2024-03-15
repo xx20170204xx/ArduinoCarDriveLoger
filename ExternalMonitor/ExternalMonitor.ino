@@ -585,8 +585,8 @@ void displayThrottle(float throttle)
   per = per - 0;
   per = per / (g_EEPEOM.m_szThrHigh - 0);
   per2 = per * 100;
-  per2 = (per2 < 0.0f ? 0.0f : per);
-  per2 = (per2 > 100.0f ? 100.0f : per);
+  per2 = (per2 < 0.0f ? 0.0f : per2);
+  per2 = (per2 > 100.0f ? 100.0f : per2);
 
   memset( buf, 0x00, sizeof(buf) );
   memset( throttleBuf, 0x00, sizeof(throttleBuf) );
@@ -707,6 +707,27 @@ void display3Meter(){
   char tachoBuf[3][10+1];
   int fill_r[3];
 
+  char printBuf[10+1];
+  char throttleBuf[10+1];
+  int16_t width_p = display.width() / 3;
+  int16_t xx,yy = display.height()-4;
+  int16_t width = 0;
+  int16_t height = 4;
+  float per = g_recvData.throttle;
+  float per2;
+
+  per = per - 0;
+  per = per / (g_EEPEOM.m_szThrHigh - 0);
+  per2 = per * 100;
+  per2 = (per2 < 0.0f ? 0.0f : per2);
+  per2 = (per2 > 100.0f ? 100.0f : per2);
+
+  memset( printBuf, 0x00, sizeof(printBuf) );
+  memset( throttleBuf, 0x00, sizeof(throttleBuf) );
+
+  dtostrf(per2,    3,0, throttleBuf ); // ZZ9
+  sprintf(printBuf,"%3.3s",throttleBuf);
+
   memset( tachoBuf, 0x00, sizeof(tachoBuf) );
   memset( fill_r, 0x00, sizeof(fill_r) );
 
@@ -733,6 +754,10 @@ void display3Meter(){
   display.drawCircle(80, 16, 12, SSD1306_WHITE);
   display.fillCircle(80, 16, fill_r[2], SSD1306_WHITE);
 
+  display.drawRect(xx, yy, display.width(), height, SSD1306_WHITE);
+  width = display.width() * per;
+  display.fillRect(xx, yy, width, height, SSD1306_WHITE);
+
   /* テキスト表示 */
   display.setTextSize(1);
   display.setTextColor(SSD1306_WHITE);
@@ -742,6 +767,11 @@ void display3Meter(){
   display.println(tachoBuf[1]);
   display.setCursor(96,16);
   display.println(tachoBuf[2]);
+  display.setCursor(96,24);
+  display.println(printBuf);
+
+
+
 
 
   display.display();
