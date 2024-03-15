@@ -66,6 +66,20 @@ const float THROTTLE_MAX   = 1024.0f;
 #define BTN01_PIN A3
 #define BTN02_PIN 3
 
+enum AXIS_FLAG
+{
+  AXIS_FLAG_X_PLUS  = (1 << 0),
+  AXIS_FLAG_X_MINUS = (1 << 1),
+  AXIS_FLAG_Y_PLUS  = (1 << 2),
+  AXIS_FLAG_Y_MINUS = (1 << 3),
+  AXIS_FLAG_Z_PLUS  = (1 << 4),
+  AXIS_FLAG_Z_MINUS = (1 << 5),
+
+  AXIS_FLAG_X_MASK  = (AXIS_FLAG_X_PLUS | AXIS_FLAG_X_MINUS),
+  AXIS_FLAG_Y_MASK  = (AXIS_FLAG_Y_PLUS | AXIS_FLAG_Y_MINUS),
+  AXIS_FLAG_Z_MASK  = (AXIS_FLAG_Z_PLUS | AXIS_FLAG_Z_MINUS),
+};
+
 typedef struct
 {
   float x;
@@ -92,10 +106,12 @@ typedef struct
 
 typedef struct
 {
-  size_t  size;
-  char    m_modeNum;
-  int     m_szThrLow;
-  int     m_szThrHigh;
+  size_t    size;
+  char      m_modeNum;
+  int       m_szThrLow;
+  int       m_szThrHigh;
+  int       m_AxisVFlag;
+  int       m_AxisHFlag;
 } EEPROMDATA;
 
 static void InitRomData( EEPROMDATA* pRom );
@@ -164,7 +180,7 @@ void setup() {
     Serial.print("High:");
     Serial.println(g_EEPEOM.m_szThrHigh);
 
-    if( g_EEPEOM.size != sizeof(EEPROMDATA) )
+    if( CheckRomData(&g_EEPEOM) != 0 )
     {
       /* init ROMDATA */
       InitRomData(&g_EEPEOM);
@@ -182,6 +198,8 @@ void loop() {
   recvSerial();
   buttonCheck();
 
+  display3Meter();
+  return;
   switch(g_mode)
   {
     case 'S':
@@ -685,6 +703,84 @@ void displayAngle(PVECTOR3 angle)
   display.display();
 } /* displayAngle */
 
+void display3Meter(){
+  char tachoBuf[3][10+1];
+  int fill_r[3];
+
+  memset( tachoBuf, 0x00, sizeof(tachoBuf) );
+  memset( fill_r, 0x00, sizeof(fill_r) );
+
+  dtostrf(g_recvData.waterTemp, 3,0, tachoBuf[0] );
+  dtostrf(g_recvData.oilTemp, 3,0, tachoBuf[1] );
+  dtostrf(g_recvData.oilPress, 3,0, tachoBuf[2] );
+  // sprintf(buf,"%6.6s",tachoBuf);
+
+  fill_r[0] = (g_recvData.waterTemp / 130) * 12;
+  fill_r[1] = (g_recvData.oilTemp / 130) * 12;
+  fill_r[2] = (g_recvData.oilPress / 10) * 12;
+  fill_r[0] = (fill_r[0] > 12 ? 12 : (fill_r[0] < 0 ? 0 : fill_r[0]));
+  fill_r[1] = (fill_r[1] > 12 ? 12 : (fill_r[1] < 0 ? 0 : fill_r[1]));
+  fill_r[2] = (fill_r[2] > 12 ? 12 : (fill_r[2] < 0 ? 0 : fill_r[2]));
+
+  display.clearDisplay();
+
+  display.drawCircle(16, 16, 12, SSD1306_WHITE);
+  display.fillCircle(16, 16, fill_r[0], SSD1306_WHITE);
+
+  display.drawCircle(48, 16, 12, SSD1306_WHITE);
+  display.fillCircle(48, 16, fill_r[1], SSD1306_WHITE);
+
+  display.drawCircle(80, 16, 12, SSD1306_WHITE);
+  display.fillCircle(80, 16, fill_r[2], SSD1306_WHITE);
+
+  /* テキスト表示 */
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(96,0);
+  display.println(tachoBuf[0]);
+  display.setCursor(96,8);
+  display.println(tachoBuf[1]);
+  display.setCursor(96,16);
+  display.println(tachoBuf[2]);
+
+
+  display.display();
+} /* display3Meter */
+
+static int CheckRomData( EEPROMDATA* pRom )
+{
+  int l_iCnt1=0;
+  int l_Flags = pRom->m_AxisVFlag | pRom->m_AxisHFlag;
+
+  if( pRom == NULL )
+  {
+    return 1;
+  }
+
+  if( pRom->size != sizeof(EEPROMDATA) )
+  {
+    return 2;
+  }
+
+  /* フラグの指定に値が設定されていない場合エラーとする */
+  if( pRom->m_AxisVFlag == 0 || pRom->m_AxisHFlag == 0 )
+  {
+    return 3;
+  }
+
+  l_iCnt1 += (l_Flags & AXIS_FLAG_X_MASK) ? 1 : 0;
+  l_iCnt1 += (l_Flags & AXIS_FLAG_Y_MASK) ? 1 : 0;
+  l_iCnt1 += (l_Flags & AXIS_FLAG_Z_MASK) ? 1 : 0;
+  
+  /* 2種類の軸が指定されていない場合エラーとする */
+  if( l_iCnt1 != 2 )
+  {
+    return 4;
+  }
+
+  return 0;
+} /* CheckRomData */
+
 static void InitRomData( EEPROMDATA* pRom )
 {
   if( pRom == NULL )
@@ -696,6 +792,8 @@ static void InitRomData( EEPROMDATA* pRom )
   pRom->m_modeNum = 0;
   pRom->m_szThrLow = 0;
   pRom->m_szThrHigh = 1024;
+  pRom->m_AxisVFlag = AXIS_FLAG_X_PLUS;
+  pRom->m_AxisHFlag = AXIS_FLAG_Y_PLUS;
   //
 } /* InitRomData */
 
