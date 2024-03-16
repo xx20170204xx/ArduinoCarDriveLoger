@@ -10813,7 +10813,7 @@
 		(uuid "c631d8f5-98b6-4ec1-9bbb-a1b65bda8958")
 	)
 	(gr_rect
-		(start 24.35898 20.311)
+		(start 66.35898 20.311)
 		(end 102.92698 80.636)
 		(stroke
 			(width 0.1)
@@ -10822,6 +10822,17 @@
 		(fill none)
 		(layer "Edge.Cuts")
 		(uuid "ced0a574-56b9-44a2-9ef7-277dc8cbb800")
+	)
+	(gr_rect
+		(start 24.33358 20.311)
+		(end 63.85898 80.6)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill none)
+		(layer "Edge.Cuts")
+		(uuid "ea318759-bde5-4e97-8513-7ab9d7ffb812")
 	)
 	(gr_text "Water"
 		(at 101.65698 72.635 -90)
